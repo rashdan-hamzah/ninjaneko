@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ninja Neko</title>
+  <title>Ninja Cat Surfers - Vertical 3-Lane Runner</title>
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,maximum-scale=1.0">
   <style>
     html, body {
@@ -170,8 +170,9 @@
       transition: background 0.1s;
     }
     #overlay-content button:hover { background: #169e6e; color: #fff; }
+
     @media (max-width: 600px) {
-      #gameCanvas { width: 100vw !important; height: 59vw !important; }
+      #gameCanvas { width: 100vw !important; height: 99vh !important; }
       #scoreboard, #stats { font-size: 0.95em; padding: 0 9vw; }
       .stat-bar { width: 36vw; max-width: 70px; }
     }
@@ -200,7 +201,7 @@
       width: 100vw;
       max-width: 420px;
       height: 72vw;
-      max-height: 340px;
+      max-height: 420px;
       background: transparent;
       display: block;
     }
@@ -237,7 +238,7 @@
       <span id="score">0</span>
       <span id="highscore">Best: 0</span>
     </div>
-    <canvas id="gameCanvas" width="420" height="620" tabindex="0"></canvas>
+    <canvas id="gameCanvas" width="420" height="700" tabindex="0"></canvas>
     <div id="stats">
       <span>
         <span style="font-size:1.05em">🍣</span>
@@ -266,25 +267,30 @@
       </div>
     </div>
     <div id="storyline">
-      <canvas id="story-canvas" width="420" height="340"></canvas>
+      <canvas id="story-canvas" width="420" height="420"></canvas>
       <div id="story-text"></div>
       <button id="story-btn">Continue</button>
     </div>
   </div>
   <script>
-  // ===== VISUALS & GAME DIMENSIONS =====
-  const CANVAS = document.getElementById('gameCanvas');
-  const CTX = CANVAS.getContext('2d');
+  // === Responsive portrait canvas ===
   function fitCanvas() {
     const w = window.innerWidth, h = window.innerHeight;
-    let cw = Math.min(420, w, h*0.68), ch = Math.round(cw*1.45);
+    let cw = Math.min(420, w);
+    let ch = Math.max(500, Math.min(700, h));
+    if (w < 420) { cw = w; ch = h; }
     CANVAS.width = cw;
     CANVAS.height = ch;
     CANVAS.style.width = cw + "px";
     CANVAS.style.height = ch + "px";
     GAME.CW = cw; GAME.CH = ch;
   }
-  // ===== CAT & GAME CONSTANTS =====
+  const CANVAS = document.getElementById('gameCanvas');
+  const CTX = CANVAS.getContext('2d');
+  fitCanvas();
+  window.addEventListener('resize', fitCanvas);
+
+  // === Game constants/state ===
   const LANES = [0, 1, 2];
   const COLORS = {
     sky: ["#232942", "#494e8c"],
@@ -304,13 +310,14 @@
     duckTimer: 0,
     animFrame: 0,
     animTick: 0,
-    state: "run", // run, jump, duck, hurt, sleep
+    state: "run", // run, jump, duck, hurt, sleep, turn-left, turn-right
     mood: "normal", // happy, normal, sad, tired, sleepy
-    canControl: false // true after story
+    canControl: false,
+    turnTargetLane: null,
+    turnProgress: 0, // 0-1
+    turnDir: 0 // -1 left, 1 right
   };
-  // Tamagotchi Stats
   const STATS = { hunger: 100, happiness: 100, energy: 100 };
-  // Game State
   let GAME = {
     running: false,
     gameover: false,
@@ -319,7 +326,6 @@
     highscore: 0,
     speed: 8,
     lanes: 3,
-    laneY: 0,
     groundY: 0,
     bgOffset: 0,
     ticks: 0,
@@ -328,19 +334,19 @@
     petPopup: 0,
     theme: "night",
     CW: 420,
-    CH: 620
+    CH: 700
   };
-  // Obstacles
   const OBSTACLES = [];
+  // Vertical obstacles (x: laneX(lane), y: -height)
   const OBSTACLE_TYPES = [
-    { type:"crate", width:52, height:52, lane:1, color:"#6b4a1f" },
-    { type:"cat-guard", width:54, height:52, lane:0, color:"#443a31" },
-    { type:"yarn", width:38, height:38, lane:2, color:"#fa9bb2" },
-    { type:"kunai", width:28, height:20, lane:0, color:"#b1e0ff" },
-    { type:"cone", width:32, height:38, lane:2, color:"#ffa34c" }
+    { type:"crate", width:52, height:52, color:"#6b4a1f" },
+    { type:"cat-guard", width:54, height:52, color:"#443a31" },
+    { type:"yarn", width:38, height:38, color:"#fa9bb2" },
+    { type:"kunai", width:28, height:20, color:"#b1e0ff" },
+    { type:"cone", width:32, height:38, color:"#ffa34c" }
   ];
 
-  // ====== UTILITIES & UI ======
+  // === Utility / UI ===
   function setStatBar(bar, value) {
     bar.style.width = `${Math.max(0, Math.min(100, value))}%`;
   }
@@ -381,8 +387,6 @@
     return GAME.CH - 106;
   }
   function getObstacleY(type) {
-    if (type==="crate"||type==="cat-guard"||type==="cone"||type==="yarn") return -60;
-    if (type==="kunai") return -34;
     return -60;
   }
   function getObstacleHeight(type) {
@@ -391,7 +395,38 @@
     return 52;
   }
 
-  // ===== MAIN GAME LOGIC =====
+  // === Ninja Cat Turn Animation ===
+  function startCatTurn(targetLane) {
+    if (CAT.isJumping || CAT.isDucking || !CAT.canControl || CAT.lane===targetLane) return;
+    CAT.turnTargetLane = targetLane;
+    CAT.turnProgress = 0;
+    CAT.turnDir = targetLane > CAT.lane ? 1 : -1;
+    CAT.state = CAT.turnDir === 1 ? "turn-right" : "turn-left";
+    CAT.canControl = false;
+  }
+  function updateCatTurn() {
+    if (CAT.turnTargetLane !== null) {
+      CAT.turnProgress += 0.13; // Lower = slower, Higher = snappier
+      if (CAT.turnProgress >= 1) {
+        CAT.lane = CAT.turnTargetLane;
+        CAT.turnTargetLane = null;
+        CAT.turnDir = 0;
+        CAT.turnProgress = 0;
+        CAT.state = "run";
+        CAT.canControl = true;
+      }
+    }
+  }
+  function getCatX() {
+    if (CAT.turnTargetLane !== null) {
+      // Interpolate between current and target lane positions
+      let from = laneX(CAT.lane), to = laneX(CAT.turnTargetLane);
+      return from + (to-from)*CAT.turnProgress;
+    }
+    return laneX(CAT.lane);
+  }
+
+  // === Main Game Logic ===
   function resetGame(full=true) {
     GAME.running = true;
     GAME.gameover = false;
@@ -415,6 +450,8 @@
     CAT.animTick = 0;
     CAT.mood = "normal";
     CAT.canControl = true;
+    CAT.turnTargetLane = null;
+    CAT.turnProgress = 0;
     updateStatsUI();
     setScore(0);
     if (full) STATS.hunger=100,STATS.happiness=100,STATS.energy=100;
@@ -431,34 +468,42 @@
     document.getElementById('overlay').classList.remove('active');
   }
 
-  // ===== CAT DRAWING (NINJA VIBES) =====
-  function drawCat(x, y, state, frame, mood, isDucking) {
+  // === Cat Drawing (with turn/tilt) ===
+  function drawCat(x, y, state, frame, mood, isDucking, turnState=0) {
+    // turnState: -1 = left, 0 = forward, 1 = right, fractional for in-between
     CTX.save();
     // Shadow
     CTX.globalAlpha = 0.18;
+    let shadowOffset = (turnState)*15;
     CTX.beginPath();
-    CTX.ellipse(x+CAT.width/2, y+CAT.height-8, isDucking?23:29, 9, 0, 0, 2*Math.PI);
+    CTX.ellipse(x+CAT.width/2+shadowOffset, y+CAT.height-8, isDucking?23:29, 9, 0, 0, 2*Math.PI);
     CTX.fillStyle="#1f2439";
     CTX.fill();
     CTX.globalAlpha = 1;
     // Main
     CTX.save();
-    CTX.translate(x,y);
-    if (isDucking) CTX.translate(0, 16);
-    // Tail
-    let tailSwing = (state==="run"||state==="jump")?Math.sin(frame/1.5)*11:0;
-    CTX.strokeStyle="#474d71";
-    CTX.lineWidth=7;
-    CTX.beginPath();
-    CTX.moveTo(48,44);
-    CTX.quadraticCurveTo(66+tailSwing,24+tailSwing,40,9+(state==="jump"?12:0));
-    CTX.stroke();
-    // Body (ninja suit)
+    CTX.translate(x+CAT.width/2, y+CAT.height/2);
+    // Turning: rotate body slightly
+    let bodyTilt = turnState*0.27;
+    CTX.rotate(bodyTilt);
+    CTX.translate(-CAT.width/2,-CAT.height/2);
+    // Ninja blur effect on turn
+    if (turnState!==0) {
+      CTX.save();
+      CTX.globalAlpha = 0.18*Math.abs(turnState);
+      CTX.filter = "blur(3px)";
+      CTX.translate(turnState*14,0);
+      CTX.beginPath();
+      CTX.ellipse(28,36,24,18,0,0,2*Math.PI);
+      CTX.fillStyle="#232942";
+      CTX.fill();
+      CTX.restore();
+    }
+    // Body
     CTX.fillStyle="#232942";
     CTX.beginPath();
     CTX.ellipse(28,36,24,18,0,0,2*Math.PI);
     CTX.fill();
-    // Belt
     CTX.fillStyle="#b21f2d";
     CTX.fillRect(10,48,36,7);
     // Legs
@@ -470,8 +515,12 @@
     CTX.fillRect(32-legMove,lY,lw,lh);
     // Head
     CTX.save();
-    let headTilt=(state==="jump")?-0.14:(state==="duck"?0.10:0);
-    CTX.translate(29,12); CTX.rotate(headTilt); CTX.translate(-29,-12);
+    CTX.translate(29,12);
+    let headTilt=bodyTilt*0.6;
+    if (state==="jump") headTilt-=0.09;
+    else if (state==="duck") headTilt+=0.10;
+    CTX.rotate(headTilt);
+    CTX.translate(-29,-12);
     // Ears
     CTX.beginPath();
     CTX.moveTo(9,17); CTX.lineTo(20,1); CTX.lineTo(26,17); CTX.closePath();
@@ -484,7 +533,6 @@
     CTX.ellipse(29,21,16,13.5,0,0,2*Math.PI);
     CTX.fillStyle="#353c67";
     CTX.fill();
-    // Mask wrap
     CTX.beginPath();
     CTX.ellipse(29,21,15,11,0,0,2*Math.PI);
     CTX.fillStyle="#232942";
@@ -537,9 +585,9 @@
     // Ninja bandana
     CTX.save();
     CTX.translate(10,17);
-    CTX.rotate(-0.6+Math.sin(frame/11)*0.12);
+    CTX.rotate(-0.6+Math.sin(frame/11)*0.18+bodyTilt*0.4);
     CTX.fillStyle="#b21f2d";
-    CTX.fillRect(0,0,14,3.5);
+    CTX.fillRect(0,0,15,4);
     CTX.restore();
     // Nose
     CTX.beginPath();
@@ -559,7 +607,7 @@
     CTX.stroke();
     CTX.restore();
     // Pet popup
-    if (GAME.petPopup>0) drawHeart(x+29,y-16-GAME.petPopup*0.5);
+    if (GAME.petPopup>0) drawHeart(x+CAT.width/2, y-16-GAME.petPopup*0.5);
     // Zzz (sleep)
     if (state==="sleep") drawZzz(x+42,y-7);
     CTX.restore();
@@ -587,7 +635,8 @@
     CTX.globalAlpha=0.8; CTX.fill();
     CTX.restore();
   }
-  // ===== OBSTACLE DRAWING =====
+
+  // === Obstacle Drawing (vertical) ===
   function drawObstacle(ob) {
     CTX.save();
     let {x,y,type,width,height,color}=ob;
@@ -597,27 +646,21 @@
       CTX.strokeStyle="#4e2c11"; CTX.lineWidth=3;
       CTX.strokeRect(x+2,y+2,width-4,height-4);
     } else if (type==="cat-guard") {
-      // Cat guard (ninja style)
       CTX.save();
       CTX.translate(x,y);
-      // Body
       CTX.fillStyle="#3f2e2a";
       CTX.beginPath();
       CTX.ellipse(width/2,height-13,width/2.5,17,0,0,2*Math.PI);
       CTX.fill();
-      // Head
       CTX.fillStyle="#2a1f1a";
       CTX.beginPath();
       CTX.ellipse(width/2,20,15,13,0,0,2*Math.PI);
       CTX.fill();
-      // Eyes (angry)
       CTX.fillStyle="#ffe35e";
       CTX.fillRect(width/2-6,23,3,3);
       CTX.fillRect(width/2+3,23,3,3);
-      // Ninja bandana
       CTX.fillStyle="#b21f2d";
       CTX.fillRect(width/2-14,13,28,7);
-      // Ears
       CTX.beginPath();
       CTX.moveTo(10,10); CTX.lineTo(15,0); CTX.lineTo(18,14); CTX.closePath();
       CTX.fillStyle="#42312a"; CTX.fill();
@@ -662,27 +705,24 @@
     }
     CTX.restore();
   }
-  // ===== GROUND, BG, DECOR =====
+
+  // === Ground, BG, Decor (vertical) ===
   function drawGround(offset) {
     CTX.save();
-    // Sidewalk stripes (ninja city night)
     for(let i=0;i<10;i++) {
-      let x=(i*110-(offset%110));
+      let y=(i*110-(offset%110));
       CTX.fillStyle=COLORS.side;
-      CTX.fillRect(x,GAME.CH-59,70,14);
+      CTX.fillRect(0,y,GAME.CW,70);
       CTX.strokeStyle="#434373"; CTX.lineWidth=2;
-      CTX.strokeRect(x+5,GAME.CH-59,60,14);
+      CTX.strokeRect(0,y+5,GAME.CW,60);
     }
-    // Main road
     CTX.fillStyle=COLORS.road;
     CTX.fillRect(0,GAME.CH-112,GAME.CW,53);
-    // Main ground
     CTX.fillStyle=COLORS.ground;
     CTX.fillRect(0,GAME.CH-59,GAME.CW,59);
     CTX.restore();
   }
   function drawBackground(offset) {
-    // BG: ninja cityscape
     let theme = GAME.theme;
     if (theme==="night") {
       CTX.save();
@@ -690,35 +730,33 @@
       CTX.beginPath();
       CTX.arc(60,60,23,0,2*Math.PI);
       CTX.fillStyle="#ffe35e"; CTX.fill();
-      // Stars
-      for(let i=0;i<15;i++){
+      for(let i=0;i<20;i++){
         CTX.save();
         CTX.globalAlpha=0.5+0.5*Math.sin(GAME.ticks/60+i*2);
         CTX.beginPath();
-        CTX.arc((i*27+offset*0.3)%GAME.CW,40+(i%3)*12,1.2,0,2*Math.PI);
+        CTX.arc(40+(i*16+offset*0.3)%GAME.CW,40+(i%3)*12,1.2,0,2*Math.PI);
         CTX.fillStyle="#fff"; CTX.fill();
         CTX.restore();
       }
       CTX.restore();
     }
     // Distant cityscape
-    for(let i=0;i<5;i++){
-      let x=(i*120-(offset%240));
+    for(let i=0;i<8;i++){
+      let y=(i*120-(offset%240));
       CTX.fillStyle=theme==="night"?"#2e3750":"#b0b9c6";
-      CTX.fillRect(x,GAME.CH-220,68,68+randomInt(-6,14));
+      CTX.fillRect(32,y,68,68+randomInt(-6,14));
     }
     // Pagoda rooftops
     for(let i=0;i<2;i++){
-      let px=(i*240-(offset%480))+80;
+      let py=(i*240-(offset%480))+80;
       CTX.save();
       CTX.fillStyle="#e4a700";
-      CTX.fillRect(px,GAME.CH-180,70,10);
+      CTX.fillRect(60,py,GAME.CW-120,10);
       CTX.restore();
     }
-    // Neon clouds
     for(let i=0;i<4;i++){
-      let cx=(i*120-(offset%480))+60;
-      let cy=38+(i%2)*9;
+      let cy=(i*120-(offset%480))+60;
+      let cx=38+(i%2)*36;
       CTX.save();
       CTX.globalAlpha=0.19+0.13*(Math.sin(GAME.ticks/60+i)+1);
       CTX.beginPath();
@@ -728,7 +766,8 @@
       CTX.restore();
     }
   }
-  // ===== POWERUP FOOD =====
+
+  // === Food Powerup (vertical) ===
   function drawFood(food) {
     if (!food) return;
     CTX.save();
@@ -744,35 +783,37 @@
     CTX.globalAlpha=1;
     CTX.restore();
   }
-  // ===== MAIN GAME LOOP =====
+
+  // === Main Game Loop (vertical, portrait, lane turning) ===
   function gameLoop() {
     if (!GAME.running) return;
     fitCanvas();
     CTX.clearRect(0,0,GAME.CW,GAME.CH);
     GAME.ticks++;
-    // Theme switch for vibes
-    if (GAME.score>0 && Math.floor(GAME.score)%350===0 && Math.floor(GAME.score)!==0) {
+    // Theme switch
+    if (GAME.score>0 && Math.floor(GAME.score)%500===0 && Math.floor(GAME.score)!==0) {
       if (GAME.theme==="night") setTheme("sunset");
       else if (GAME.theme==="sunset") setTheme("sky");
       else setTheme("night");
     }
-    // Update speed
-    GAME.speed = 8+Math.floor(GAME.score/200);
+    // Slow speed ramp
+    GAME.speed = 8 + Math.pow(GAME.score/800, 0.65);
     // BG
     drawBackground(GAME.bgOffset);
-    // GROUND
     drawGround(GAME.bgOffset);
-    // Obstacles
+    // Obstacles (vertical)
     for (let i=OBSTACLES.length-1;i>=0;i--) {
       let ob=OBSTACLES[i];
       ob.y += GAME.speed;
       drawObstacle(ob);
       if (ob.y>GAME.CH+60) OBSTACLES.splice(i,1);
     }
-    // Cat
+    // Cat animation
     CAT.animTick++;
     if (CAT.animTick%4===0) CAT.animFrame++;
-    // Apply gravity
+    // Lane turn animation
+    updateCatTurn();
+    // Cat jump
     if (!CAT.isJumping && CAT.y<getLaneY()) {
       CAT.y = getLaneY(); CAT.vy=0; CAT.state="run";
     }
@@ -787,10 +828,11 @@
       CAT.state="duck";
       CAT.duckTimer--;
       if (CAT.duckTimer<=0) { CAT.isDucking=false; CAT.state="run"; }
-    } else if (!CAT.isJumping) CAT.state="run";
-    // Draw Cat
-    CAT.x = laneX(CAT.lane);
-    drawCat(CAT.x, CAT.y, CAT.state, CAT.animFrame, CAT.mood, CAT.isDucking);
+    } else if (!CAT.isJumping && CAT.turnTargetLane==null) CAT.state="run";
+    // Draw Cat (with "turn" state)
+    let turnState = CAT.turnTargetLane!==null ? CAT.turnDir*(1-CAT.turnProgress) : 0;
+    CAT.x = getCatX();
+    drawCat(CAT.x, CAT.y, CAT.state, CAT.animFrame, CAT.mood, CAT.isDucking, turnState);
     // Collisions
     let catRect = {
       x: CAT.x+10, y: CAT.y+(CAT.isDucking?20:0),
@@ -803,13 +845,13 @@
     }
     if (hit) {
       GAME.running=false; CAT.canControl=false; CAT.state="hurt";
-      drawCat(CAT.x,CAT.y,"hurt",CAT.animFrame,"sad",CAT.isDucking);
+      drawCat(CAT.x,CAT.y,"hurt",CAT.animFrame,"sad",CAT.isDucking,0);
       setTimeout(()=>{
         showOverlay("Caught by Cat Guard!",`
           <b>Score:</b> ${Math.floor(GAME.score)}<br>
           <b>Best:</b> ${Math.floor(GAME.highscore)}<br>
           <br>
-          <small>Swipe or tap to switch lanes/jump.<br>Feed, Pet, Sleep for bonuses.<br>Stay ahead, avoid cat-guards!</small>
+          <small>Swipe or tap to jump, swipe left/right to change lanes.<br>Feed, Pet, Sleep for bonuses.<br>Stay ahead, avoid cat-guards!</small>
         `);
       }, 650);
       return;
@@ -828,8 +870,8 @@
     }
     // Score
     setScore(GAME.score+0.22*GAME.speed);
-    // Spawn obstacles (multi-lane)
-    if (GAME.ticks%Math.max(34,52-GAME.speed*3)===0) {
+    // Spawn obstacles
+    if (GAME.ticks%Math.max(34,78-GAME.speed*2.2)===0) {
       let laneChoices = [0,1,2];
       let count = randomInt(1,2);
       for(let i=0;i<count;i++){
@@ -888,7 +930,7 @@
     // Game Over if stats zero
     if (STATS.hunger<=0 || STATS.energy<=0) {
       GAME.running=false; CAT.canControl=false; CAT.state="hurt";
-      drawCat(CAT.x,CAT.y,"hurt",CAT.animFrame,"sad",CAT.isDucking);
+      drawCat(CAT.x,CAT.y,"hurt",CAT.animFrame,"sad",CAT.isDucking,0);
       setTimeout(()=>{
         showOverlay("Ninja Cat Fainted!",`
           <b>Score:</b> ${Math.floor(GAME.score)}<br>
@@ -902,12 +944,12 @@
     requestAnimationFrame(gameLoop);
   }
 
-  // ===== COLLISION =====
+  // === Collision
   function rectIntersect(a,b) {
     return (a.x<b.x+b.width && a.x+a.width>b.x && a.y<b.y+b.height && a.y+a.height>b.y);
   }
 
-  // ===== CONTROLS =====
+  // === Controls (vertical, portrait, lane turn animation) ===
   function jump() {
     if (!CAT.canControl || CAT.isJumping || CAT.state==="sleep") return;
     CAT.vy = CAT.jumpV;
@@ -922,23 +964,19 @@
     CAT.state="duck";
     CAT.duckTimer = 25;
   }
-  function laneSwitch(dir) {
-    if (!CAT.canControl || CAT.state==="sleep") return;
-    let newLane = CAT.lane+dir;
-    if (newLane<0||newLane>2) return;
-    CAT.lane=newLane;
-    CAT.x=laneX(CAT.lane);
+  function doLaneSwitch(dir) {
+    let target = CAT.lane+dir;
+    if (target<0||target>2) return;
+    startCatTurn(target);
   }
-  // Keyboard
   window.addEventListener('keydown', e=>{
     if (!CAT.canControl) return;
     if (e.code==='ArrowUp'||e.code==='Space') jump();
     else if (e.code==='ArrowDown') duck();
-    else if (e.code==='ArrowLeft') laneSwitch(-1);
-    else if (e.code==='ArrowRight') laneSwitch(1);
+    else if (e.code==='ArrowLeft') doLaneSwitch(-1);
+    else if (e.code==='ArrowRight') doLaneSwitch(1);
     e.preventDefault();
   },{passive:false});
-  // --- MOBILE SWIPE ---
   let touchStartX=null, touchStartY=null, touchMoved=false;
   CANVAS.addEventListener('touchstart', e=>{
     if (!CAT.canControl) return;
@@ -951,8 +989,8 @@
     let t = e.touches[0];
     let dx = t.clientX-touchStartX, dy = t.clientY-touchStartY;
     if (Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>26) {
-      laneSwitch(dx>0?1:-1);
-      touchStartX=t.clientX; // Allow rapid switches
+      doLaneSwitch(dx>0?1:-1);
+      touchStartX=t.clientX;
       touchMoved=true;
     } else if (Math.abs(dy)>Math.abs(dx)&&dy<-23) {
       jump();
@@ -967,7 +1005,7 @@
   },{passive:false});
   CANVAS.addEventListener('touchend', e=>{
     if (!CAT.canControl) return;
-    if (!touchMoved) jump(); // Tap = jump
+    if (!touchMoved) jump();
     touchStartX=null; touchStartY=null; touchMoved=false;
     e.preventDefault();
   },{passive:false});
@@ -975,7 +1013,7 @@
   document.body.addEventListener('scroll', function(e){window.scrollTo(0,0);});
   CANVAS.addEventListener('click',()=>CANVAS.focus());
 
-  // ===== BUTTONS =====
+  // === Buttons
   document.getElementById('feedBtn').onclick=()=>{
     if (!GAME.running||!CAT.canControl) return;
     if (STATS.hunger>95) {displayMessage("Ninja is full!");return;}
@@ -1003,103 +1041,90 @@
     resetGame();
     requestAnimationFrame(gameLoop);
   };
-  // ===== PERSISTENCE =====
+
+  // === Persistence
   let hs=+localStorage.getItem('ninjacatsurfers_highscore');
   if (!isNaN(hs)) {
     GAME.highscore=hs;
     document.getElementById('highscore').textContent="Best: "+Math.floor(GAME.highscore);
   }
-  // ===== STORYLINE =====
-  const storyFrames = [
-    {
-      text: "In the neon-lit alleys of Meowkyo City, a daring ninja cat named Neko has just pulled off the ultimate heist...",
-      anim: "steal"
-    },
-    {
-      text: "Clutching the legendary <b>Golden Sushi Roll</b>, Neko darts into the night! But wait... the Cat Guards have spotted the thief!",
-      anim: "run"
-    },
-    {
-      text: "With a yowl, the Cat Guards give chase. Neko must run, leap, and dodge obstacles to escape with the prize.",
-      anim: "chase"
-    },
-    {
-      text: "Help Ninja Neko outrun the Cat Guards!<br><br><small>Swipe or tap to jump, swipe left/right to change lanes. Collect sushi, avoid obstacles, and keep your ninja skills sharp!</small>",
-      anim: "ready"
-    }
-  ];
-  let storyIdx = 0;
+
+  // === Animated Storyline Intro ===
   function showStoryline(callback) {
     const storyDiv = document.getElementById('storyline');
     const storyCanvas = document.getElementById('story-canvas');
     const storyCtx = storyCanvas.getContext('2d');
     storyDiv.classList.add('active');
-    storyIdx = 0;
-    renderStoryFrame(storyFrames[storyIdx]);
-    document.getElementById('story-btn').onclick = ()=>{
-      storyIdx++;
-      if (storyIdx < storyFrames.length) {
-        renderStoryFrame(storyFrames[storyIdx]);
-      } else {
+    let t = 0, scene = 0, done = false;
+    const texts = [
+      "In the neon-lit alleys of Meowkyo City, a daring ninja cat named Neko has just pulled off the ultimate heist...",
+      "Clutching the legendary <b>Golden Sushi Roll</b>, Neko darts into the night! But wait... the Cat Guards have spotted the thief!",
+      "With a yowl, the Cat Guards give chase. Neko must run, leap, and dodge obstacles to escape with the prize.",
+      "Help Ninja Neko outrun the Cat Guards!<br><br><small>Swipe or tap to jump, swipe left/right to change lanes. Collect sushi, avoid obstacles, and keep your ninja skills sharp!</small>"
+    ];
+    let showBtn = false;
+    document.getElementById('story-btn').style.display = "none";
+    function nextScene() {
+      if (scene<3) { scene++; t=0; }
+      else {
         storyDiv.classList.remove('active');
-        CAT.canControl = true;
         if (callback) callback();
+        done = true;
       }
-    };
-    function renderStoryFrame(frame) {
-      drawStoryAnim(storyCtx,frame.anim,storyCanvas.width,storyCanvas.height,()=>{});
-      document.getElementById('story-text').innerHTML = frame.text;
     }
-  }
-  function drawStoryAnim(ctx, anim, W, H, cb) {
-    // Clear
-    ctx.clearRect(0,0,W,H);
-    // BG
-    ctx.save();
-    ctx.fillStyle = "#232942";
-    ctx.fillRect(0,0,W,H);
-    // Neon city
-    for(let i=0;i<4;i++){
-      let x = 60+i*80;
-      ctx.fillStyle="#31386b";
-      ctx.fillRect(x,H-70,32,48+randomInt(-6,10));
+    document.getElementById('story-btn').onclick = nextScene;
+    function animate() {
+      if (done) return;
+      t += 1;
+      storyCtx.clearRect(0,0,storyCanvas.width,storyCanvas.height);
+      // BG
+      storyCtx.save();
+      storyCtx.fillStyle = "#232942";
+      storyCtx.fillRect(0,0,storyCanvas.width,storyCanvas.height);
+      // Neon city
+      for(let i=0;i<4;i++){
+        let x = 60+i*80;
+        storyCtx.fillStyle="#31386b";
+        storyCtx.fillRect(x,storyCanvas.height-70,32,48+randomInt(-6,10));
+      }
+      // Animate scenes
+      if (scene===0) {
+        // Cat sneaks in, paw reaches, sushi glows
+        let cx = 70+Math.min(1.2*t,130);
+        drawCatStory(storyCtx,cx,storyCanvas.height-120,"sneak",true,false,false);
+        if (t>25) drawSushiGlow(storyCtx, cx+55, storyCanvas.height-110, 1+0.07*Math.sin(t/7));
+        if (t>80) showBtn = true;
+      } else if (scene===1) {
+        // Cat running with sushi, motion blur, guard fading in
+        let cx = 200+Math.cos(t/17)*8 + Math.min(1.2*(t-2),110);
+        drawCatStory(storyCtx,cx,storyCanvas.height-130,"run",true,true,false);
+        if (t>12) drawCatGuardStory(storyCtx, cx-88, storyCanvas.height-123, "chase", Math.min(1,(t-12)/24));
+        if (t>80) showBtn = true;
+      } else if (scene===2) {
+        // Cat guard chasing, cat ahead, alert icon, sushi
+        let cx = 220+Math.sin(t/21)*5, gx = cx-80+Math.abs(Math.sin(t/12))*8;
+        drawCatStory(storyCtx,cx,storyCanvas.height-128,"run",true,true,false);
+        drawCatGuardStory(storyCtx, gx, storyCanvas.height-120, "chase", 1);
+        storyCtx.font="bold 30px Arial";
+        storyCtx.fillStyle="#ffe35e";
+        storyCtx.globalAlpha=0.6;
+        storyCtx.fillText("!", gx+18, storyCanvas.height-152);
+        storyCtx.globalAlpha=1;
+        if(t>80) showBtn = true;
+      } else {
+        // Ninja cat heroic pose, guard faded back
+        let cx = storyCanvas.width/2-12;
+        drawCatStory(storyCtx,cx,storyCanvas.height-128,"hero",true,false,true);
+        drawCatGuardStory(storyCtx, cx-80, storyCanvas.height-120, "idle", 0.3);
+        showBtn = true;
+      }
+      storyCtx.restore();
+      document.getElementById('story-text').innerHTML = texts[scene];
+      if (showBtn) document.getElementById('story-btn').style.display = "";
+      else document.getElementById('story-btn').style.display = "none";
+      if (!done) requestAnimationFrame(animate);
     }
-    if (anim==="steal") {
-      // Ninja cat sneaking, paw on a glowing sushi
-      drawCatStory(ctx, W/2-66, H-140, "sneak", true);
-      drawSushiGlow(ctx, W/2+30, H-115, 1);
-    } else if (anim==="run") {
-      // Ninja cat running with sushi, motion lines
-      drawCatStory(ctx, W/2-46, H-128, "run", true, true);
-      drawSushiGlow(ctx, W/2+44, H-118, 0.8);
-      ctx.save();
-      ctx.strokeStyle="#ffe35e";
-      ctx.globalAlpha=0.28;
-      ctx.lineWidth=8;
-      ctx.beginPath();
-      ctx.moveTo(W/2-16,H-98); ctx.lineTo(W/2+32,H-88);
-      ctx.stroke();
-      ctx.restore();
-    } else if (anim==="chase") {
-      // Cat guard chasing, ninja cat ahead, alert icon
-      drawCatStory(ctx, W/2-24, H-124, "run", true, true);
-      drawCatGuardStory(ctx, W/2-70, H-120, "chase");
-      ctx.font="bold 30px Arial";
-      ctx.fillStyle="#ffe35e";
-      ctx.save();
-      ctx.globalAlpha=0.6;
-      ctx.fillText("!", W/2-58, H-152);
-      ctx.restore();
-      drawSushiGlow(ctx, W/2+56, H-115, 0.7);
-    } else if (anim==="ready") {
-      // Ninja cat heroic pose, bandana fluttering
-      drawCatStory(ctx, W/2-12, H-128, "hero", true, false, true);
-      drawSushiGlow(ctx, W/2+52, H-114, 0.9);
-      // Cat guard in background, faded
-      drawCatGuardStory(ctx, W/2-80, H-120, "idle", 0.3);
-    }
-    ctx.restore();
-    if (cb) cb();
+    animate();
   }
   function drawSushiGlow(ctx,x,y,scale=1) {
     ctx.save();
@@ -1220,7 +1245,7 @@
     ctx.restore();
   }
 
-  // ===== INIT & STORYLINE START =====
+  // === Init
   updateStatsUI(); setScore(0);
   fitCanvas();
   showStoryline(()=>{
@@ -1235,7 +1260,6 @@
     }
   });
   window.scrollTo(0,0);
-  window.addEventListener('resize', fitCanvas);
   let lastTouch=0;
   document.body.addEventListener('touchend',function(e){
     let now=new Date().getTime();
