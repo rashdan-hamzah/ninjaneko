@@ -3,275 +3,673 @@
 <head>
   <meta charset="UTF-8">
   <title>Dragon Dash</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: linear-gradient(to bottom, #cce6ff, #ffe3e3 85%);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      user-select: none;
+      touch-action: none;
+    }
     body {
-      background: #cce6ff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin: 0;
-      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+    }
+    #game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 16px;
     }
     canvas {
       background: #e0f7fa;
-      margin-top: 30px;
       box-shadow: 0 4px 24px #0002;
       border-radius: 18px;
       display: block;
+      max-width: 98vw;
+      max-height: 80vh;
+      image-rendering: pixelated;
+      touch-action: none;
     }
-    #score {
-      font-size: 1.5em;
-      margin-top: 20px;
+    #score, #highscore {
+      font-size: 1.4em;
       color: #006064;
       font-weight: bold;
+      margin: 8px 0 0 0;
       text-shadow: 1px 1px 2px #fff8;
     }
+    #highscore {
+      font-size: 1.05em;
+      color: #0f172a;
+      margin-top: 0;
+    }
     #restart {
-      margin-top: 10px;
-      padding: 10px 24px;
-      font-size: 1em;
-      border-radius: 8px;
+      margin: 16px 0 0 0;
+      padding: 11px 32px;
+      font-size: 1.1em;
+      border-radius: 9px;
       border: none;
       background: #80deea;
       color: #006064;
       cursor: pointer;
       box-shadow: 0 2px 8px #0001;
       display: none;
+      font-weight: bold;
+      letter-spacing: 0.8px;
     }
     #restart:active {
       background: #4dd0e1;
     }
+    #howto {
+      margin-top: 10px;
+      font-size: 1em;
+      color: #555;
+      background: rgba(255,255,255,0.7);
+      border-radius: 10px;
+      padding: 6px 12px;
+    }
+    @media (max-width: 520px) {
+      #howto { font-size: 0.95em; }
+      #score, #highscore { font-size: 1.1em; }
+    }
+    #mobile-controls {
+      display: none;
+      width: 240px;
+      margin-top: 10px;
+      justify-content: space-between;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mc-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: none;
+      margin: 0 1px;
+      background: #fff;
+      box-shadow: 0 2px 8px #0002;
+      font-size: 2.2em;
+      color: #0ea5e9;
+      font-weight: bold;
+      touch-action: none;
+    }
+    .mc-btn:active {
+      background: #bbeeff;
+    }
+    @media (max-width: 680px) {
+      #mobile-controls { display: flex; }
+    }
   </style>
 </head>
 <body>
-  <div id="score">Score: 0</div>
-  <canvas id="game" width="400" height="600"></canvas>
-  <button id="restart">Restart</button>
+  <div id="game-container">
+    <div id="score">Score: 0</div>
+    <div id="highscore">High Score: 0</div>
+    <canvas id="game" width="400" height="600"></canvas>
+    <button id="restart">Restart</button>
+    <div id="howto">
+      Use <b>Arrow Keys</b> or <b>WASD</b> (or tap buttons) to move the dragon.<br>
+      Collect <span style="color:#fbbf24;">gems</span> and avoid obstacles!
+    </div>
+    <div id="mobile-controls">
+      <button class="mc-btn" id="btn-left">&#8592;</button>
+      <div style="display: flex; flex-direction: column;">
+        <button class="mc-btn" id="btn-up">&#8593;</button>
+        <button class="mc-btn" id="btn-down">&#8595;</button>
+      </div>
+      <button class="mc-btn" id="btn-right">&#8594;</button>
+    </div>
+  </div>
+  <audio id="sfx-gem" src="data:audio/wav;base64,UklGRrQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YfQAAABkZmZmZmZmZmZmZmZmaWZmZmZmZmZmZmZmaWZmZmZmZmZmZmZmZmaWZmZmZmZmZmZmZmZmZmaWZmZmZmZmZmZmZmZmZmaWZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZn" preload="auto"></audio>
+  <audio id="sfx-dead" src="data:audio/wav;base64,UklGRioAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YY4AAABkZmZmZmZmZmZmZmZmZmaWZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZn" preload="auto"></audio>
+  <audio id="sfx-hop" src="data:audio/wav;base64,UklGRkIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YcAAAAAAgICA//8AAICAgP//AAD///8A//8AAP///wD///8A//8AAP///wD///8A//8AAP///wD///8A//8AAP///wD///8A//8AAP///wD///8A//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" preload="auto"></audio>
+  <audio id="sfx-bg" loop preload="auto" src="data:audio/wav;base64,UklGRuQAAABXQVZFZm10IBAAAAABAAEAIlYAAB9AAABAAgAZGF0YYwAAAD///////////9/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f39/f3//w=="></audio>
   <script>
-    // Game constants
-    const TILE_SIZE = 40;
-    const LANE_HEIGHT = 60;
-    const COLS = 10;
-    const ROWS = 15;
-    const CANVAS_WIDTH = TILE_SIZE * COLS;
-    const CANVAS_HEIGHT = LANE_HEIGHT * ROWS;
+    // --- CONFIGURATION ---
+    const TILE = 40, LANE_H = 40, COLS = 10, ROWS = 15;
+    const CANVAS_W = TILE * COLS, CANVAS_H = LANE_H * ROWS;
+    const SAFE_ROWS = 2; // Safe zone at bottom
+    const OBSTACLE_COLORS = ["#e57373","#ffb74d","#81c784","#64b5f6","#ba68c8"];
+    const GEM_COLOR = "#fbbf24";
+    const GEM_SIZE = 20;
+    const OBSTACLE_MIN_W = TILE*0.9, OBSTACLE_MAX_W = TILE*2.4;
+    const OBSTACLE_HEIGHT = 28;
+    const DRAGON_SIZE = 32;
+    const FPS = 60;
 
-    // Dragon character
-    const dragon = {
-      x: Math.floor(COLS / 2),
-      y: ROWS - 2,
-      color: "#67e8f9",
-      size: TILE_SIZE * 0.9,
-      alive: true,
-      cuteFace: true
+    // --- STATE ---
+    let dragon, lanes, gems, gameOver, score, highScore, tick, bgClouds, mobile, autoMove, musicStarted = false;
+    let keyState = {up: false, down: false, left: false, right: false};
+    const sfx = {
+      gem: document.getElementById("sfx-gem"),
+      dead: document.getElementById("sfx-dead"),
+      hop: document.getElementById("sfx-hop"),
+      bg: document.getElementById("sfx-bg")
     };
 
-    // Obstacles and lanes
-    const lanes = [];
-    const obstaclesPerLane = 3;
-    const laneSpeeds = [0, 1, -1, 1.5, -1.5, 2, -2, 2.5, -2.5, 1, -1, 1.2, -1.2, 1.3, -1.3];
-
-    // Score
-    let score = 0, maxScore = 0;
-    let gameOver = false;
-
-    // Canvas setup
+    // --- CANVAS ---
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
-    canvas.width = CANVAS_WIDTH; canvas.height = CANVAS_HEIGHT;
+    canvas.width = CANVAS_W; canvas.height = CANVAS_H;
 
-    // Score display
-    const scoreDiv = document.getElementById("score");
-    const restartBtn = document.getElementById("restart");
+    function isMobile() {
+      return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 520;
+    }
 
-    // Initialize lanes and obstacles
-    function resetLanes() {
-      lanes.length = 0;
-      for (let i = 0; i < ROWS; i++) {
-        if (i < 2) {
-          lanes.push({ obstacles: [], speed: 0 }); // Safe zone at start
-          continue;
-        }
-        let speed = laneSpeeds[i % laneSpeeds.length];
+    // --- INITIALIZE ---
+    function initGame() {
+      dragon = {
+        x: Math.floor(COLS/2),
+        y: ROWS-2,
+        alive: true,
+        anim: 0,
+        facing: 1 // 1=right, -1=left
+      };
+      tick = 0;
+      score = 0;
+      gameOver = false;
+      updateScore();
+      autoMove = false;
+
+      // Highscore
+      highScore = +localStorage.getItem("drg-hs")||0;
+      document.getElementById("highscore").textContent = `High Score: ${highScore}`;
+
+      // Lanes and obstacles
+      lanes = [];
+      for(let i=0;i<ROWS;i++) {
+        if(i < SAFE_ROWS) {lanes.push({obstacles:[],speed:0});continue;}
+        let speed = ((i%2===0)?1:-1)*(1.05 + i*0.07);
         let obstacles = [];
-        for (let j = 0; j < obstaclesPerLane; j++) {
-          let obsX = Math.random() * CANVAS_WIDTH;
-          obstacles.push({ x: obsX, width: TILE_SIZE * (1.2 + Math.random()), color: "#ffab91" });
+        let n = 2 + Math.floor(Math.random()*2) + Math.floor(i/6);
+        for(let j=0;j<n;j++) {
+          let w = OBSTACLE_MIN_W + Math.random()*(OBSTACLE_MAX_W-OBSTACLE_MIN_W);
+          let x = Math.random() * (CANVAS_W-w);
+          obstacles.push({
+            x: x,
+            width: w,
+            color: OBSTACLE_COLORS[i%OBSTACLE_COLORS.length]
+          });
         }
-        lanes.push({ obstacles, speed });
+        lanes.push({obstacles,speed});
+      }
+
+      // Gems
+      gems = [];
+      for(let i=SAFE_ROWS;i<ROWS-2;i++) {
+        if(Math.random() < 0.7) {
+          let gx = Math.floor(Math.random()*(COLS));
+          gems.push({x:gx,y:i,active:true});
+        }
+      }
+
+      // BG Clouds
+      bgClouds = [];
+      for(let i=0;i<7;i++) bgClouds.push({
+        x: Math.random()*CANVAS_W,
+        y: Math.random()*150+20,
+        r: Math.random()*18+24,
+        s: 0.15+Math.random()*0.18
+      });
+    }
+
+    // --- DRAWING ---
+
+    function drawBg() {
+      // Sky gradient
+      let grad = ctx.createLinearGradient(0,0,0,CANVAS_H);
+      grad.addColorStop(0, "#cce6ff");
+      grad.addColorStop(0.6, "#e0f7fa");
+      grad.addColorStop(1, "#ffe3e3");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+
+      // Clouds
+      for(let c of bgClouds) {
+        ctx.save();
+        ctx.globalAlpha = 0.28;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
+        ctx.arc(c.x+c.r*0.7, c.y+10, c.r*0.7, 0, Math.PI*2);
+        ctx.arc(c.x-c.r*0.6, c.y+7, c.r*0.5, 0, Math.PI*2);
+        ctx.fillStyle = "#fff";
+        ctx.fill();
+        ctx.restore();
       }
     }
 
-    // Draw dragon
-    function drawDragon() {
-      let px = dragon.x * TILE_SIZE + TILE_SIZE/2;
-      let py = dragon.y * LANE_HEIGHT + LANE_HEIGHT/2;
-      ctx.save();
-      ctx.translate(px, py);
-      // Body
-      ctx.beginPath();
-      ctx.arc(0, 0, dragon.size/2, 0, Math.PI * 2);
-      ctx.fillStyle = dragon.color;
-      ctx.shadowColor = "#22d3ee";
-      ctx.shadowBlur = 8;
-      ctx.fill();
-      ctx.shadowBlur = 0;
-      // Eyes
-      ctx.fillStyle = "#fff";
-      ctx.beginPath(); ctx.arc(-8, -4, 6, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(8, -4, 6, 0, Math.PI*2); ctx.fill();
-      ctx.fillStyle = "#222";
-      ctx.beginPath(); ctx.arc(-8, -3, 3, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(8, -3, 3, 0, Math.PI*2); ctx.fill();
-      // Blush
-      ctx.fillStyle = "#fbbf24";
-      ctx.beginPath(); ctx.arc(-14, 6, 2.5, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(14, 6, 2.5, 0, Math.PI*2); ctx.fill();
-      // Smile
-      ctx.strokeStyle = "#333";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(0, 6, 8, Math.PI*0.1, Math.PI*0.9);
-      ctx.stroke();
-      // Wings
-      ctx.strokeStyle = "#60a5fa";
-      ctx.lineWidth = 4;
-      ctx.beginPath(); ctx.moveTo(-16,0); ctx.lineTo(-30,-12); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(16,0); ctx.lineTo(30,-12); ctx.stroke();
-      ctx.restore();
+    function drawLanes() {
+      for(let row=0;row<ROWS;row++) {
+        let y = row*LANE_H;
+        // Ground
+        ctx.save();
+        if(row<SAFE_ROWS) {
+          ctx.fillStyle = "#d1fae5";
+        } else if(row%2==0) {
+          ctx.fillStyle = "#fde68a";
+        } else {
+          ctx.fillStyle = "#fbbf24";
+        }
+        ctx.fillRect(0, y, CANVAS_W, LANE_H);
+        ctx.restore();
+
+        // Lane lines
+        if(row>SAFE_ROWS-1) {
+          ctx.save();
+          ctx.strokeStyle = "#fff9";
+          ctx.setLineDash([8,7]);
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(0, y+LANE_H-2.5);
+          ctx.lineTo(CANVAS_W, y+LANE_H-2.5);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.restore();
+        }
+      }
     }
 
-    // Draw obstacles
     function drawObstacles() {
-      for (let row = 2; row < ROWS; row++) {
+      for(let row=SAFE_ROWS;row<ROWS;row++) {
         let lane = lanes[row];
-        for (let obs of lane.obstacles) {
+        for(let obs of lane.obstacles) {
+          let y = row*LANE_H+LANE_H/2-OBSTACLE_HEIGHT/2;
+          ctx.save();
           ctx.fillStyle = obs.color;
-          ctx.fillRect(obs.x, row * LANE_HEIGHT + 10, obs.width, LANE_HEIGHT - 20);
-          ctx.strokeStyle = "#d84315";
-          ctx.strokeRect(obs.x, row * LANE_HEIGHT + 10, obs.width, LANE_HEIGHT - 20);
+          ctx.strokeStyle = "#2225";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.roundRect(obs.x, y, obs.width, OBSTACLE_HEIGHT, 11);
+          ctx.fill();
+          ctx.stroke();
+          // "Face" for fun
+          ctx.save();
+          ctx.translate(obs.x+obs.width/2, y+OBSTACLE_HEIGHT/2+2);
+          ctx.scale(0.8,1);
+          ctx.fillStyle="#fff";
+          ctx.beginPath();ctx.arc(-7,-2,4,0,Math.PI*2);ctx.arc(7,-2,4,0,Math.PI*2);ctx.fill();
+          ctx.fillStyle="#333";
+          ctx.beginPath();ctx.arc(-7,-2,1.5,0,Math.PI*2);ctx.arc(7,-2,1.5,0,Math.PI*2);ctx.fill();
+          ctx.restore();
+          ctx.restore();
         }
       }
     }
 
-    // Draw ground and lanes
-    function drawBackground() {
-      for (let row = 0; row < ROWS; row++) {
-        ctx.fillStyle = (row === 0 || row === 1) ? "#a7f3d0" : (row % 2 ? "#fcd34d" : "#fbbf24");
-        ctx.fillRect(0, row * LANE_HEIGHT, CANVAS_WIDTH, LANE_HEIGHT);
+    function drawGems() {
+      for(let gem of gems) if(gem.active) {
+        let px = gem.x*TILE + TILE/2, py = gem.y*LANE_H + LANE_H/2;
+        ctx.save();
+        ctx.translate(px, py-8+3*Math.sin(tick/6+gem.x));
+        ctx.scale(1.06,1);
+        ctx.rotate(Math.PI/4);
+        ctx.globalAlpha = 0.94;
+        ctx.fillStyle = GEM_COLOR;
+        ctx.beginPath();
+        ctx.moveTo(0,-GEM_SIZE/2);
+        ctx.lineTo(GEM_SIZE/2,0);
+        ctx.lineTo(0,GEM_SIZE/2);
+        ctx.lineTo(-GEM_SIZE/2,0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "#fff9";
+        ctx.beginPath();
+        ctx.arc(0,-GEM_SIZE/3,4,0,Math.PI*2);
+        ctx.fill();
+        ctx.restore();
       }
     }
 
-    // Draw everything
-    function draw() {
-      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      drawBackground();
-      drawObstacles();
-      drawDragon();
+    // --- PIXEL ART DRAGON ---
+    function drawDragon(px,py,flip,anim) {
+      // px,py are center coordinates
+      ctx.save();
+      ctx.translate(px,py);
+      ctx.scale(flip,1);
+
+      // Body (main)
+      ctx.save();
+      ctx.shadowColor="#0ff7";
+      ctx.shadowBlur=6;
+      ctx.fillStyle="#67e8f9";
+      ctx.beginPath();
+      ctx.ellipse(0,3,16,13,0,0,Math.PI*2);
+      ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.restore();
+
+      // Belly
+      ctx.save();
+      ctx.fillStyle="#fff6";
+      ctx.beginPath();
+      ctx.ellipse(0,10,10,7,0,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+
+      // Tail
+      ctx.save();
+      ctx.rotate(Math.sin(anim/6)*0.09-0.15);
+      ctx.fillStyle="#60a5fa";
+      ctx.beginPath();
+      ctx.ellipse(-16,16,8,6,0,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+
+      // Wings (flap)
+      let wingA = Math.sin(anim/6)*0.5 + 0.5;
+      ctx.save();
+      ctx.globalAlpha=0.85;
+      ctx.strokeStyle="#93c5fd";
+      ctx.lineWidth=7;
+      ctx.beginPath();
+      ctx.moveTo(-6,-3); ctx.lineTo(-18,-14+wingA*10);
+      ctx.moveTo(6,-3); ctx.lineTo(18,-14+wingA*10);
+      ctx.stroke();
+      ctx.restore();
+
+      // Head
+      ctx.save();
+      ctx.translate(0,-12);
+      ctx.strokeStyle="#60a5fa";
+      ctx.lineWidth=3.5;
+      ctx.beginPath();
+      ctx.arc(-8,-7,5,0,Math.PI*2);
+      ctx.arc(8,-7,5,0,Math.PI*2);
+      ctx.stroke();
+      // Face
+      ctx.save();
+      ctx.fillStyle="#67e8f9";
+      ctx.beginPath();
+      ctx.arc(0,0,12,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+
+      // Eyes
+      ctx.save();
+      ctx.fillStyle="#fff";
+      ctx.beginPath(); ctx.arc(-4,-2,3,0,Math.PI*2); ctx.arc(4,-2,3,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle="#222";
+      ctx.beginPath(); ctx.arc(-4,-1,1.2,0,Math.PI*2); ctx.arc(4,-1,1.2,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+
+      // Nostrils
+      ctx.save();
+      ctx.fillStyle="#60a5fa";
+      ctx.beginPath(); ctx.arc(-2,4,1,0,Math.PI*2); ctx.arc(2,4,1,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+
+      // Blush
+      ctx.save();
+      ctx.globalAlpha=0.8;
+      ctx.fillStyle="#fbbf24";
+      ctx.beginPath();ctx.arc(-6,5,1.6,0,Math.PI*2);ctx.arc(6,5,1.6,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+
+      // Smile
+      ctx.save();
+      ctx.strokeStyle="#222";
+      ctx.lineWidth=1.5;
+      ctx.beginPath();
+      ctx.arc(0,5,5,Math.PI*0.1,Math.PI*0.9);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.restore(); // head
+
+      ctx.restore(); // main dragon
     }
 
-    // Move obstacles
-    function moveObstacles() {
-      for (let row = 2; row < ROWS; row++) {
+    // --- GAME LOGIC ---
+
+    function moveObstacles(dt) {
+      for(let row=SAFE_ROWS;row<ROWS;row++) {
         let lane = lanes[row];
-        for (let obs of lane.obstacles) {
-          obs.x += lane.speed;
-          if (lane.speed > 0 && obs.x > CANVAS_WIDTH) obs.x = -obs.width;
-          if (lane.speed < 0 && obs.x + obs.width < 0) obs.x = CANVAS_WIDTH;
+        let speed = lane.speed * (1+score*0.05);
+        for(let obs of lane.obstacles) {
+          obs.x += speed*dt/16;
+          if(speed>0 && obs.x > CANVAS_W) obs.x = -obs.width;
+          if(speed<0 && obs.x+obs.width < 0) obs.x = CANVAS_W;
         }
+      }
+      // Clouds
+      for(let c of bgClouds) {
+        c.x += c.s;
+        if(c.x > CANVAS_W+40) c.x = -40;
       }
     }
 
-    // Collision detection
+    function dragonPx() { return dragon.x*TILE+TILE/2; }
+    function dragonPy() { return dragon.y*LANE_H+LANE_H/2+3; }
+
     function checkCollision() {
-      if (dragon.y < 2) return false; // Safe zone
+      if(dragon.y < SAFE_ROWS) return false;
       let lane = lanes[dragon.y];
-      let px = dragon.x * TILE_SIZE;
-      for (let obs of lane.obstacles) {
-        if (px + TILE_SIZE*0.1 < obs.x + obs.width &&
-            px + TILE_SIZE*0.9 > obs.x) {
-          // Collision!
+      let px = dragonPx()-DRAGON_SIZE/2+4;
+      let py = dragonPy()-DRAGON_SIZE/2;
+      for(let obs of lane.obstacles) {
+        let oy = dragon.y*LANE_H+LANE_H/2-OBSTACLE_HEIGHT/2;
+        if(px+DRAGON_SIZE-8 > obs.x && px+8 < obs.x+obs.width &&
+           py+DRAGON_SIZE-10 > oy && py+8 < oy+OBSTACLE_HEIGHT) {
           return true;
         }
       }
       return false;
     }
 
-    // Move dragon
-    function moveDragon(dx, dy) {
-      if (!dragon.alive) return;
-      let nx = dragon.x + dx;
-      let ny = dragon.y + dy;
-      if (nx < 0 || nx >= COLS) return;
-      if (ny < 0 || ny >= ROWS) return;
-      dragon.x = nx; dragon.y = ny;
-      if (dragon.y < ROWS - 2 && dragon.y > score) {
+    function collectGem() {
+      for(let gem of gems) if(gem.active) {
+        if(dragon.x===gem.x && dragon.y===gem.y) {
+          gem.active = false;
+          score += 7;
+          playSfx("gem");
+          updateScore();
+          break;
+        }
+      }
+    }
+
+    function updateScore() {
+      document.getElementById("score").textContent = `Score: ${score}`;
+    }
+
+    function showGameOver() {
+      document.getElementById("score").textContent = `Game Over! Score: ${score}`;
+      if(score > highScore) {
+        highScore = score;
+        localStorage.setItem("drg-hs", highScore);
+        document.getElementById("highscore").textContent = `High Score: ${highScore}`;
+      }
+      document.getElementById("restart").style.display = "inline-block";
+    }
+
+    function moveDragon(dx,dy) {
+      if(!dragon.alive) return;
+      let nx = dragon.x+dx, ny = dragon.y+dy;
+      if(nx<0||nx>=COLS||ny<0||ny>=ROWS) return;
+      dragon.x=nx; dragon.y=ny;
+      dragon.facing = dx!==0 ? dx : dragon.facing;
+      dragon.anim++;
+      playSfx("hop");
+      if(dragon.y < SAFE_ROWS) return;
+      if(dragon.y > score) {
         score = dragon.y;
         updateScore();
       }
-      if (checkCollision()) {
-        dragon.alive = false;
-        gameOver = true;
+      collectGem();
+      if(checkCollision()) {
+        dragon.alive=false;
+        gameOver=true;
+        playSfx("dead");
         showGameOver();
+        stopMusic();
       }
     }
 
-    // Handle input
+    function playSfx(name) {
+      try {
+        sfx[name].currentTime=0;
+        sfx[name].play();
+      } catch(e){}
+    }
+    function startMusic() {
+      if(!musicStarted) {
+        try {sfx.bg.currentTime=0;sfx.bg.volume=0.18;sfx.bg.play();musicStarted=true;} catch(e){}
+      }
+    }
+    function stopMusic() {
+      try {sfx.bg.pause();sfx.bg.currentTime=0;musicStarted=false;} catch(e){}
+    }
+
+    // --- INPUT ---
     document.addEventListener("keydown", (e) => {
-      if (!dragon.alive) return;
-      if (e.key === "ArrowUp" || e.key === "w") moveDragon(0,-1);
-      if (e.key === "ArrowDown" || e.key === "s") moveDragon(0,1);
-      if (e.key === "ArrowLeft" || e.key === "a") moveDragon(-1,0);
-      if (e.key === "ArrowRight" || e.key === "d") moveDragon(1,0);
+      if(!dragon.alive) return;
+      if(e.repeat) return;
+      let k = e.key.toLowerCase();
+      if(k==="arrowup"||k==="w") moveDragon(0,-1);
+      if(k==="arrowdown"||k==="s") moveDragon(0,1);
+      if(k==="arrowleft"||k==="a") moveDragon(-1,0);
+      if(k==="arrowright"||k==="d") moveDragon(1,0);
+      startMusic();
     });
 
-    // Update score display
-    function updateScore() {
-      scoreDiv.textContent = `Score: ${score}`;
-    }
-
-    // Show game over
-    function showGameOver() {
-      scoreDiv.textContent = `Game Over! Score: ${score}`;
-      restartBtn.style.display = "inline-block";
-    }
-
-    // Restart game
-    function restartGame() {
-      dragon.x = Math.floor(COLS / 2);
-      dragon.y = ROWS - 2;
-      dragon.alive = true;
-      score = 0;
-      gameOver = false;
-      updateScore();
-      restartBtn.style.display = "none";
-      resetLanes();
-      draw();
-    }
-    restartBtn.addEventListener("click", restartGame);
-
-    // Game loop
-    function gameLoop() {
-      if (!gameOver) {
-        moveObstacles();
-        if (checkCollision()) {
-          dragon.alive = false;
-          gameOver = true;
-          showGameOver();
+    // Touch controls
+    function setupMobileControls() {
+      const btns = [
+        {id:"btn-up",dx:0,dy:-1},
+        {id:"btn-down",dx:0,dy:1},
+        {id:"btn-left",dx:-1,dy:0},
+        {id:"btn-right",dx:1,dy:0}
+      ];
+      for(let b of btns) {
+        let btn = document.getElementById(b.id);
+        btn.ontouchstart = e=>{
+          e.preventDefault();
+          moveDragon(b.dx,b.dy);
+          startMusic();
+        };
+        btn.onmousedown = e=>{
+          e.preventDefault();
+          moveDragon(b.dx,b.dy);
+          startMusic();
         }
-        draw();
       }
+    }
+    setupMobileControls();
+
+    // Restart
+    document.getElementById("restart").onclick = ()=>{
+      initGame();
+      document.getElementById("restart").style.display = "none";
+      startMusic();
+    }
+
+    // --- GAME LOOP ---
+    let lastTime = 0;
+    function gameLoop(ts) {
+      if(!lastTime) lastTime = ts;
+      let dt = Math.min(ts-lastTime,40);
+      lastTime = ts;
+      tick++;
+      if(!gameOver) {
+        moveObstacles(dt);
+        if(checkCollision() && dragon.alive) {
+          dragon.alive=false;gameOver=true;playSfx("dead");
+          showGameOver();stopMusic();
+        }
+      }
+
+      // DRAW
+      drawBg();
+      drawLanes();
+      drawObstacles();
+      drawGems();
+      // Dragon
+      let px = dragonPx(), py = dragonPy();
+      let flip = dragon.facing;
+      let anim = tick;
+      if(dragon.alive) drawDragon(px,py,flip,anim);
+      else {
+        // "splat" animation
+        ctx.save();
+        ctx.globalAlpha=0.62+0.38*Math.sin(tick/2);
+        drawDragon(px,py,flip,anim*0.8);
+        ctx.restore();
+      }
+      // Overlay
+      if(gameOver) {
+        ctx.save();
+        ctx.globalAlpha=0.68;
+        ctx.fillStyle="#fff";
+        ctx.fillRect(CANVAS_W/2-110,CANVAS_H/2-50,220,100);
+        ctx.globalAlpha=1;
+        ctx.textAlign="center";
+        ctx.font="bold 2.2em Arial";
+        ctx.fillStyle="#06b6d4";
+        ctx.fillText("Game Over",CANVAS_W/2,CANVAS_H/2-12);
+        ctx.font="1.15em Arial";
+        ctx.fillStyle="#333";
+        ctx.fillText(`Score: ${score}`,CANVAS_W/2,CANVAS_H/2+18);
+        if(score>=highScore) {
+          ctx.font="1em Arial";
+          ctx.fillStyle="#f59e42";
+          ctx.fillText("New High Score!",CANVAS_W/2,CANVAS_H/2+44);
+        }
+        ctx.restore();
+      }
+
       requestAnimationFrame(gameLoop);
     }
 
-    // Initialize game
-    function start() {
-      resetLanes();
-      updateScore();
-      draw();
+    // --- STARTUP ---
+    window.onload = ()=>{
+      mobile = isMobile();
+      if(mobile) document.getElementById("mobile-controls").style.display = "flex";
+      else document.getElementById("mobile-controls").style.display = "none";
+      initGame();
+      drawBg();drawLanes();drawObstacles();drawGems();
+      let px = dragonPx(), py = dragonPy();
+      drawDragon(px,py,1,0);
       requestAnimationFrame(gameLoop);
-    }
-    start();
+    };
+
+    // --- MOBILE SWIPE CONTROLS ---
+    let touchStartX=0, touchStartY=0;
+    canvas.addEventListener("touchstart",e=>{
+      if(e.touches.length===1) {
+        let t = e.touches[0];
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+      }
+    });
+    canvas.addEventListener("touchend",e=>{
+      if(!dragon.alive) return;
+      let t = e.changedTouches[0];
+      let dx = t.clientX-touchStartX, dy = t.clientY-touchStartY;
+      if(Math.abs(dx)>Math.abs(dy)) {
+        if(dx>30) moveDragon(1,0);
+        else if(dx<-30) moveDragon(-1,0);
+      } else {
+        if(dy>30) moveDragon(0,1);
+        else if(dy<-30) moveDragon(0,-1);
+      }
+      startMusic();
+    });
+    // Prevent scroll
+    document.body.addEventListener("touchmove",e=>{e.preventDefault();},{passive:false});
+
+    // --- PREVENT DOUBLE TAP ZOOM ---
+    let lastTouch = 0;
+    document.addEventListener('touchend', function (event) {
+      let now = new Date().getTime();
+      if (now - lastTouch <= 300) event.preventDefault();
+      lastTouch = now;
+    }, false);
+
   </script>
 </body>
 </html>
