@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ninja Cat Crossy Road</title>
+  <title>Cute Dragon Crossy - Road Hop Game</title>
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,maximum-scale=1.0">
   <style>
     html, body {
       margin: 0; padding: 0;
-      background: #232942;
+      background: #8ee7f4;
       font-family: 'Segoe UI', Arial, sans-serif;
       user-select: none;
       -webkit-user-select: none;
@@ -16,19 +16,16 @@
       overscroll-behavior: none;
       height: 100%; width: 100vw; min-height: 100vh;
     }
-    body {
-      width: 100vw; min-height: 100vh; height: 100vh;
-    }
+    body { width: 100vw; min-height: 100vh; height: 100vh; }
     #game-container {
       width: 100vw; height: 100vh;
       display: flex; flex-direction: column;
       align-items: center; justify-content: flex-start;
       position: relative; overflow: hidden;
-      background: #232942;
+      background: linear-gradient(#8ee7f4 70%, #61c8cc 100%);
     }
     #gameCanvas {
-      display: block;
-      margin: 0 auto; border-radius: 14px;
+      display: block; margin: 0 auto; border-radius: 14px;
       touch-action: none; background: transparent;
     }
     #scoreboard {
@@ -41,62 +38,37 @@
       z-index: 11; pointer-events: none;
     }
     #message {
-      position: absolute;
-      top: 54px; left: 0; right: 0;
+      position: absolute; top: 54px; left: 0; right: 0;
       text-align: center; font-size: 1.10em;
-      color: #f8e98c; font-weight: 650;
+      color: #41b3cf; font-weight: 650;
       letter-spacing: 1px; min-height: 18px;
       z-index: 13; pointer-events: none;
-      text-shadow: 0 1px 4px #21213b;
+      text-shadow: 0 1px 4px #fff;
     }
     #overlay {
       display: none;
       position: fixed; left: 0; top: 0; right: 0; bottom: 0;
-      background: rgba(36, 44, 66, 0.20);
+      background: rgba(36, 44, 66, 0.16);
       z-index: 1000; align-items: center; justify-content: center; overflow: hidden;
     }
     #overlay.active { display: flex; }
     #overlay-content {
-      background: #232942; border-radius: 18px;
+      background: #e8faff; border-radius: 18px;
       box-shadow: 0 4px 22px #0002;
       padding: 36px 25px 22px 25px;
-      text-align: center; min-width: 230px; max-width: 95vw;
-      color: #f8e98c;
+      text-align: center; min-width: 230px; max-width: 97vw;
+      color: #27a89e;
     }
-    #overlay-content h2 { margin: 0 0 16px 0; color: #f8e98c; }
-    #overlay-content p { margin: 0 0 16px 0; color: #fffbe0; font-size: 1.11em; }
+    #overlay-content h2 { margin: 0 0 16px 0; color: #27a89e; }
+    #overlay-content p { margin: 0 0 16px 0; color: #41b3cf; font-size: 1.11em; }
     #overlay-content button {
       margin-top: 13px;
-      font-size: 1.09em; background: #45ecc8;
-      color: #145a31; border: none; border-radius: 8px;
+      font-size: 1.09em; background: #ffdb80;
+      color: #977000; border: none; border-radius: 8px;
       padding: 9px 24px; font-weight: 700; cursor: pointer;
       transition: background 0.1s;
     }
-    #overlay-content button:hover { background: #169e6e; color: #fff; }
-    #storyline {
-      position: absolute; left: 0; right: 0; top: 0; bottom: 0;
-      z-index: 2000; width: 100vw; height: 100vh;
-      background: radial-gradient(ellipse at center, #10182b 80%, #232942 100%);
-      display: none; justify-content: center; align-items: center; flex-direction: column; overflow: hidden;
-    }
-    #storyline.active { display: flex; animation: fadeIn 0.7s; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    #story-canvas {
-      width: 100vw; max-width: 420px; height: 72vw; max-height: 420px; background: transparent; display: block;
-    }
-    #story-text {
-      color: #ffe35e; font-size: 1.15em;
-      text-align: center; margin: 18px auto 0 auto;
-      width: 90vw; max-width: 420px; min-height: 70px; font-weight: 600;
-      text-shadow: 2px 2px 14px #23294299;
-    }
-    #story-btn {
-      margin-top: 16px; font-size: 1.08em; background: #fa9bb2;
-      color: #3a1526; border: none; border-radius: 8px;
-      padding: 10px 28px; font-weight: 700; cursor: pointer;
-      transition: background 0.11s; box-shadow: 0 3px 18px #0002;
-    }
-    #story-btn:hover { background: #d36782; color: #fff; }
+    #overlay-content button:hover { background: #ffe7a9; color: #ad8500; }
     @media (max-width: 600px) {
       #gameCanvas { width: 100vw !important; height: 99vh !important; }
       #scoreboard { font-size: 0.95em; padding: 0 9vw; }
@@ -109,7 +81,7 @@
       <span id="score">0</span>
       <span id="highscore">Best: 0</span>
     </div>
-    <canvas id="gameCanvas" width="420" height="700" tabindex="0"></canvas>
+    <canvas id="gameCanvas" width="360" height="600" tabindex="0"></canvas>
     <div id="message"></div>
     <div id="overlay">
       <div id="overlay-content">
@@ -118,43 +90,35 @@
         <button id="restartBtn">Restart</button>
       </div>
     </div>
-    <div id="storyline">
-      <canvas id="story-canvas" width="420" height="420"></canvas>
-      <div id="story-text"></div>
-      <button id="story-btn">Continue</button>
-    </div>
   </div>
   <script>
-  // === Responsive portrait canvas ===
+  // == Responsive Canvas ==
   const CANVAS = document.getElementById('gameCanvas');
   const CTX = CANVAS.getContext('2d');
   function fitCanvas() {
     const w = window.innerWidth, h = window.innerHeight;
     let cw = Math.min(420, w);
-    let ch = Math.max(500, Math.min(700, h));
+    let ch = Math.max(440, Math.min(620, h));
     if (w < 420) { cw = w; ch = h; }
-    CANVAS.width = cw;
-    CANVAS.height = ch;
+    CANVAS.width = cw; CANVAS.height = ch;
     GAME.CW = cw; GAME.CH = ch;
   }
   window.addEventListener('resize', fitCanvas);
 
-  // === Game constants/state ===
-  const GRID = { cols: 3, rows: 14, cell: 48 };
+  // == Game Constants ==
+  const GRID = { cols: 5, rows: 13, cell: 44 };
   const COLORS = {
-    grass: "#374d36",
-    road: "#39394b",
-    water: "#29396A",
-    lane: "#232942",
-    log: "#9d7e45",
-    sushi: "#ffe35e",
-    guard: "#392c22"
+    grass: "#b2f483",
+    road: "#eaeaea",
+    water: "#a3e1ff",
+    log: "#c8a573",
+    car: "#f47474",
+    dragon: "#85d2f2",
+    coin: "#ffd957"
   };
-
-  // === Cat Object ===
-  const CAT = {
-    col: 1,
-    row: 0,
+  // == Dragon (player) ==
+  const DRAGON = {
+    col: 2, row: 0,
     x: 0, y: 0,
     tx: 0, ty: 0,
     moving: false,
@@ -165,18 +129,16 @@
     alive: true
   };
 
-  // === Rows generation
-  // Each row: { type: 'grass'|'road'|'water', obstacles: [ ... ] }
+  // == Map rows ==
   let MAP = [];
   let scrollY = 0;
   let score = 0, highscore = 0;
   let gameOver = false;
-  let message = "";
   let tick = 0;
+  let message = "";
   let inputLock = false;
 
-  // === Obstacles
-  // {x, dir, speed, type}
+  // == Obstacles ==
   function spawnRow(rowN) {
     let type;
     if (rowN === 0) type = "grass";
@@ -191,7 +153,7 @@
       let count = 1+Math.floor(Math.random()*2);
       for(let i=0;i<count;i++) {
         let c = Math.floor(Math.random()*GRID.cols);
-        let speed = 0.7+Math.random()*0.5;
+        let speed = 0.5+Math.random()*0.5;
         obstacles.push({col:c, x:c, px:c, dir, speed, type:"car"});
       }
     }
@@ -200,23 +162,23 @@
       let count = 1+Math.floor(Math.random()*2);
       for(let i=0;i<count;i++) {
         let c = Math.floor(Math.random()*GRID.cols);
-        let speed = 0.5+Math.random()*0.4;
+        let speed = 0.3+Math.random()*0.3;
         obstacles.push({col:c, x:c, px:c, dir, speed, type:"log"});
       }
     }
-    if (type === "grass" && Math.random()<0.15) {
+    if (type === "grass" && Math.random()<0.18) {
       let c = Math.floor(Math.random()*GRID.cols);
-      obstacles.push({col:c, x:c, px:c, dir:0, speed:0, type:Math.random()<0.5?"sushi":"guard"});
+      obstacles.push({col:c, x:c, px:c, dir:0, speed:0, type:Math.random()<0.65?"coin":"guard"});
     }
     return {type, obstacles};
   }
 
-  // === Drawing functions
+  // == Drawing helper functions ==
   function drawCellBg(type,y) {
     if (type==="grass") CTX.fillStyle=COLORS.grass;
     else if (type==="road") CTX.fillStyle=COLORS.road;
     else if (type==="water") CTX.fillStyle=COLORS.water;
-    else CTX.fillStyle="#232942";
+    else CTX.fillStyle="#a0e7f4";
     CTX.fillRect(0,y,GRID.cols*GRID.cell,GRID.cell);
   }
 
@@ -224,138 +186,163 @@
     CTX.save();
     CTX.translate(x+GRID.cell/2,y+GRID.cell/2);
     CTX.rotate(dir===1?0:Math.PI);
-    CTX.fillStyle="#e95d5d";
-    CTX.fillRect(-14,-13,28,26);
+    CTX.fillStyle=COLORS.car;
+    CTX.fillRect(-14,-11,28,22);
     CTX.fillStyle="#fff";
-    CTX.fillRect(-13,-12,8,8); CTX.fillRect(5,-12,8,8);
-    CTX.fillRect(-13,4,8,8); CTX.fillRect(5,4,8,8);
+    CTX.fillRect(-13,-10,8,7); CTX.fillRect(5,-10,8,7);
+    CTX.fillRect(-13,3,8,7); CTX.fillRect(5,3,8,7);
     CTX.restore();
   }
   function drawLog(x,y) {
     CTX.save();
     CTX.translate(x,y);
     CTX.fillStyle=COLORS.log;
-    CTX.fillRect(5,GRID.cell/2-9,GRID.cell-10,18);
+    CTX.fillRect(5,GRID.cell/2-8,GRID.cell-10,16);
     CTX.restore();
   }
-  function drawSushi(x,y) {
+  function drawCoin(x,y) {
     CTX.save();
     CTX.translate(x+GRID.cell/2,y+GRID.cell/2);
     CTX.beginPath();
-    CTX.ellipse(0,0,14,8,0,0,2*Math.PI);
-    CTX.fillStyle="#fff47c"; CTX.fill();
-    CTX.strokeStyle="#e4a700"; CTX.stroke();
-    CTX.beginPath();
-    CTX.ellipse(0,-2,7,3.6,0,0,2*Math.PI);
-    CTX.fillStyle="#e4a700"; CTX.globalAlpha=0.8; CTX.fill();
+    CTX.arc(0,0,10,0,2*Math.PI);
+    CTX.fillStyle=COLORS.coin; CTX.globalAlpha=0.91; CTX.fill();
     CTX.globalAlpha=1;
+    CTX.lineWidth=2; CTX.strokeStyle="#eabf2f"; CTX.stroke();
+    CTX.font="bold 17px Arial";
+    CTX.fillStyle="#fffbc1";
+    CTX.textAlign="center"; CTX.textBaseline="middle";
+    CTX.fillText("★",0,2.5);
     CTX.restore();
   }
   function drawGuard(x,y) {
     CTX.save();
     CTX.translate(x+GRID.cell/2,y+GRID.cell/2+6);
     CTX.beginPath();
-    CTX.ellipse(0,5,16,11,0,0,2*Math.PI);
-    CTX.fillStyle=COLORS.guard; CTX.fill();
+    CTX.ellipse(0,5,15,10,0,0,2*Math.PI);
+    CTX.fillStyle="#76624a"; CTX.fill();
     CTX.beginPath();
-    CTX.ellipse(0,-8,13,10,0,0,2*Math.PI);
-    CTX.fillStyle="#2a1f1a"; CTX.fill();
-    CTX.fillStyle="#ffe35e";
-    CTX.fillRect(-8,-4,4,4); CTX.fillRect(4,-4,4,4);
+    CTX.ellipse(0,-8,12,8,0,0,2*Math.PI);
+    CTX.fillStyle="#4a3b2a"; CTX.fill();
+    CTX.fillStyle="#eabf2f";
+    CTX.fillRect(-6,-5,3,3); CTX.fillRect(3,-5,3,3);
     CTX.restore();
   }
 
-  function drawCat() {
-    let x = CAT.x, y = CAT.y;
+  function drawDragon() {
+    let x = DRAGON.x, y = DRAGON.y;
     // Hop animation
     let jumpY = 0;
     let turn = 0;
-    if (CAT.moving) {
-      let t = CAT.moveT;
-      jumpY = -18 * Math.sin(Math.PI*t);
-      turn = CAT.facing*0.2*(1-Math.cos(Math.PI*t));
-      x = CAT.x + (CAT.tx-CAT.x)*t;
-      y = CAT.y + (CAT.ty-CAT.y)*t;
+    if (DRAGON.moving) {
+      let t = DRAGON.moveT;
+      jumpY = -14 * Math.sin(Math.PI*t);
+      turn = DRAGON.facing*0.23*(1-Math.cos(Math.PI*t));
+      x = DRAGON.x + (DRAGON.tx-DRAGON.x)*t;
+      y = DRAGON.y + (DRAGON.ty-DRAGON.y)*t;
     }
     CTX.save();
     CTX.translate(x+GRID.cell/2, y+GRID.cell/2+jumpY);
     CTX.rotate(turn);
+
     // Shadow
     CTX.save();
     CTX.globalAlpha = 0.17;
     CTX.beginPath();
-    CTX.ellipse(0,GRID.cell/2-10,19,7,0,0,2*Math.PI);
+    CTX.ellipse(0,GRID.cell/2-8,14,5,0,0,2*Math.PI);
     CTX.fillStyle="#1f2439";
     CTX.fill();
     CTX.restore();
+
     // Body
-    CTX.fillStyle="#232942";
-    CTX.beginPath(); CTX.ellipse(0,8,18,14,0,0,2*Math.PI); CTX.fill();
-    // Belt
-    CTX.fillStyle="#b21f2d"; CTX.fillRect(-13,22,26,6);
+    CTX.save();
+    // Back spikes
+    for(let i=0;i<4;i++) {
+      CTX.beginPath();
+      CTX.moveTo(-8+i*4,-6+i*3); CTX.lineTo(-5+i*4,-11+i*3); CTX.lineTo(-2+i*4,-6+i*3);
+      CTX.closePath();
+      CTX.fillStyle="#4cbc5c"; CTX.globalAlpha=0.56; CTX.fill(); CTX.globalAlpha=1;
+    }
+    // Tail
+    CTX.save();
+    CTX.rotate(Math.sin(tick/9)/8);
+    CTX.beginPath();
+    CTX.moveTo(0,16);
+    CTX.quadraticCurveTo(-10,23,0,30);
+    CTX.lineWidth=4; CTX.strokeStyle="#36ba49"; CTX.stroke();
+    CTX.restore();
+    // Body main
+    CTX.beginPath(); CTX.ellipse(0,7,13,11,0,0,2*Math.PI); CTX.fillStyle=COLORS.dragon; CTX.fill();
+    // Belly
+    CTX.beginPath(); CTX.ellipse(0,13,8,5.5,0,0,2*Math.PI); CTX.fillStyle="#fffbe0"; CTX.globalAlpha=0.85; CTX.fill();
+    CTX.globalAlpha=1;
     // Legs
-    CTX.fillStyle="#343c5a";
-    CTX.fillRect(-10,18,7,10);
-    CTX.fillRect(3,18,7,10);
+    CTX.fillStyle="#30a9b2";
+    CTX.fillRect(-9,18,6,10); CTX.fillRect(3,18,6,10);
+    CTX.restore();
+
     // Head
     CTX.save();
-    CTX.translate(0,-4);
-    // Ears
-    CTX.beginPath();
-    CTX.moveTo(-11,-2); CTX.lineTo(-5,-18); CTX.lineTo(-1,-2); CTX.closePath();
-    CTX.fillStyle="#424c6e"; CTX.fill();
-    CTX.beginPath();
-    CTX.moveTo(11,-2); CTX.lineTo(5,-18); CTX.lineTo(1,-2); CTX.closePath();
-    CTX.fill();
-    // Face
-    CTX.beginPath(); CTX.ellipse(0,0,13,10,0,0,2*Math.PI); CTX.fillStyle="#353c67"; CTX.fill();
-    CTX.beginPath(); CTX.ellipse(0,0,12,8,0,0,2*Math.PI); CTX.fillStyle="#232942"; CTX.fill();
-    // Eyes
-    CTX.fillStyle="#ffe35e";
-    if (CAT.state==="splat") {
-      CTX.beginPath();
-      CTX.arc(-4,2,2.2,Math.PI*1.1,Math.PI*1.95); CTX.arc(4,2,2.2,Math.PI*1.05,Math.PI*1.9);
-      CTX.strokeStyle="#ffe35e"; CTX.lineWidth=2; CTX.stroke();
-    } else {
-      CTX.beginPath();
-      CTX.arc(-4,0,2.1,0,2*Math.PI); CTX.arc(4,0,2.1,0,2*Math.PI); CTX.fill();
-      CTX.fillStyle="#fff"; CTX.beginPath(); CTX.arc(-3.2,-0.7,0.6,0,2*Math.PI); CTX.arc(4.8,-0.7,0.6,0,2*Math.PI); CTX.fill();
-    }
-    // Bandana
+    CTX.translate(0,-7);
+    // Horns
     CTX.save();
-    CTX.rotate(-0.5);
-    CTX.fillStyle="#b21f2d";
-    CTX.fillRect(-13,-9,14,3.5);
+    CTX.rotate(-0.17);
+    CTX.fillStyle="#ffe47c";
+    CTX.fillRect(-10,-13,4,12);
     CTX.restore();
+    CTX.save();
+    CTX.rotate(0.17);
+    CTX.fillStyle="#ffe47c";
+    CTX.fillRect(6,-13,4,12);
+    CTX.restore();
+    // Cheek
+    if (DRAGON.state!=="splat" && Math.abs(turn)<0.05) {
+      CTX.beginPath();
+      CTX.arc(-7,4,2,0,2*Math.PI); CTX.arc(7,4,2,0,2*Math.PI);
+      CTX.fillStyle="#ffd9d6"; CTX.globalAlpha=0.5; CTX.fill(); CTX.globalAlpha=1;
+    }
+    // Face
+    CTX.beginPath(); CTX.ellipse(0,0,11,9,0,0,2*Math.PI); CTX.fillStyle=COLORS.dragon; CTX.fill();
+    // Eyes
+    CTX.fillStyle="#2b3a46";
+    if (DRAGON.state==="splat") {
+      CTX.beginPath();
+      CTX.arc(-4,1,1.2,Math.PI*1.1,Math.PI*1.95); CTX.arc(4,1,1.2,Math.PI*1.05,Math.PI*1.9);
+      CTX.strokeStyle="#2b3a46"; CTX.lineWidth=2; CTX.stroke();
+    } else {
+      CTX.beginPath(); CTX.arc(-4,0,1.1,0,2*Math.PI); CTX.arc(4,0,1.1,0,2*Math.PI); CTX.fill();
+      CTX.fillStyle="#fff"; CTX.beginPath(); CTX.arc(-3.4,-0.4,0.4,0,2*Math.PI); CTX.arc(4.6,-0.4,0.4,0,2*Math.PI); CTX.fill();
+    }
+    // Nostrils
+    CTX.fillStyle="#457e86";
+    CTX.beginPath(); CTX.arc(-2,4,0.5,0,2*Math.PI); CTX.arc(2,4,0.5,0,2*Math.PI); CTX.fill();
+    // Smile
+    if (DRAGON.state!=="splat") {
+      CTX.beginPath();
+      CTX.arc(0,5,3,0,Math.PI,false);
+      CTX.strokeStyle="#34898d"; CTX.lineWidth=1.2; CTX.globalAlpha=0.7; CTX.stroke(); CTX.globalAlpha=1;
+    }
     CTX.restore();
     CTX.restore();
     CTX.restore();
   }
 
-  // === Main Game Functions ===
+  // == Main Game Functions ==
   function resetMap() {
     MAP = [];
     for (let i=0;i<GRID.rows+4;i++) {
       MAP.push(spawnRow(i));
     }
     scrollY = 0;
-    CAT.row = 1;
-    CAT.col = 1;
-    CAT.x = CAT.col*GRID.cell;
-    CAT.y = (GRID.rows-1)*GRID.cell;
-    CAT.tx = CAT.x; CAT.ty = CAT.y;
-    CAT.moving = false;
-    CAT.moveT = 0;
-    CAT.facing = 0;
-    CAT.state = "idle";
-    CAT.alive = true;
-    score = 0;
-    gameOver = false;
-    tick = 0;
-    message = "";
-    inputLock = false;
+    DRAGON.row = 1;
+    DRAGON.col = 2;
+    DRAGON.x = DRAGON.col*GRID.cell;
+    DRAGON.y = (GRID.rows-1)*GRID.cell;
+    DRAGON.tx = DRAGON.x; DRAGON.ty = DRAGON.y;
+    DRAGON.moving = false; DRAGON.moveT = 0;
+    DRAGON.facing = 0;
+    DRAGON.state = "idle"; DRAGON.alive = true;
+    score = 0; gameOver = false; tick = 0; message = ""; inputLock = false;
   }
-
   function showOverlay(title, msg) {
     document.getElementById('overlay').classList.add('active');
     document.getElementById('overlay-title').textContent = title;
@@ -371,13 +358,12 @@
     if (score > highscore) {
       highscore = score;
       document.getElementById('highscore').textContent = "Best: " + highscore;
-      localStorage.setItem('ninjacat_crossy_highscore', highscore);
+      localStorage.setItem('dragon_crossy_highscore', highscore);
     }
   }
-
-  // === Game Loop ===
   function gameLoop() {
     fitCanvas();
+    tick++;
     CTX.clearRect(0,0,GRID.cols*GRID.cell,GAME.CH);
     let y0 = Math.floor(scrollY/GRID.cell);
 
@@ -388,82 +374,77 @@
       let y = r*GRID.cell - (scrollY%GRID.cell);
       if (mapRow) {
         drawCellBg(mapRow.type, y);
-        // Obstacles
         for (let obs of mapRow.obstacles) {
           let obsX = obs.x*GRID.cell;
           if (obs.type==="car") drawCar(obsX,y,obs.dir);
           if (obs.type==="log") drawLog(obsX,y);
-          if (obs.type==="sushi") drawSushi(obsX,y);
+          if (obs.type==="coin") drawCoin(obsX,y);
           if (obs.type==="guard") drawGuard(obsX,y);
         }
       }
     }
-    // Draw cat
-    drawCat();
+    // Draw dragon
+    drawDragon();
 
     // Draw score
-    setScore(CAT.row-1);
+    setScore(DRAGON.row-1);
 
     // Handle movement
-    if (CAT.moving) {
-      CAT.moveT += 0.08;
-      if (CAT.moveT>=1) {
-        CAT.moving = false;
-        CAT.x = CAT.tx; CAT.y = CAT.ty;
-        CAT.col = Math.round(CAT.x/GRID.cell);
-        CAT.row = Math.max(1,Math.round(GRID.rows-(CAT.y/GRID.cell)));
+    if (DRAGON.moving) {
+      DRAGON.moveT += 0.09;
+      if (DRAGON.moveT>=1) {
+        DRAGON.moving = false;
+        DRAGON.x = DRAGON.tx; DRAGON.y = DRAGON.ty;
+        DRAGON.col = Math.round(DRAGON.x/GRID.cell);
+        DRAGON.row = Math.max(1,Math.round(GRID.rows-(DRAGON.y/GRID.cell)));
         // Check for obstacles
-        let prow = MAP[CAT.row];
+        let prow = MAP[DRAGON.row];
         let hit = false;
         if (prow) {
           for (let obs of prow.obstacles) {
-            if (obs.col===CAT.col && ((obs.type==="car" && prow.type==="road") || obs.type==="guard")) {
-              CAT.state = "splat"; CAT.alive = false; hit = true;
-              message = obs.type==="car" ? "Run over! Ouch!" : "Caught by Cat Guard!";
+            if (obs.col===DRAGON.col && ((obs.type==="car" && prow.type==="road") || obs.type==="guard")) {
+              DRAGON.state = "splat"; DRAGON.alive = false; hit = true;
+              message = obs.type==="car" ? "Car hit! Ouch!" : "Caught by Guard!";
             }
-            if (obs.col===CAT.col && obs.type==="sushi") {
-              message = "Yum! Ninja Sushi!";
+            if (obs.col===DRAGON.col && obs.type==="coin") {
+              message = "Shiny coin! +3";
               setTimeout(()=>{message="";},1200);
               prow.obstacles = prow.obstacles.filter(o=>o!==obs);
               setScore(score+3);
             }
           }
           if (prow.type==="water") {
-            let safe = prow.obstacles.some(obs=>obs.type==="log"&&obs.col===CAT.col);
+            let safe = prow.obstacles.some(obs=>obs.type==="log"&&obs.col===DRAGON.col);
             if (!safe) {
-              CAT.state = "splat"; CAT.alive = false; hit = true;
-              message = "Splash! Ninja Cat can't swim!";
+              DRAGON.state = "splat"; DRAGON.alive = false; hit = true;
+              message = "Splash! Dragon can't swim!";
             }
           }
         }
-        // Out of bounds?
-        if (CAT.col<0 || CAT.col>=GRID.cols) {
-          CAT.state="splat"; CAT.alive=false; hit=true;
-          message="Fell off the map!";
+        if (DRAGON.col<0 || DRAGON.col>=GRID.cols) {
+          DRAGON.state="splat"; DRAGON.alive=false; hit=true;
+          message="Fell off the world!";
         }
-        if (hit) {
-          setTimeout(()=>endGame(), 700);
-        }
+        if (hit) setTimeout(()=>endGame(), 700);
       }
     }
     // Move obstacles
     for (let rowIdx=0; rowIdx<MAP.length; rowIdx++) {
       let row = MAP[rowIdx];
-      // Only animate visible rows
       if (row.type==="road"||row.type==="water") {
         for (let obs of row.obstacles) {
           obs.px = obs.x;
-          obs.x += obs.dir*obs.speed*0.13;
+          obs.x += obs.dir*obs.speed*0.09;
           if (obs.x < -0.7) obs.x = GRID.cols-0.3;
           if (obs.x > GRID.cols-0.3) obs.x = -0.7;
           obs.col = Math.round(obs.x);
         }
       }
     }
-    // Autoscroll if cat close to top
-    let cy = CAT.y-(scrollY%GRID.cell);
-    if (cy < 3.5*GRID.cell && CAT.alive && !CAT.moving) {
-      scrollY += 3.4;
+    // Autoscroll if dragon close to top
+    let cy = DRAGON.y-(scrollY%GRID.cell);
+    if (cy < 3.5*GRID.cell && DRAGON.alive && !DRAGON.moving) {
+      scrollY += 2.2;
     }
     // Generate new rows
     while (MAP.length < y0+GRID.rows+4) {
@@ -471,38 +452,33 @@
     }
     // Show message
     document.getElementById('message').textContent = message;
-
-    // Animate
     if (!gameOver) requestAnimationFrame(gameLoop);
   }
-
   function endGame() {
     gameOver = true;
     showOverlay("Game Over", `
       <b>Score:</b> ${score}<br>
       <b>Best:</b> ${highscore}<br><br>
-      <small>Tap/swipe up to hop, left/right to move, avoid cars, water, and cat guards.<br>Collect sushi for bonus points!</small>
+      <small>Tap/swipe up to hop, left/right to move, avoid cars, water, and guards.<br>Collect coins for bonus points!<br>Chill and hop on!</small>
     `);
   }
-
-  // === Controls ===
-  function moveCat(dx,dy) {
-    if (!CAT.alive || CAT.moving || inputLock) return;
-    let nx = CAT.col+dx, ny = CAT.row+dy;
+  function moveDragon(dx,dy) {
+    if (!DRAGON.alive || DRAGON.moving || inputLock) return;
+    let nx = DRAGON.col+dx, ny = DRAGON.row+dy;
     if (nx<0||nx>=GRID.cols||ny<1) return;
-    CAT.tx = nx*GRID.cell;
-    CAT.ty = CAT.y - dy*GRID.cell;
-    CAT.moving = true;
-    CAT.moveT = 0;
-    CAT.facing = dx;
+    DRAGON.tx = nx*GRID.cell;
+    DRAGON.ty = DRAGON.y - dy*GRID.cell;
+    DRAGON.moving = true;
+    DRAGON.moveT = 0;
+    DRAGON.facing = dx;
     inputLock = true;
-    setTimeout(()=>{inputLock=false;},170);
+    setTimeout(()=>{inputLock=false;},160);
   }
   window.addEventListener('keydown', e=>{
-    if (!CAT.alive || CAT.moving) return;
-    if (e.code==='ArrowUp') moveCat(0,1);
-    else if (e.code==='ArrowLeft') moveCat(-1,0);
-    else if (e.code==='ArrowRight') moveCat(1,0);
+    if (!DRAGON.alive || DRAGON.moving) return;
+    if (e.code==='ArrowUp') moveDragon(0,1);
+    else if (e.code==='ArrowLeft') moveDragon(-1,0);
+    else if (e.code==='ArrowRight') moveDragon(1,0);
     e.preventDefault();
   },{passive:false});
   let touchStartX=null, touchStartY=null;
@@ -511,21 +487,19 @@
     touchStartX=t.clientX; touchStartY=t.clientY;
   },{passive:false});
   CANVAS.addEventListener('touchend', e=>{
-    if (!CAT.alive || CAT.moving || inputLock) return;
+    if (!DRAGON.alive || DRAGON.moving || inputLock) return;
     let dx = e.changedTouches[0].clientX-touchStartX;
     let dy = e.changedTouches[0].clientY-touchStartY;
     if (Math.abs(dx)>Math.abs(dy)) {
-      if (dx<-22) moveCat(-1,0);
-      else if (dx>22) moveCat(1,0);
+      if (dx<-18) moveDragon(-1,0);
+      else if (dx>18) moveDragon(1,0);
     } else {
-      if (dy<-18) moveCat(0,1);
+      if (dy<-12) moveDragon(0,1);
     }
     touchStartX = touchStartY = null;
     e.preventDefault();
   },{passive:false});
-  CANVAS.addEventListener('click',()=>{ if (!CAT.alive || CAT.moving) return; moveCat(0,1); });
-
-  // === Overlay
+  CANVAS.addEventListener('click',()=>{ if (!DRAGON.alive || DRAGON.moving) return; moveDragon(0,1); });
   document.getElementById('restartBtn').onclick=()=>{
     hideOverlay();
     resetMap();
@@ -536,142 +510,15 @@
       hideOverlay(); resetMap(); gameLoop();
     }
   });
-
-  // === Animated Storyline Intro ===
-  function showStoryline(callback) {
-    const storyDiv = document.getElementById('storyline');
-    const storyCanvas = document.getElementById('story-canvas');
-    const storyCtx = storyCanvas.getContext('2d');
-    storyDiv.classList.add('active');
-    let t = 0, scene = 0, done = false;
-    const texts = [
-      "In the neon-lit alleys of Meowkyo City, a daring ninja cat named Neko has just pulled off the ultimate heist...",
-      "Clutching the legendary <b>Golden Sushi Roll</b>, Neko must cross the city to escape! But the Cat Guards are everywhere.",
-      "Help Ninja Neko hop across busy roads, rivers, and city paths. Outrun the Cat Guards and collect sushi for a high score!",
-      "<small>Tap or swipe up to hop, left/right to move, collect sushi, and avoid obstacles. Good luck, ninja!</small>"
-    ];
-    let showBtn = false;
-    document.getElementById('story-btn').style.display = "none";
-    function nextScene() {
-      if (scene<3) { scene++; t=0; }
-      else {
-        storyDiv.classList.remove('active');
-        if (callback) callback();
-        done = true;
-      }
-    }
-    document.getElementById('story-btn').onclick = nextScene;
-    function animate() {
-      if (done) return;
-      t += 1;
-      storyCtx.clearRect(0,0,storyCanvas.width,storyCanvas.height);
-      storyCtx.save(); storyCtx.fillStyle = "#232942";
-      storyCtx.fillRect(0,0,storyCanvas.width,storyCanvas.height);
-      // Neon city
-      for(let i=0;i<4;i++){
-        let x = 60+i*80;
-        storyCtx.fillStyle="#31386b";
-        storyCtx.fillRect(x,storyCanvas.height-70,32,48+Math.sin((t+i*8)/20)*10);
-      }
-      if (scene===0) {
-        let cx = 70+Math.min(1.2*t,130);
-        drawCatStory(storyCtx,cx,storyCanvas.height-120,"sneak",true,false);
-        if (t>25) drawSushiGlow(storyCtx, cx+55, storyCanvas.height-110, 1+0.07*Math.sin(t/7));
-        if (t>80) showBtn = true;
-      } else if (scene===1) {
-        let cx = 200+Math.cos(t/17)*8 + Math.min(1.2*(t-2),110);
-        drawCatStory(storyCtx,cx,storyCanvas.height-130,"run",true,true);
-        if (t>12) drawCatGuardStory(storyCtx, cx-88, storyCanvas.height-123, "chase", Math.min(1,(t-12)/24));
-        if (t>80) showBtn = true;
-      } else if (scene===2) {
-        let cx = 220+Math.sin(t/21)*5, gx = cx-80+Math.abs(Math.sin(t/12))*8;
-        drawCatStory(storyCtx,cx,storyCanvas.height-128,"run",true,true);
-        drawCatGuardStory(storyCtx, gx, storyCanvas.height-120, "chase", 1);
-        storyCtx.font="bold 30px Arial";
-        storyCtx.fillStyle="#ffe35e";
-        storyCtx.globalAlpha=0.6;
-        storyCtx.fillText("!", gx+18, storyCanvas.height-152);
-        storyCtx.globalAlpha=1;
-        if(t>80) showBtn = true;
-      } else {
-        let cx = storyCanvas.width/2-12;
-        drawCatStory(storyCtx,cx,storyCanvas.height-128,"hero",true,false);
-        drawCatGuardStory(storyCtx, cx-80, storyCanvas.height-120, "idle", 0.3);
-        showBtn = true;
-      }
-      storyCtx.restore();
-      document.getElementById('story-text').innerHTML = texts[scene];
-      if (showBtn) document.getElementById('story-btn').style.display = "";
-      else document.getElementById('story-btn').style.display = "none";
-      if (!done) requestAnimationFrame(animate);
-    }
-    animate();
-  }
-  function drawSushiGlow(ctx,x,y,scale=1) {
-    ctx.save();
-    ctx.globalAlpha=0.49;
-    ctx.beginPath(); ctx.arc(x,y+7,18*scale,0,2*Math.PI);
-    ctx.fillStyle="#ffe35e"; ctx.shadowColor="#ffe35e"; ctx.shadowBlur=16; ctx.fill();
-    ctx.globalAlpha=1; ctx.shadowBlur=0;
-    ctx.beginPath(); ctx.ellipse(x,y,21*scale,11*scale,0,0,2*Math.PI); ctx.fillStyle="#fff47c"; ctx.fill();
-    ctx.beginPath(); ctx.ellipse(x,y-3,9*scale,4*scale,0,0,2*Math.PI); ctx.fillStyle="#e4a700"; ctx.globalAlpha=0.8; ctx.fill();
-    ctx.globalAlpha=1; ctx.restore();
-  }
-  function drawCatStory(ctx,x,y,pose,hasBandana,hasSushi) {
-    ctx.save(); ctx.translate(x,y);
-    ctx.fillStyle="#232942";
-    ctx.beginPath(); ctx.ellipse(28,36,24,18,0,0,2*Math.PI); ctx.fill();
-    ctx.fillStyle="#b21f2d"; ctx.fillRect(10,48,36,7);
-    ctx.save(); ctx.translate(29,12);
-    let headTilt=0;
-    if (pose==="sneak") headTilt=-0.2;
-    else if (pose==="run") headTilt=0.11;
-    else if (pose==="hero") headTilt=-0.09;
-    ctx.rotate(headTilt); ctx.translate(-29,-12);
-    ctx.beginPath(); ctx.moveTo(9,17); ctx.lineTo(20,1); ctx.lineTo(26,17); ctx.closePath(); ctx.fillStyle="#424c6e"; ctx.fill();
-    ctx.beginPath(); ctx.moveTo(48,17); ctx.lineTo(37,1); ctx.lineTo(32,17); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(29,21,16,13.5,0,0,2*Math.PI); ctx.fillStyle="#353c67"; ctx.fill();
-    ctx.beginPath(); ctx.ellipse(29,21,15,11,0,0,2*Math.PI); ctx.fillStyle="#232942"; ctx.fill();
-    ctx.fillStyle="#ffe35e";
-    if (pose==="sneak") { ctx.fillRect(18,26,4,4); ctx.fillRect(38,26,4,4); }
-    else if (pose==="hero") {
-      ctx.beginPath(); ctx.arc(20,24,3.9,0,2*Math.PI); ctx.arc(38,24,3.9,0,2*Math.PI); ctx.fill();
-      ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(21.8,23,1.1,0,2*Math.PI); ctx.arc(39.8,23,1.1,0,2*Math.PI); ctx.fill();
-    } else {
-      ctx.beginPath(); ctx.arc(20,24,3.6,0,2*Math.PI); ctx.arc(38,24,3.6,0,2*Math.PI); ctx.fill();
-      ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(21.8,23,1,0,2*Math.PI); ctx.arc(39.8,23,1,0,2*Math.PI); ctx.fill();
-    }
-    if (hasBandana) {
-      ctx.save(); ctx.translate(10,17); ctx.rotate(-0.6+Math.sin(Date.now()/400)*0.18);
-      ctx.fillStyle="#b21f2d"; ctx.fillRect(0,0,16,4); ctx.restore();
-    }
-    ctx.restore();
-    if (hasSushi) { ctx.save(); ctx.translate(54,28); ctx.rotate(0.34); drawSushiGlow(ctx,0,0,0.6); ctx.restore(); }
-    ctx.restore();
-  }
-  function drawCatGuardStory(ctx,x,y,pose,alpha=1) {
-    ctx.save(); ctx.globalAlpha=alpha; ctx.translate(x,y);
-    ctx.fillStyle="#3f2e2a"; ctx.beginPath(); ctx.ellipse(27,44,17,13,0,0,2*Math.PI); ctx.fill();
-    ctx.fillStyle="#2a1f1a"; ctx.beginPath(); ctx.ellipse(27,20,15,13,0,0,2*Math.PI); ctx.fill();
-    ctx.fillStyle="#ffe35e"; ctx.fillRect(20,23,4,4); ctx.fillRect(30,23,4,4);
-    ctx.fillStyle="#b21f2d"; ctx.fillRect(13,13,28,7);
-    ctx.beginPath(); ctx.moveTo(10,10); ctx.lineTo(15,0); ctx.lineTo(18,14); ctx.closePath(); ctx.fillStyle="#42312a"; ctx.fill();
-    ctx.beginPath(); ctx.moveTo(38,10); ctx.lineTo(33,0); ctx.lineTo(30,14); ctx.closePath(); ctx.fill();
-    ctx.restore();
-  }
-  // === Persistent highscore
-  let hs=+localStorage.getItem('ninjacat_crossy_highscore');
+  let hs=+localStorage.getItem('dragon_crossy_highscore');
   if (!isNaN(hs)) {
     highscore=hs;
     document.getElementById('highscore').textContent="Best: "+highscore;
   }
-  // === Start the game!
+  // -- Start game --
   fitCanvas();
-  showStoryline(()=>{
-    resetMap();
-    gameLoop();
-  });
-  window.scrollTo(0,0);
+  resetMap();
+  gameLoop();
   </script>
 </body>
 </html>
