@@ -2,523 +2,276 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cute Dragon Crossy - Road Hop Game</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,maximum-scale=1.0">
+  <title>Dragon Dash</title>
   <style>
-    html, body {
-      margin: 0; padding: 0;
-      background: #8ee7f4;
+    body {
+      background: #cce6ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
       font-family: 'Segoe UI', Arial, sans-serif;
-      user-select: none;
-      -webkit-user-select: none;
-      overflow: hidden;
-      touch-action: none;
-      overscroll-behavior: none;
-      height: 100%; width: 100vw; min-height: 100vh;
     }
-    body { width: 100vw; min-height: 100vh; height: 100vh; }
-    #game-container {
-      width: 100vw; height: 100vh;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: flex-start;
-      position: relative; overflow: hidden;
-      background: linear-gradient(#8ee7f4 70%, #61c8cc 100%);
+    canvas {
+      background: #e0f7fa;
+      margin-top: 30px;
+      box-shadow: 0 4px 24px #0002;
+      border-radius: 18px;
+      display: block;
     }
-    #gameCanvas {
-      display: block; margin: 0 auto; border-radius: 14px;
-      touch-action: none; background: transparent;
+    #score {
+      font-size: 1.5em;
+      margin-top: 20px;
+      color: #006064;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px #fff8;
     }
-    #scoreboard {
-      position: absolute; top: 10px; left: 0; right: 0;
-      width: 100vw; display: flex;
-      justify-content: space-between; padding: 0 30px;
-      font-size: 1.35em; font-weight: bold;
-      color: #fffbe0; letter-spacing: 0.5px;
-      text-shadow: 2px 2px 6px #29292955;
-      z-index: 11; pointer-events: none;
-    }
-    #message {
-      position: absolute; top: 54px; left: 0; right: 0;
-      text-align: center; font-size: 1.10em;
-      color: #41b3cf; font-weight: 650;
-      letter-spacing: 1px; min-height: 18px;
-      z-index: 13; pointer-events: none;
-      text-shadow: 0 1px 4px #fff;
-    }
-    #overlay {
+    #restart {
+      margin-top: 10px;
+      padding: 10px 24px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: none;
+      background: #80deea;
+      color: #006064;
+      cursor: pointer;
+      box-shadow: 0 2px 8px #0001;
       display: none;
-      position: fixed; left: 0; top: 0; right: 0; bottom: 0;
-      background: rgba(36, 44, 66, 0.16);
-      z-index: 1000; align-items: center; justify-content: center; overflow: hidden;
     }
-    #overlay.active { display: flex; }
-    #overlay-content {
-      background: #e8faff; border-radius: 18px;
-      box-shadow: 0 4px 22px #0002;
-      padding: 36px 25px 22px 25px;
-      text-align: center; min-width: 230px; max-width: 97vw;
-      color: #27a89e;
-    }
-    #overlay-content h2 { margin: 0 0 16px 0; color: #27a89e; }
-    #overlay-content p { margin: 0 0 16px 0; color: #41b3cf; font-size: 1.11em; }
-    #overlay-content button {
-      margin-top: 13px;
-      font-size: 1.09em; background: #ffdb80;
-      color: #977000; border: none; border-radius: 8px;
-      padding: 9px 24px; font-weight: 700; cursor: pointer;
-      transition: background 0.1s;
-    }
-    #overlay-content button:hover { background: #ffe7a9; color: #ad8500; }
-    @media (max-width: 600px) {
-      #gameCanvas { width: 100vw !important; height: 99vh !important; }
-      #scoreboard { font-size: 0.95em; padding: 0 9vw; }
+    #restart:active {
+      background: #4dd0e1;
     }
   </style>
 </head>
 <body>
-  <div id="game-container">
-    <div id="scoreboard">
-      <span id="score">0</span>
-      <span id="highscore">Best: 0</span>
-    </div>
-    <canvas id="gameCanvas" width="360" height="600" tabindex="0"></canvas>
-    <div id="message"></div>
-    <div id="overlay">
-      <div id="overlay-content">
-        <h2 id="overlay-title"></h2>
-        <p id="overlay-msg"></p>
-        <button id="restartBtn">Restart</button>
-      </div>
-    </div>
-  </div>
+  <div id="score">Score: 0</div>
+  <canvas id="game" width="400" height="600"></canvas>
+  <button id="restart">Restart</button>
   <script>
-  // == Responsive Canvas ==
-  const CANVAS = document.getElementById('gameCanvas');
-  const CTX = CANVAS.getContext('2d');
-  function fitCanvas() {
-    const w = window.innerWidth, h = window.innerHeight;
-    let cw = Math.min(420, w);
-    let ch = Math.max(440, Math.min(620, h));
-    if (w < 420) { cw = w; ch = h; }
-    CANVAS.width = cw; CANVAS.height = ch;
-    GAME.CW = cw; GAME.CH = ch;
-  }
-  window.addEventListener('resize', fitCanvas);
+    // Game constants
+    const TILE_SIZE = 40;
+    const LANE_HEIGHT = 60;
+    const COLS = 10;
+    const ROWS = 15;
+    const CANVAS_WIDTH = TILE_SIZE * COLS;
+    const CANVAS_HEIGHT = LANE_HEIGHT * ROWS;
 
-  // == Game Constants ==
-  const GRID = { cols: 5, rows: 13, cell: 44 };
-  const COLORS = {
-    grass: "#b2f483",
-    road: "#eaeaea",
-    water: "#a3e1ff",
-    log: "#c8a573",
-    car: "#f47474",
-    dragon: "#85d2f2",
-    coin: "#ffd957"
-  };
-  // == Dragon (player) ==
-  const DRAGON = {
-    col: 2, row: 0,
-    x: 0, y: 0,
-    tx: 0, ty: 0,
-    moving: false,
-    moveT: 0, // 0-1
-    facing: 0, // 0=up, -1=left, 1=right
-    animFrame: 0,
-    state: "idle", // idle, hop, splat
-    alive: true
-  };
+    // Dragon character
+    const dragon = {
+      x: Math.floor(COLS / 2),
+      y: ROWS - 2,
+      color: "#67e8f9",
+      size: TILE_SIZE * 0.9,
+      alive: true,
+      cuteFace: true
+    };
 
-  // == Map rows ==
-  let MAP = [];
-  let scrollY = 0;
-  let score = 0, highscore = 0;
-  let gameOver = false;
-  let tick = 0;
-  let message = "";
-  let inputLock = false;
+    // Obstacles and lanes
+    const lanes = [];
+    const obstaclesPerLane = 3;
+    const laneSpeeds = [0, 1, -1, 1.5, -1.5, 2, -2, 2.5, -2.5, 1, -1, 1.2, -1.2, 1.3, -1.3];
 
-  // == Obstacles ==
-  function spawnRow(rowN) {
-    let type;
-    if (rowN === 0) type = "grass";
-    else if (rowN < 3) type = "road";
-    else if (rowN < 5) type = "grass";
-    else if (rowN < 7) type = "water";
-    else type = ["road","grass","water"][Math.floor(Math.random()*3)];
+    // Score
+    let score = 0, maxScore = 0;
+    let gameOver = false;
 
-    let obstacles = [];
-    if (type === "road") {
-      let dir = Math.random()<0.5?-1:1;
-      let count = 1+Math.floor(Math.random()*2);
-      for(let i=0;i<count;i++) {
-        let c = Math.floor(Math.random()*GRID.cols);
-        let speed = 0.5+Math.random()*0.5;
-        obstacles.push({col:c, x:c, px:c, dir, speed, type:"car"});
-      }
-    }
-    if (type === "water") {
-      let dir = Math.random()<0.5?-1:1;
-      let count = 1+Math.floor(Math.random()*2);
-      for(let i=0;i<count;i++) {
-        let c = Math.floor(Math.random()*GRID.cols);
-        let speed = 0.3+Math.random()*0.3;
-        obstacles.push({col:c, x:c, px:c, dir, speed, type:"log"});
-      }
-    }
-    if (type === "grass" && Math.random()<0.18) {
-      let c = Math.floor(Math.random()*GRID.cols);
-      obstacles.push({col:c, x:c, px:c, dir:0, speed:0, type:Math.random()<0.65?"coin":"guard"});
-    }
-    return {type, obstacles};
-  }
+    // Canvas setup
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    canvas.width = CANVAS_WIDTH; canvas.height = CANVAS_HEIGHT;
 
-  // == Drawing helper functions ==
-  function drawCellBg(type,y) {
-    if (type==="grass") CTX.fillStyle=COLORS.grass;
-    else if (type==="road") CTX.fillStyle=COLORS.road;
-    else if (type==="water") CTX.fillStyle=COLORS.water;
-    else CTX.fillStyle="#a0e7f4";
-    CTX.fillRect(0,y,GRID.cols*GRID.cell,GRID.cell);
-  }
+    // Score display
+    const scoreDiv = document.getElementById("score");
+    const restartBtn = document.getElementById("restart");
 
-  function drawCar(x,y,dir) {
-    CTX.save();
-    CTX.translate(x+GRID.cell/2,y+GRID.cell/2);
-    CTX.rotate(dir===1?0:Math.PI);
-    CTX.fillStyle=COLORS.car;
-    CTX.fillRect(-14,-11,28,22);
-    CTX.fillStyle="#fff";
-    CTX.fillRect(-13,-10,8,7); CTX.fillRect(5,-10,8,7);
-    CTX.fillRect(-13,3,8,7); CTX.fillRect(5,3,8,7);
-    CTX.restore();
-  }
-  function drawLog(x,y) {
-    CTX.save();
-    CTX.translate(x,y);
-    CTX.fillStyle=COLORS.log;
-    CTX.fillRect(5,GRID.cell/2-8,GRID.cell-10,16);
-    CTX.restore();
-  }
-  function drawCoin(x,y) {
-    CTX.save();
-    CTX.translate(x+GRID.cell/2,y+GRID.cell/2);
-    CTX.beginPath();
-    CTX.arc(0,0,10,0,2*Math.PI);
-    CTX.fillStyle=COLORS.coin; CTX.globalAlpha=0.91; CTX.fill();
-    CTX.globalAlpha=1;
-    CTX.lineWidth=2; CTX.strokeStyle="#eabf2f"; CTX.stroke();
-    CTX.font="bold 17px Arial";
-    CTX.fillStyle="#fffbc1";
-    CTX.textAlign="center"; CTX.textBaseline="middle";
-    CTX.fillText("★",0,2.5);
-    CTX.restore();
-  }
-  function drawGuard(x,y) {
-    CTX.save();
-    CTX.translate(x+GRID.cell/2,y+GRID.cell/2+6);
-    CTX.beginPath();
-    CTX.ellipse(0,5,15,10,0,0,2*Math.PI);
-    CTX.fillStyle="#76624a"; CTX.fill();
-    CTX.beginPath();
-    CTX.ellipse(0,-8,12,8,0,0,2*Math.PI);
-    CTX.fillStyle="#4a3b2a"; CTX.fill();
-    CTX.fillStyle="#eabf2f";
-    CTX.fillRect(-6,-5,3,3); CTX.fillRect(3,-5,3,3);
-    CTX.restore();
-  }
-
-  function drawDragon() {
-    let x = DRAGON.x, y = DRAGON.y;
-    // Hop animation
-    let jumpY = 0;
-    let turn = 0;
-    if (DRAGON.moving) {
-      let t = DRAGON.moveT;
-      jumpY = -14 * Math.sin(Math.PI*t);
-      turn = DRAGON.facing*0.23*(1-Math.cos(Math.PI*t));
-      x = DRAGON.x + (DRAGON.tx-DRAGON.x)*t;
-      y = DRAGON.y + (DRAGON.ty-DRAGON.y)*t;
-    }
-    CTX.save();
-    CTX.translate(x+GRID.cell/2, y+GRID.cell/2+jumpY);
-    CTX.rotate(turn);
-
-    // Shadow
-    CTX.save();
-    CTX.globalAlpha = 0.17;
-    CTX.beginPath();
-    CTX.ellipse(0,GRID.cell/2-8,14,5,0,0,2*Math.PI);
-    CTX.fillStyle="#1f2439";
-    CTX.fill();
-    CTX.restore();
-
-    // Body
-    CTX.save();
-    // Back spikes
-    for(let i=0;i<4;i++) {
-      CTX.beginPath();
-      CTX.moveTo(-8+i*4,-6+i*3); CTX.lineTo(-5+i*4,-11+i*3); CTX.lineTo(-2+i*4,-6+i*3);
-      CTX.closePath();
-      CTX.fillStyle="#4cbc5c"; CTX.globalAlpha=0.56; CTX.fill(); CTX.globalAlpha=1;
-    }
-    // Tail
-    CTX.save();
-    CTX.rotate(Math.sin(tick/9)/8);
-    CTX.beginPath();
-    CTX.moveTo(0,16);
-    CTX.quadraticCurveTo(-10,23,0,30);
-    CTX.lineWidth=4; CTX.strokeStyle="#36ba49"; CTX.stroke();
-    CTX.restore();
-    // Body main
-    CTX.beginPath(); CTX.ellipse(0,7,13,11,0,0,2*Math.PI); CTX.fillStyle=COLORS.dragon; CTX.fill();
-    // Belly
-    CTX.beginPath(); CTX.ellipse(0,13,8,5.5,0,0,2*Math.PI); CTX.fillStyle="#fffbe0"; CTX.globalAlpha=0.85; CTX.fill();
-    CTX.globalAlpha=1;
-    // Legs
-    CTX.fillStyle="#30a9b2";
-    CTX.fillRect(-9,18,6,10); CTX.fillRect(3,18,6,10);
-    CTX.restore();
-
-    // Head
-    CTX.save();
-    CTX.translate(0,-7);
-    // Horns
-    CTX.save();
-    CTX.rotate(-0.17);
-    CTX.fillStyle="#ffe47c";
-    CTX.fillRect(-10,-13,4,12);
-    CTX.restore();
-    CTX.save();
-    CTX.rotate(0.17);
-    CTX.fillStyle="#ffe47c";
-    CTX.fillRect(6,-13,4,12);
-    CTX.restore();
-    // Cheek
-    if (DRAGON.state!=="splat" && Math.abs(turn)<0.05) {
-      CTX.beginPath();
-      CTX.arc(-7,4,2,0,2*Math.PI); CTX.arc(7,4,2,0,2*Math.PI);
-      CTX.fillStyle="#ffd9d6"; CTX.globalAlpha=0.5; CTX.fill(); CTX.globalAlpha=1;
-    }
-    // Face
-    CTX.beginPath(); CTX.ellipse(0,0,11,9,0,0,2*Math.PI); CTX.fillStyle=COLORS.dragon; CTX.fill();
-    // Eyes
-    CTX.fillStyle="#2b3a46";
-    if (DRAGON.state==="splat") {
-      CTX.beginPath();
-      CTX.arc(-4,1,1.2,Math.PI*1.1,Math.PI*1.95); CTX.arc(4,1,1.2,Math.PI*1.05,Math.PI*1.9);
-      CTX.strokeStyle="#2b3a46"; CTX.lineWidth=2; CTX.stroke();
-    } else {
-      CTX.beginPath(); CTX.arc(-4,0,1.1,0,2*Math.PI); CTX.arc(4,0,1.1,0,2*Math.PI); CTX.fill();
-      CTX.fillStyle="#fff"; CTX.beginPath(); CTX.arc(-3.4,-0.4,0.4,0,2*Math.PI); CTX.arc(4.6,-0.4,0.4,0,2*Math.PI); CTX.fill();
-    }
-    // Nostrils
-    CTX.fillStyle="#457e86";
-    CTX.beginPath(); CTX.arc(-2,4,0.5,0,2*Math.PI); CTX.arc(2,4,0.5,0,2*Math.PI); CTX.fill();
-    // Smile
-    if (DRAGON.state!=="splat") {
-      CTX.beginPath();
-      CTX.arc(0,5,3,0,Math.PI,false);
-      CTX.strokeStyle="#34898d"; CTX.lineWidth=1.2; CTX.globalAlpha=0.7; CTX.stroke(); CTX.globalAlpha=1;
-    }
-    CTX.restore();
-    CTX.restore();
-    CTX.restore();
-  }
-
-  // == Main Game Functions ==
-  function resetMap() {
-    MAP = [];
-    for (let i=0;i<GRID.rows+4;i++) {
-      MAP.push(spawnRow(i));
-    }
-    scrollY = 0;
-    DRAGON.row = 1;
-    DRAGON.col = 2;
-    DRAGON.x = DRAGON.col*GRID.cell;
-    DRAGON.y = (GRID.rows-1)*GRID.cell;
-    DRAGON.tx = DRAGON.x; DRAGON.ty = DRAGON.y;
-    DRAGON.moving = false; DRAGON.moveT = 0;
-    DRAGON.facing = 0;
-    DRAGON.state = "idle"; DRAGON.alive = true;
-    score = 0; gameOver = false; tick = 0; message = ""; inputLock = false;
-  }
-  function showOverlay(title, msg) {
-    document.getElementById('overlay').classList.add('active');
-    document.getElementById('overlay-title').textContent = title;
-    document.getElementById('overlay-msg').innerHTML = msg;
-    document.getElementById('restartBtn').focus();
-  }
-  function hideOverlay() {
-    document.getElementById('overlay').classList.remove('active');
-  }
-  function setScore(val) {
-    score = val;
-    document.getElementById('score').textContent = score;
-    if (score > highscore) {
-      highscore = score;
-      document.getElementById('highscore').textContent = "Best: " + highscore;
-      localStorage.setItem('dragon_crossy_highscore', highscore);
-    }
-  }
-  function gameLoop() {
-    fitCanvas();
-    tick++;
-    CTX.clearRect(0,0,GRID.cols*GRID.cell,GAME.CH);
-    let y0 = Math.floor(scrollY/GRID.cell);
-
-    // Draw grid
-    for (let r=0; r<GRID.rows+2; r++) {
-      let rowIdx = y0 + r;
-      let mapRow = MAP[rowIdx];
-      let y = r*GRID.cell - (scrollY%GRID.cell);
-      if (mapRow) {
-        drawCellBg(mapRow.type, y);
-        for (let obs of mapRow.obstacles) {
-          let obsX = obs.x*GRID.cell;
-          if (obs.type==="car") drawCar(obsX,y,obs.dir);
-          if (obs.type==="log") drawLog(obsX,y);
-          if (obs.type==="coin") drawCoin(obsX,y);
-          if (obs.type==="guard") drawGuard(obsX,y);
+    // Initialize lanes and obstacles
+    function resetLanes() {
+      lanes.length = 0;
+      for (let i = 0; i < ROWS; i++) {
+        if (i < 2) {
+          lanes.push({ obstacles: [], speed: 0 }); // Safe zone at start
+          continue;
         }
+        let speed = laneSpeeds[i % laneSpeeds.length];
+        let obstacles = [];
+        for (let j = 0; j < obstaclesPerLane; j++) {
+          let obsX = Math.random() * CANVAS_WIDTH;
+          obstacles.push({ x: obsX, width: TILE_SIZE * (1.2 + Math.random()), color: "#ffab91" });
+        }
+        lanes.push({ obstacles, speed });
       }
     }
+
     // Draw dragon
-    drawDragon();
+    function drawDragon() {
+      let px = dragon.x * TILE_SIZE + TILE_SIZE/2;
+      let py = dragon.y * LANE_HEIGHT + LANE_HEIGHT/2;
+      ctx.save();
+      ctx.translate(px, py);
+      // Body
+      ctx.beginPath();
+      ctx.arc(0, 0, dragon.size/2, 0, Math.PI * 2);
+      ctx.fillStyle = dragon.color;
+      ctx.shadowColor = "#22d3ee";
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      // Eyes
+      ctx.fillStyle = "#fff";
+      ctx.beginPath(); ctx.arc(-8, -4, 6, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(8, -4, 6, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = "#222";
+      ctx.beginPath(); ctx.arc(-8, -3, 3, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(8, -3, 3, 0, Math.PI*2); ctx.fill();
+      // Blush
+      ctx.fillStyle = "#fbbf24";
+      ctx.beginPath(); ctx.arc(-14, 6, 2.5, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(14, 6, 2.5, 0, Math.PI*2); ctx.fill();
+      // Smile
+      ctx.strokeStyle = "#333";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 6, 8, Math.PI*0.1, Math.PI*0.9);
+      ctx.stroke();
+      // Wings
+      ctx.strokeStyle = "#60a5fa";
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(-16,0); ctx.lineTo(-30,-12); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(16,0); ctx.lineTo(30,-12); ctx.stroke();
+      ctx.restore();
+    }
 
-    // Draw score
-    setScore(DRAGON.row-1);
-
-    // Handle movement
-    if (DRAGON.moving) {
-      DRAGON.moveT += 0.09;
-      if (DRAGON.moveT>=1) {
-        DRAGON.moving = false;
-        DRAGON.x = DRAGON.tx; DRAGON.y = DRAGON.ty;
-        DRAGON.col = Math.round(DRAGON.x/GRID.cell);
-        DRAGON.row = Math.max(1,Math.round(GRID.rows-(DRAGON.y/GRID.cell)));
-        // Check for obstacles
-        let prow = MAP[DRAGON.row];
-        let hit = false;
-        if (prow) {
-          for (let obs of prow.obstacles) {
-            if (obs.col===DRAGON.col && ((obs.type==="car" && prow.type==="road") || obs.type==="guard")) {
-              DRAGON.state = "splat"; DRAGON.alive = false; hit = true;
-              message = obs.type==="car" ? "Car hit! Ouch!" : "Caught by Guard!";
-            }
-            if (obs.col===DRAGON.col && obs.type==="coin") {
-              message = "Shiny coin! +3";
-              setTimeout(()=>{message="";},1200);
-              prow.obstacles = prow.obstacles.filter(o=>o!==obs);
-              setScore(score+3);
-            }
-          }
-          if (prow.type==="water") {
-            let safe = prow.obstacles.some(obs=>obs.type==="log"&&obs.col===DRAGON.col);
-            if (!safe) {
-              DRAGON.state = "splat"; DRAGON.alive = false; hit = true;
-              message = "Splash! Dragon can't swim!";
-            }
-          }
+    // Draw obstacles
+    function drawObstacles() {
+      for (let row = 2; row < ROWS; row++) {
+        let lane = lanes[row];
+        for (let obs of lane.obstacles) {
+          ctx.fillStyle = obs.color;
+          ctx.fillRect(obs.x, row * LANE_HEIGHT + 10, obs.width, LANE_HEIGHT - 20);
+          ctx.strokeStyle = "#d84315";
+          ctx.strokeRect(obs.x, row * LANE_HEIGHT + 10, obs.width, LANE_HEIGHT - 20);
         }
-        if (DRAGON.col<0 || DRAGON.col>=GRID.cols) {
-          DRAGON.state="splat"; DRAGON.alive=false; hit=true;
-          message="Fell off the world!";
-        }
-        if (hit) setTimeout(()=>endGame(), 700);
       }
     }
+
+    // Draw ground and lanes
+    function drawBackground() {
+      for (let row = 0; row < ROWS; row++) {
+        ctx.fillStyle = (row === 0 || row === 1) ? "#a7f3d0" : (row % 2 ? "#fcd34d" : "#fbbf24");
+        ctx.fillRect(0, row * LANE_HEIGHT, CANVAS_WIDTH, LANE_HEIGHT);
+      }
+    }
+
+    // Draw everything
+    function draw() {
+      ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+      drawBackground();
+      drawObstacles();
+      drawDragon();
+    }
+
     // Move obstacles
-    for (let rowIdx=0; rowIdx<MAP.length; rowIdx++) {
-      let row = MAP[rowIdx];
-      if (row.type==="road"||row.type==="water") {
-        for (let obs of row.obstacles) {
-          obs.px = obs.x;
-          obs.x += obs.dir*obs.speed*0.09;
-          if (obs.x < -0.7) obs.x = GRID.cols-0.3;
-          if (obs.x > GRID.cols-0.3) obs.x = -0.7;
-          obs.col = Math.round(obs.x);
+    function moveObstacles() {
+      for (let row = 2; row < ROWS; row++) {
+        let lane = lanes[row];
+        for (let obs of lane.obstacles) {
+          obs.x += lane.speed;
+          if (lane.speed > 0 && obs.x > CANVAS_WIDTH) obs.x = -obs.width;
+          if (lane.speed < 0 && obs.x + obs.width < 0) obs.x = CANVAS_WIDTH;
         }
       }
     }
-    // Autoscroll if dragon close to top
-    let cy = DRAGON.y-(scrollY%GRID.cell);
-    if (cy < 3.5*GRID.cell && DRAGON.alive && !DRAGON.moving) {
-      scrollY += 2.2;
+
+    // Collision detection
+    function checkCollision() {
+      if (dragon.y < 2) return false; // Safe zone
+      let lane = lanes[dragon.y];
+      let px = dragon.x * TILE_SIZE;
+      for (let obs of lane.obstacles) {
+        if (px + TILE_SIZE*0.1 < obs.x + obs.width &&
+            px + TILE_SIZE*0.9 > obs.x) {
+          // Collision!
+          return true;
+        }
+      }
+      return false;
     }
-    // Generate new rows
-    while (MAP.length < y0+GRID.rows+4) {
-      MAP.push(spawnRow(MAP.length));
+
+    // Move dragon
+    function moveDragon(dx, dy) {
+      if (!dragon.alive) return;
+      let nx = dragon.x + dx;
+      let ny = dragon.y + dy;
+      if (nx < 0 || nx >= COLS) return;
+      if (ny < 0 || ny >= ROWS) return;
+      dragon.x = nx; dragon.y = ny;
+      if (dragon.y < ROWS - 2 && dragon.y > score) {
+        score = dragon.y;
+        updateScore();
+      }
+      if (checkCollision()) {
+        dragon.alive = false;
+        gameOver = true;
+        showGameOver();
+      }
     }
-    // Show message
-    document.getElementById('message').textContent = message;
-    if (!gameOver) requestAnimationFrame(gameLoop);
-  }
-  function endGame() {
-    gameOver = true;
-    showOverlay("Game Over", `
-      <b>Score:</b> ${score}<br>
-      <b>Best:</b> ${highscore}<br><br>
-      <small>Tap/swipe up to hop, left/right to move, avoid cars, water, and guards.<br>Collect coins for bonus points!<br>Chill and hop on!</small>
-    `);
-  }
-  function moveDragon(dx,dy) {
-    if (!DRAGON.alive || DRAGON.moving || inputLock) return;
-    let nx = DRAGON.col+dx, ny = DRAGON.row+dy;
-    if (nx<0||nx>=GRID.cols||ny<1) return;
-    DRAGON.tx = nx*GRID.cell;
-    DRAGON.ty = DRAGON.y - dy*GRID.cell;
-    DRAGON.moving = true;
-    DRAGON.moveT = 0;
-    DRAGON.facing = dx;
-    inputLock = true;
-    setTimeout(()=>{inputLock=false;},160);
-  }
-  window.addEventListener('keydown', e=>{
-    if (!DRAGON.alive || DRAGON.moving) return;
-    if (e.code==='ArrowUp') moveDragon(0,1);
-    else if (e.code==='ArrowLeft') moveDragon(-1,0);
-    else if (e.code==='ArrowRight') moveDragon(1,0);
-    e.preventDefault();
-  },{passive:false});
-  let touchStartX=null, touchStartY=null;
-  CANVAS.addEventListener('touchstart', e=>{
-    let t = e.touches[0];
-    touchStartX=t.clientX; touchStartY=t.clientY;
-  },{passive:false});
-  CANVAS.addEventListener('touchend', e=>{
-    if (!DRAGON.alive || DRAGON.moving || inputLock) return;
-    let dx = e.changedTouches[0].clientX-touchStartX;
-    let dy = e.changedTouches[0].clientY-touchStartY;
-    if (Math.abs(dx)>Math.abs(dy)) {
-      if (dx<-18) moveDragon(-1,0);
-      else if (dx>18) moveDragon(1,0);
-    } else {
-      if (dy<-12) moveDragon(0,1);
+
+    // Handle input
+    document.addEventListener("keydown", (e) => {
+      if (!dragon.alive) return;
+      if (e.key === "ArrowUp" || e.key === "w") moveDragon(0,-1);
+      if (e.key === "ArrowDown" || e.key === "s") moveDragon(0,1);
+      if (e.key === "ArrowLeft" || e.key === "a") moveDragon(-1,0);
+      if (e.key === "ArrowRight" || e.key === "d") moveDragon(1,0);
+    });
+
+    // Update score display
+    function updateScore() {
+      scoreDiv.textContent = `Score: ${score}`;
     }
-    touchStartX = touchStartY = null;
-    e.preventDefault();
-  },{passive:false});
-  CANVAS.addEventListener('click',()=>{ if (!DRAGON.alive || DRAGON.moving) return; moveDragon(0,1); });
-  document.getElementById('restartBtn').onclick=()=>{
-    hideOverlay();
-    resetMap();
-    gameLoop();
-  };
-  document.getElementById('overlay').addEventListener('click',e=>{
-    if (e.target===document.getElementById('overlay')) {
-      hideOverlay(); resetMap(); gameLoop();
+
+    // Show game over
+    function showGameOver() {
+      scoreDiv.textContent = `Game Over! Score: ${score}`;
+      restartBtn.style.display = "inline-block";
     }
-  });
-  let hs=+localStorage.getItem('dragon_crossy_highscore');
-  if (!isNaN(hs)) {
-    highscore=hs;
-    document.getElementById('highscore').textContent="Best: "+highscore;
-  }
-  // -- Start game --
-  fitCanvas();
-  resetMap();
-  gameLoop();
+
+    // Restart game
+    function restartGame() {
+      dragon.x = Math.floor(COLS / 2);
+      dragon.y = ROWS - 2;
+      dragon.alive = true;
+      score = 0;
+      gameOver = false;
+      updateScore();
+      restartBtn.style.display = "none";
+      resetLanes();
+      draw();
+    }
+    restartBtn.addEventListener("click", restartGame);
+
+    // Game loop
+    function gameLoop() {
+      if (!gameOver) {
+        moveObstacles();
+        if (checkCollision()) {
+          dragon.alive = false;
+          gameOver = true;
+          showGameOver();
+        }
+        draw();
+      }
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Initialize game
+    function start() {
+      resetLanes();
+      updateScore();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+    start();
   </script>
 </body>
 </html>
