@@ -2,249 +2,222 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dragon Sprite Playground</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Resume</title>
   <style>
-    html, body {
-      height: 100%; margin: 0; background: #cce6ff;
-      font-family: Arial, sans-serif; user-select: none;
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
+
     body {
-      display: flex; flex-direction: column; align-items: center;
-      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      background-color: #fefefe;
+      color: #333;
+      margin: 0;
+      padding: 0;
     }
-    #game-container {
-      margin-top: 18px;
-      display: flex; flex-direction: column; align-items: center;
+
+    /* Header Section */
+    header {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      padding: 2rem;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
     }
-    canvas {
-      background: #e0f7fa;
-      box-shadow: 0 4px 24px #0002;
-      border-radius: 18px;
-      max-width: 98vw; max-height: 70vh;
-      image-rendering: pixelated;
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: #222;
     }
-    #howto {
-      margin-top: 8px; font-size: 1.1em; color: #2d3748;
-      background: rgba(255,255,255,0.7);
-      border-radius: 10px; padding: 7px 14px;
+
+    header p {
+      font-size: 1.2rem;
+      color: #555;
+      margin-top: 0.5rem;
     }
-    #mobile-controls {
-      display: none; width: 240px; margin-top: 10px;
-      justify-content: space-between; user-select: none;
-      -webkit-tap-highlight-color: transparent;
+
+    /* Main Resume Section */
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
     }
-    .mc-btn {
-      width: 60px; height: 60px; border-radius: 50%; border: none; margin: 0 1px;
-      background: #fff; box-shadow: 0 2px 8px #0002;
-      font-size: 2.2em; color: #0ea5e9; font-weight: bold; touch-action: none;
+
+    section {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgb(0 0 0 / 10%);
+      margin-bottom: 2rem;
+      overflow: hidden;
+      border: 1px solid #e4e4e4;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    .mc-btn:active { background: #bbeeff; }
-    @media (max-width: 680px) {
-      #mobile-controls { display: flex; }
+
+    section:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 15px rgb(0 0 0 / 15%);
+    }
+
+    section h2 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: #333;
+      padding: 1rem;
+      background: #f8f9fa;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    section h2:hover {
+      background: #e9ecef;
+    }
+
+    .section-content {
+      padding: 1.5rem;
+      display: none;
+      font-size: 1rem;
+      color: #555;
+      border-top: 1px solid #e4e4e4;
+    }
+
+    .section-content p,
+    .section-content ul {
+      margin: 0.5rem 0;
+    }
+
+    .section-content ul {
+      list-style: disc;
+      padding-left: 1.5rem;
+    }
+
+    .active .section-content {
+      display: block;
+    }
+
+    /* Footer Section */
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #777;
+      border-top: 1px solid #ddd;
+      margin-top: 2rem;
+    }
+
+    footer a {
+      color: #007BFF;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    footer a:hover {
+      color: #0056b3;
+      text-decoration: underline;
+    }
+
+    /* Button-Like Hover for Section Headers */
+    section h2:active {
+      background: #dee2e6;
+    }
+
+    /* Media Queries */
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 2rem;
+      }
+
+      header p {
+        font-size: 1rem;
+      }
+
+      section h2 {
+        font-size: 1.2rem;
+      }
+
+      .section-content {
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="game-container">
-    <canvas id="game" width="400" height="600"></canvas>
-    <div id="howto">
-      Use <b>Arrow Keys</b> or <b>WASD</b> (or tap buttons) to walk the dragon.<br>
-      Watch it come alive with idle and walk cycles!
-    </div>
-    <div id="mobile-controls">
-      <button class="mc-btn" id="btn-left">&#8592;</button>
-      <div style="display: flex; flex-direction: column;">
-        <button class="mc-btn" id="btn-up">&#8593;</button>
-        <button class="mc-btn" id="btn-down">&#8595;</button>
+  <!-- Header -->
+  <header>
+    <h1>Rashdan Hamzah</h1>
+    <p>Consultant | Problem Solver | Innovator</p>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- About Me Section -->
+    <section>
+      <h2>About Me</h2>
+      <div class="section-content">
+        <p>
+          I am a driven consultant with expertise in strategy, problem-solving, and innovation. Passionate about delivering impactful solutions that drive business success.
+        </p>
       </div>
-      <button class="mc-btn" id="btn-right">&#8594;</button>
-    </div>
-  </div>
+    </section>
+
+    <!-- Work Experience Section -->
+    <section>
+      <h2>Work Experience</h2>
+      <div class="section-content">
+        <ul>
+          <li><strong>Consultant</strong> at XYZ Consulting (2023–Present)</li>
+          <li><strong>Analyst</strong> at ABC Corp (2020–2023)</li>
+          <li><strong>Intern</strong> at DEF Solutions (2019)</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Education Section -->
+    <section>
+      <h2>Education</h2>
+      <div class="section-content">
+        <ul>
+          <li><strong>MBA</strong>, Harvard Business School</li>
+          <li><strong>Bachelor of Economics</strong>, University of XYZ</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section>
+      <h2>Skills</h2>
+      <div class="section-content">
+        <ul>
+          <li>Strategic Thinking</li>
+          <li>Data Analysis</li>
+          <li>Public Speaking</li>
+          <li>Leadership</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>
+      Built with ❤️ by Rashdan Hamzah. Inspired by Apple’s design philosophy. 
+      <br>
+      <a href="mailto:rashdan@example.com">Contact Me</a>
+    </p>
+  </footer>
+
+  <!-- JavaScript for Interactivity -->
   <script>
-    // ---- CONFIG ----
-    const TILE = 40, COLS = 10, ROWS = 15;
-    const CANVAS_W = TILE * COLS, CANVAS_H = TILE * ROWS;
-    // Use your direct raw GitHub PNG link here:
-    const DRAGON_SHEET = "https://raw.githubusercontent.com/rashdan-hamzah/ninjaneko/main/game_boy_2.png";
-
-    // Frame definitions from your image (see "WALKING" row, facing right, down, left, up)
-    // Each frame is 32x32 px, with 6 frames per "walking" direction
-    const SPRITE_W = 32, SPRITE_H = 32;
-    // Walking rows (from top, 0=right, 1=down, 2=left, 3=up)
-    const WALK_ROW = {right:3, down:4, left:5, up:6};
-    const LOOK_ROW = {right:1, down:2, left:7, up:8};
-    const FRAMES_PER_WALK = 6; // from sheet
-
-    // ---- STATE ----
-    let dragon = {
-      x: Math.floor(COLS/2),
-      y: Math.floor(ROWS/2),
-      dir: "down", // "down", "up", "left", "right"
-      moving: false,
-      frame: 0,
-      frameTick: 0, // for animation timing
-      lookFrame: 0,
-      idleTime: 0
-    };
-
-    let lastInputDir = "down";
-    let imgLoaded = false;
-    let spriteImg = new window.Image();
-    spriteImg.src = DRAGON_SHEET;
-    spriteImg.onload = () => { imgLoaded = true; };
-
-    // ---- CANVAS ----
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-    canvas.width = CANVAS_W; canvas.height = CANVAS_H;
-
-    // ---- INPUT ----
-    let inputQueue = [], keys = {};
-    document.addEventListener("keydown", e => {
-      let k = e.key.toLowerCase();
-      if(["arrowup","w"].includes(k)) queueMove("up");
-      if(["arrowdown","s"].includes(k)) queueMove("down");
-      if(["arrowleft","a"].includes(k)) queueMove("left");
-      if(["arrowright","d"].includes(k)) queueMove("right");
+    document.querySelectorAll('section h2').forEach(header => {
+      header.addEventListener('click', () => {
+        const section = header.parentElement;
+        section.classList.toggle('active');
+      });
     });
-
-    function queueMove(dir) {
-      if(dragon.moving) return;
-      inputQueue.push(dir);
-      lastInputDir = dir;
-    }
-
-    // Touch controls
-    function setupMobileControls() {
-      const btns = [
-        {id:"btn-up",dir:"up"},
-        {id:"btn-down",dir:"down"},
-        {id:"btn-left",dir:"left"},
-        {id:"btn-right",dir:"right"}
-      ];
-      for(let b of btns) {
-        let btn = document.getElementById(b.id);
-        btn.ontouchstart = e => { e.preventDefault(); queueMove(b.dir); };
-        btn.onmousedown = e => { e.preventDefault(); queueMove(b.dir); };
-      }
-    }
-    setupMobileControls();
-
-    // ---- GAME LOOP ----
-    function update() {
-      // If not moving, pop a direction from queue
-      if(!dragon.moving && inputQueue.length) {
-        let dir = inputQueue.shift();
-        let nx = dragon.x, ny = dragon.y;
-        if(dir==="up") ny--;
-        if(dir==="down") ny++;
-        if(dir==="left") nx--;
-        if(dir==="right") nx++;
-        // Stay in bounds
-        if(nx>=0 && nx<COLS && ny>=0 && ny<ROWS) {
-          dragon.dir = dir;
-          dragon.moving = true;
-          dragon.frameTick = 0;
-          dragon.frame = 0;
-          dragon.idleTime = 0;
-          setTimeout(() => {
-            dragon.x = nx; dragon.y = ny;
-            dragon.moving = false;
-          }, 120); // step duration
-        }
-      }
-      // Animation frame update
-      if(dragon.moving) {
-        dragon.frameTick++;
-        if(dragon.frameTick>=6) {
-          dragon.frame = (dragon.frame+1)%FRAMES_PER_WALK;
-          dragon.frameTick = 0;
-        }
-      } else {
-        // Idle
-        dragon.idleTime++;
-        if(dragon.idleTime>30) {
-          // Idle look animation cycles through 0,1,2,1
-          let seq = [0,1,2,1];
-          let idx = Math.floor((dragon.idleTime-30)/18)%seq.length;
-          dragon.lookFrame = seq[idx];
-        }
-      }
-    }
-
-    function draw() {
-      ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
-      // Ground
-      for(let y=0;y<ROWS;y++) {
-        ctx.fillStyle = y%2==0 ? "#d1fae5" : "#fde68a";
-        ctx.fillRect(0, y*TILE, CANVAS_W, TILE);
-      }
-      // Dragon
-      if(imgLoaded) {
-        let px = dragon.x*TILE+TILE/2, py = dragon.y*TILE+TILE/2;
-        ctx.save();
-        ctx.translate(px, py);
-        ctx.scale(1.5,1.5); // enlarge sprite
-        ctx.translate(-SPRITE_W/2,-SPRITE_H/2);
-        let row, col;
-        // Animation state
-        if(dragon.moving) {
-          row = WALK_ROW[dragon.dir];
-          col = dragon.frame;
-        } else if(dragon.idleTime > 30) {
-          // Idle: look around
-          // Use LOOK_ROW, 3 frames per look
-          row = LOOK_ROW[dragon.dir];
-          col = dragon.lookFrame;
-        } else {
-          // Standing
-          row = WALK_ROW[dragon.dir];
-          col = 0;
-        }
-        ctx.drawImage(spriteImg, col*SPRITE_W, row*SPRITE_H, SPRITE_W, SPRITE_H, 0, 0, SPRITE_W, SPRITE_H);
-        ctx.restore();
-      } else {
-        ctx.fillStyle = "#67e8f9";
-        ctx.beginPath();
-        ctx.arc(dragon.x*TILE+TILE/2, dragon.y*TILE+TILE/2, 16, 0, Math.PI*2);
-        ctx.fill();
-      }
-    }
-
-    function loop() {
-      update();
-      draw();
-      requestAnimationFrame(loop);
-    }
-
-    // ---- START ----
-    window.onload = () => {
-      loop();
-    };
-
-    // --- MOBILE SWIPE (for fun) ---
-    let touchStartX=0, touchStartY=0;
-    canvas.addEventListener("touchstart",e=>{
-      if(e.touches.length===1) {
-        let t = e.touches[0];
-        touchStartX = t.clientX;
-        touchStartY = t.clientY;
-      }
-    });
-    canvas.addEventListener("touchend",e=>{
-      let t = e.changedTouches[0];
-      let dx = t.clientX-touchStartX, dy = t.clientY-touchStartY;
-      if(Math.abs(dx)>Math.abs(dy)) {
-        if(dx>30) queueMove("right");
-        else if(dx<-30) queueMove("left");
-      } else {
-        if(dy>30) queueMove("down");
-        else if(dy<-30) queueMove("up");
-      }
-    });
-    // Prevent scroll
-    document.body.addEventListener("touchmove",e=>{e.preventDefault();},{passive:false});
   </script>
 </body>
 </html>
