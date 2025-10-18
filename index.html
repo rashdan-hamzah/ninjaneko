@@ -1,223 +1,857 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Resume</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Consulting Problem Solver</title>
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#0e0f13" />
   <style>
-    /* Base Styles */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    /* =========================================================================
+       Apple-inspired, ultra-smooth single-file UI
+       Focus: CSS polish, glassmorphism, motion, micro-interactions
+       ========================================================================= */
+
+    :root {
+      /* Surfaces */
+      --bg-0: #0e0f13;
+      --bg-1: #12141a;
+      --bg-2: #171a21;
+      --panel: rgba(255, 255, 255, 0.62);
+      --panel-strong: rgba(255, 255, 255, 0.82);
+      --hairline: rgba(10, 16, 26, 0.08);
+      --stroke: rgba(10, 16, 26, 0.12);
+
+      /* Text */
+      --text: #0b0c10;
+      --text-weak: rgba(11, 12, 16, 0.62);
+      --text-inv: #ffffff;
+
+      /* Accents */
+      --accent: #7aa8ff;
+      --accent-2: #9b8cff;
+      --accent-3: #68e2ff;
+
+      /* Radii */
+      --r-lg: 22px;
+      --r-md: 16px;
+      --r-sm: 12px;
+      --r-xs: 10px;
+
+      /* Shadows */
+      --sh-1: 0 12px 30px rgba(8, 10, 18, 0.14), 0 4px 14px rgba(8, 10, 18, 0.10);
+      --sh-2: 0 20px 55px rgba(8, 10, 18, 0.18), 0 6px 18px rgba(8, 10, 18, 0.10);
+
+      /* Motion */
+      --ease: cubic-bezier(.2, .6, .2, 1);
+      --spring: cubic-bezier(.18, .89, .21, 1.11);
+
+      /* Backdrop */
+      --blur: 22px;
+      --sat: 125%;
     }
 
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --panel: rgba(20, 24, 32, 0.56);
+        --panel-strong: rgba(28, 32, 42, 0.82);
+        --hairline: rgba(255, 255, 255, 0.06);
+        --stroke: rgba(255, 255, 255, 0.12);
+        --text: #e7e9ee;
+        --text-weak: rgba(231, 233, 238, 0.68);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      line-height: 1.6;
-      background-color: #fefefe;
-      color: #333;
       margin: 0;
-      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+        Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 800px at 10% -10%, #2b2e39 0%, transparent 60%),
+        radial-gradient(1000px 800px at 110% 10%, #212536 0%, transparent 60%),
+        linear-gradient(180deg, var(--bg-0), var(--bg-1));
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Header Section */
-    header {
-      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-      padding: 2rem;
-      text-align: center;
-      border-bottom: 1px solid #ddd;
+    /* Ambient orbs (subtle glow, screen blend) */
+    .orb {
+      position: fixed;
+      inset: -10vh -20vw auto auto;
+      width: 70vw; height: 70vh;
+      pointer-events: none;
+      filter: blur(52px) saturate(120%);
+      opacity: .25;
+      mix-blend-mode: screen;
+      background:
+        radial-gradient(closest-side at 30% 40%, rgba(140,115,255,.32), transparent 65%),
+        radial-gradient(closest-side at 70% 60%, rgba(72,165,255,.28), transparent 60%),
+        radial-gradient(closest-side at 50% 80%, rgba(60,220,255,.20), transparent 60%);
+      animation: orbFloat 16s var(--ease) infinite alternate;
+      z-index: 0;
+    }
+    .orb.orb-b {
+      inset: auto auto -25vh -20vw;
+      width: 60vw; height: 60vh;
+      opacity: .22;
+      transform: translate3d(0,0,0) scale(1.05);
+      animation: orbFloatB 18s var(--ease) infinite alternate;
+    }
+    @keyframes orbFloat { 0% { transform: translate3d(-2%, -1%, 0) } 100% { transform: translate3d(2%, 3%, 0) } }
+    @keyframes orbFloatB { 0% { transform: translate3d(1%, -2%, 0) } 100% { transform: translate3d(-2%, 2%, 0) } }
+
+    /* Layout */
+    .wrap {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100dvh;
     }
 
-    header h1 {
-      font-size: 2.5rem;
+    /* Top bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      margin: 16px auto 0;
+      max-width: 1080px;
+      width: calc(100% - 32px);
+      backdrop-filter: saturate(var(--sat)) blur(var(--blur));
+      -webkit-backdrop-filter: saturate(var(--sat)) blur(var(--blur));
+      background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-lg);
+      box-shadow: var(--sh-1);
+      overflow: clip;
+    }
+    .topbar-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: linear-gradient(180deg, #9db6ff, #7aa8ff);
+      box-shadow: 0 4px 10px rgba(122,168,255,.55);
+    }
+    .title {
+      font-weight: 700;
+      letter-spacing: .2px;
+      background: linear-gradient(90deg, #cfd9ff, #9fb4ff 35%, #a89cff 70%, #8fe6ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-size: 15px;
+    }
+
+    /* Segmented control */
+    .seg {
+      margin-left: auto;
+      position: relative;
+      display: inline-grid;
+      grid-auto-flow: column;
+      gap: 6px;
+      background: rgba(255,255,255,.4);
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      padding: 6px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
+    }
+    @media (prefers-color-scheme: dark) {
+      .seg { background: rgba(255,255,255,.06); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+    }
+    .seg button {
+      position: relative;
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: var(--text-weak);
+      padding: 10px 14px;
+      border-radius: 999px;
       font-weight: 600;
-      color: #222;
-    }
-
-    header p {
-      font-size: 1.2rem;
-      color: #555;
-      margin-top: 0.5rem;
-    }
-
-    /* Main Resume Section */
-    main {
-      max-width: 800px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-
-    section {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgb(0 0 0 / 10%);
-      margin-bottom: 2rem;
-      overflow: hidden;
-      border: 1px solid #e4e4e4;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    section:hover {
-      transform: scale(1.02);
-      box-shadow: 0 6px 15px rgb(0 0 0 / 15%);
-    }
-
-    section h2 {
-      font-size: 1.5rem;
-      font-weight: 500;
-      color: #333;
-      padding: 1rem;
-      background: #f8f9fa;
+      font-size: 13px;
+      letter-spacing: .2px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: color .35s var(--ease);
+      z-index: 1;
+    }
+    .seg button.active { color: var(--text); }
+    .seg .thumb {
+      position: absolute;
+      top: 4px; bottom: 4px;
+      width: 25%;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.65));
+      box-shadow: 0 8px 20px rgba(10,10,20,.10), inset 0 1px 0 rgba(255,255,255,.8);
+      border: 1px solid var(--stroke);
+      transition: transform .5s var(--spring), width .25s var(--ease), left .5s var(--spring);
+      will-change: transform, left;
+    }
+    @media (prefers-color-scheme: dark) {
+      .seg .thumb {
+        background: linear-gradient(180deg, rgba(40,44,56,.95), rgba(34,38,48,.85));
+        border-color: rgba(255,255,255,.08);
+      }
     }
 
-    section h2:hover {
-      background: #e9ecef;
+    /* Main card */
+    .main {
+      margin: 26px auto;
+      max-width: 980px;
+      width: calc(100% - 32px);
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 1fr;
+    }
+    .card {
+      position: relative;
+      background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-lg);
+      box-shadow: var(--sh-2);
+      backdrop-filter: saturate(var(--sat)) blur(var(--blur));
+      -webkit-backdrop-filter: saturate(var(--sat)) blur(var(--blur));
+      overflow: clip;
+      transform: translateZ(0);
+    }
+    /* Hairline gradient edge */
+    .card::before {
+      content: "";
+      position: absolute; inset: -1px;
+      border-radius: calc(var(--r-lg) + 1px);
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0) 40%),
+        linear-gradient(0deg, rgba(255,255,255,.25), rgba(255,255,255,0) 60%);
+      mix-blend-mode: overlay;
+    }
+    /* Sheen */
+    .card::after {
+      content: "";
+      position: absolute;
+      top: -60%; left: -20%;
+      width: 60%; height: 220%;
+      transform: rotate(12deg);
+      background: linear-gradient(90deg, rgba(255,255,255,.12), rgba(255,255,255,0), rgba(255,255,255,.14));
+      filter: blur(14px);
+      opacity: .35;
+      pointer-events: none;
+      animation: sheen 9s var(--ease) infinite;
+    }
+    @keyframes sheen {
+      0% { transform: translateX(-10%) rotate(12deg); opacity: .15; }
+      50% { transform: translateX(40%) rotate(12deg); opacity: .35; }
+      100% { transform: translateX(90%) rotate(12deg); opacity: .12; }
     }
 
-    .section-content {
-      padding: 1.5rem;
-      display: none;
-      font-size: 1rem;
-      color: #555;
-      border-top: 1px solid #e4e4e4;
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 22px 8px 22px;
+    }
+    .headline {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .22px;
+      color: var(--text-weak);
+      text-transform: uppercase;
+    }
+    .controls {
+      display: flex; gap: 10px; align-items: center;
     }
 
-    .section-content p,
-    .section-content ul {
-      margin: 0.5rem 0;
+    .card-body {
+      padding: 10px 22px 22px 22px;
     }
 
-    .section-content ul {
-      list-style: disc;
-      padding-left: 1.5rem;
+    /* Output window */
+    .output {
+      position: relative;
+      min-height: 160px;
+      border-radius: var(--r-md);
+      border: 1px solid var(--hairline);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.6));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+      overflow: clip;
+      padding: 20px 20px;
+      transition: transform .5s var(--spring), box-shadow .5s var(--ease);
+      will-change: transform, box-shadow;
+    }
+    @media (prefers-color-scheme: dark) {
+      .output {
+        background:
+          linear-gradient(180deg, rgba(34,38,48,.92), rgba(30,34,44,.82));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+      }
+    }
+    .output:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 8px 28px rgba(8,10,18,.12); }
+
+    .output-inner {
+      position: relative;
+      min-height: 120px;
+      display: grid;
+      align-content: center;
+      gap: 10px;
     }
 
-    .active .section-content {
-      display: block;
+    .prompt-title {
+      font-size: clamp(20px, 2.6vw, 26px);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: .2px;
+      color: var(--text);
+      text-wrap: balance;
+      transform-origin: 50% 100%;
+    }
+    .prompt-sub {
+      color: var(--text-weak);
+      font-size: 14px;
+    }
+    .pillrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.6));
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      font-size: 12px; font-weight: 700; color: var(--text-weak);
+      letter-spacing: .2px;
+      box-shadow: 0 4px 12px rgba(8,10,18,.06), inset 0 1px 0 rgba(255,255,255,.4);
+    }
+    @media (prefers-color-scheme: dark) {
+      .pill { background: linear-gradient(180deg, rgba(42,46,58,.9), rgba(34,38,48,.8)); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+    }
+    .dot-mini {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(180deg, var(--accent), var(--accent-3));
+      box-shadow: 0 4px 10px rgba(122,168,255,.5);
     }
 
-    /* Footer Section */
-    footer {
+    /* Framework list styling */
+    .fw-list { display: grid; gap: 8px; margin-top: 8px; }
+    .fw-item {
+      display: grid; grid-template-columns: 18px 1fr;
+      gap: 10px; align-items: start;
+      color: var(--text);
+      font-size: 15px;
+    }
+    .fw-bullet {
+      width: 18px; height: 18px; border-radius: 50%;
+      display: inline-grid; place-content: center;
+      background: linear-gradient(180deg, #cfe0ff, #a8c1ff);
+      color: #0e1a33; font-weight: 900; font-size: 11px;
+      box-shadow: 0 6px 14px rgba(122,168,255,.35), inset 0 1px 0 rgba(255,255,255,.8);
+      border: 1px solid rgba(10,16,26,.16);
+    }
+    @media (prefers-color-scheme: dark) {
+      .fw-bullet { background: linear-gradient(180deg, #3a4a6d, #2f405f); color: #e9f1ff; border-color: rgba(255,255,255,.1); }
+    }
+
+    /* Actions */
+    .actions {
+      display: flex; flex-wrap: wrap;
+      gap: 12px; margin-top: 16px;
+    }
+    .btn {
+      position: relative;
+      appearance: none;
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: .3px;
+      cursor: pointer;
+      transition: transform .5s var(--spring), box-shadow .5s var(--ease), background .3s var(--ease);
+      will-change: transform, box-shadow;
+    }
+    .btn-primary {
+      color: #0b1020;
+      background:
+        linear-gradient(180deg, #cfe0ff, #a8c1ff 60%, #9fc4ff);
+      border: 1px solid rgba(10,16,26,.16);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9),
+        0 12px 28px rgba(122,168,255,.35),
+        0 4px 10px rgba(10,16,26,.10);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 16px 34px rgba(122,168,255,.40), 0 6px 14px rgba(10,16,26,.12); }
+    .btn-primary:active { transform: translateY(0); transition: transform .08s ease; }
+
+    .btn-ghost {
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.7));
+      border: 1px solid var(--hairline);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 6px 18px rgba(8,10,18,.10);
+    }
+    .btn-ghost:hover { transform: translateY(-1px); }
+    .btn-ghost:active { transform: translateY(0); transition: transform .08s ease; }
+
+    /* Ripple effect */
+    .btn .ripple {
+      position: absolute;
+      border-radius: 999px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      width: 8px; height: 8px;
+      background: radial-gradient(circle at center, rgba(255,255,255,.8), rgba(255,255,255,0) 70%);
+      animation: ripple .7s var(--ease);
+      opacity: .7;
+    }
+    @keyframes ripple {
+      from { transform: translate(-50%, -50%) scale(.5); opacity: .6; }
+      to { transform: translate(-50%, -50%) scale(18); opacity: 0; }
+    }
+
+    /* Tooltip */
+    .tip {
+      position: absolute;
+      top: -40px; right: 10px;
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.86));
+      color: #0b0c10;
+      padding: 6px 10px;
+      border-radius: 9px;
+      font-size: 12px; font-weight: 700; letter-spacing: .2px;
+      border: 1px solid var(--hairline);
+      box-shadow: 0 10px 24px rgba(8,10,18,.14), inset 0 1px 0 rgba(255,255,255,.85);
+      transform-origin: 100% 100%;
+      transform: translateY(6px) scale(.92);
+      opacity: 0; pointer-events: none;
+      transition: transform .35s var(--spring), opacity .35s var(--ease);
+    }
+    .tip.show { opacity: 1; transform: translateY(0) scale(1); }
+
+    /* History */
+    .history {
+      display: grid; gap: 10px;
+      grid-template-columns: 1fr;
+    }
+    .row-scroll {
+      display: grid; grid-auto-flow: column; grid-auto-columns: max-content;
+      gap: 10px; padding-bottom: 2px;
+      overflow-x: auto; overscroll-behavior-x: contain;
+      scrollbar-width: thin;
+      scroll-snap-type: x proximity;
+    }
+    .chip {
+      scroll-snap-align: start;
+      white-space: nowrap;
+      max-width: 360px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--hairline);
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.7));
+      color: var(--text-weak);
+      font-size: 13px; font-weight: 700;
+      cursor: pointer;
+      transition: transform .4s var(--spring), color .3s var(--ease);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.65), 0 8px 18px rgba(8,10,18,.08);
+    }
+    .chip:hover { transform: translateY(-2px); color: var(--text); }
+    @media (prefers-color-scheme: dark) {
+      .chip { background: linear-gradient(180deg, rgba(40,44,56,.92), rgba(34,38,48,.82)); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+    }
+
+    /* Swap animations for output content */
+    .swap {
+      position: relative;
+      min-height: 120px;
+    }
+    .pane {
+      position: absolute; inset: 0;
+      display: grid; align-content: center; gap: 10px;
+      opacity: 0; transform: translateY(10px) scale(.98);
+      transition: opacity .55s var(--ease), transform .55s var(--spring), filter .55s var(--ease);
+      filter: blur(6px);
+      will-change: transform, opacity, filter;
+    }
+    .pane.show {
+      opacity: 1; transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+    .pane.exit {
+      opacity: 0; transform: translateY(-10px) scale(.995);
+      filter: blur(6px);
+    }
+
+    /* Footer */
+    .foot {
+      margin: 20px auto 30px;
+      max-width: 980px; width: calc(100% - 32px);
+      color: var(--text-weak);
+      font-size: 12px; letter-spacing: .2px;
       text-align: center;
-      padding: 1rem;
-      font-size: 0.9rem;
-      color: #777;
-      border-top: 1px solid #ddd;
-      margin-top: 2rem;
     }
 
-    footer a {
-      color: #007BFF;
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-
-    footer a:hover {
-      color: #0056b3;
-      text-decoration: underline;
-    }
-
-    /* Button-Like Hover for Section Headers */
-    section h2:active {
-      background: #dee2e6;
-    }
-
-    /* Media Queries */
-    @media (max-width: 768px) {
-      header h1 {
-        font-size: 2rem;
-      }
-
-      header p {
-        font-size: 1rem;
-      }
-
-      section h2 {
-        font-size: 1.2rem;
-      }
-
-      .section-content {
-        font-size: 0.9rem;
-      }
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .orb, .orb-b, .card::after { animation: none !important; }
+      .btn, .seg .thumb, .pane { transition-duration: .01ms !important; }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header>
-    <h1>Rashdan Hamzah</h1>
-    <p>Consultant | Problem Solver | Innovator</p>
-  </header>
+  <div class="orb"></div>
+  <div class="orb orb-b"></div>
 
-  <!-- Main Content -->
-  <main>
-    <!-- About Me Section -->
-    <section>
-      <h2>About Me</h2>
-      <div class="section-content">
-        <p>
-          I am a driven consultant with expertise in strategy, problem-solving, and innovation. Passionate about delivering impactful solutions that drive business success.
-        </p>
+  <div class="wrap">
+    <!-- Topbar -->
+    <div class="topbar" role="navigation" aria-label="Mode selector">
+      <div class="topbar-row">
+        <div class="brand">
+          <div class="dot" aria-hidden="true"></div>
+          <div class="title">Consulting Problem Solver</div>
+        </div>
+
+        <!-- Segmented control -->
+        <div class="seg" id="seg" role="tablist" aria-label="Modes">
+          <div class="thumb" id="segThumb" aria-hidden="true" style="left:4px"></div>
+          <button class="active" role="tab" aria-selected="true" data-mode="case">Case Prompt</button>
+          <button role="tab" aria-selected="false" data-mode="framework">Framework</button>
+          <button role="tab" aria-selected="false" data-mode="estimation">Estimation</button>
+          <button role="tab" aria-selected="false" data-mode="brainstorm">Brainstorm</button>
+        </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Work Experience Section -->
-    <section>
-      <h2>Work Experience</h2>
-      <div class="section-content">
-        <ul>
-          <li><strong>Consultant</strong> at XYZ Consulting (2023–Present)</li>
-          <li><strong>Analyst</strong> at ABC Corp (2020–2023)</li>
-          <li><strong>Intern</strong> at DEF Solutions (2019)</li>
-        </ul>
-      </div>
-    </section>
+    <!-- Main -->
+    <main class="main" role="main">
+      <!-- Output card -->
+      <section class="card" aria-live="polite">
+        <header class="card-head">
+          <div class="headline" id="headline">Case Prompt</div>
+          <div class="controls">
+            <button class="btn btn-ghost" id="copyBtn" aria-label="Copy to clipboard">Copy</button>
+            <div class="tip" id="copyTip">Copied!</div>
+          </div>
+        </header>
+        <div class="card-body">
+          <div class="output">
+            <div class="output-inner">
+              <div class="pillrow" id="tagRow">
+                <span class="pill"><span class="dot-mini"></span> Strategy</span>
+                <span class="pill"><span class="dot-mini"></span> MECE</span>
+                <span class="pill"><span class="dot-mini"></span> Client-ready</span>
+              </div>
 
-    <!-- Education Section -->
-    <section>
-      <h2>Education</h2>
-      <div class="section-content">
-        <ul>
-          <li><strong>MBA</strong>, Harvard Business School</li>
-          <li><strong>Bachelor of Economics</strong>, University of XYZ</li>
-        </ul>
-      </div>
-    </section>
+              <!-- Swappable content panes -->
+              <div class="swap" id="swap">
+                <div class="pane show" id="paneA"></div>
+                <div class="pane" id="paneB"></div>
+              </div>
 
-    <!-- Skills Section -->
-    <section>
-      <h2>Skills</h2>
-      <div class="section-content">
-        <ul>
-          <li>Strategic Thinking</li>
-          <li>Data Analysis</li>
-          <li>Public Speaking</li>
-          <li>Leadership</li>
-        </ul>
-      </div>
-    </section>
-  </main>
+              <div class="actions">
+                <button class="btn btn-primary" id="genBtn" aria-label="Generate">Generate</button>
+                <button class="btn btn-ghost" id="shuffleBtn" aria-label="Generate variant">Variant</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  <!-- Footer -->
-  <footer>
-    <p>
-      Built with ❤️ by Rashdan Hamzah. Inspired by Apple’s design philosophy. 
-      <br>
-      <a href="mailto:rashdan@example.com">Contact Me</a>
-    </p>
-  </footer>
+      <!-- History card -->
+      <section class="card">
+        <header class="card-head">
+          <div class="headline">History</div>
+        </header>
+        <div class="card-body">
+          <div class="history">
+            <div class="row-scroll" id="history"></div>
+          </div>
+        </div>
+      </section>
+    </main>
 
-  <!-- JavaScript for Interactivity -->
+    <footer class="foot">
+      Tip: Press Space to generate. Smooth animations, thoughtful defaults, and client-ready prompts.
+    </footer>
+  </div>
+
   <script>
-    document.querySelectorAll('section h2').forEach(header => {
-      header.addEventListener('click', () => {
-        const section = header.parentElement;
-        section.classList.toggle('active');
+    // =========================================================================
+    // Content pools
+    // =========================================================================
+    const CASE_PROMPTS = [
+      "A premium coffee chain faces declining same-store sales. How would you diagnose and reverse the trend?",
+      "A medical devices firm considers entering Southeast Asia. Outline a market entry strategy and key risks.",
+      "A B2B SaaS startup has strong adoption but rising churn. Build a plan to improve retention by 30%.",
+      "A national grocer is losing market share to discounters. What are the growth levers and how to prioritize?",
+      "A mobility app wants profitability in 12 months. Where do you focus: pricing, costs, or product mix?",
+      "An industrial manufacturer sees margin compression. Dissect COGS and propose cost-out opportunities.",
+      "A luxury apparel brand wants to launch resale. Evaluate cannibalization, economics, and operating model.",
+      "A telecom provider considers bundling streaming. Size the prize and define partnership structure.",
+      "A fintech wallet plans credit offerings. Assess risk, unit economics, and regulatory implications.",
+      "A logistics firm targets last-mile expansion. Design the network, SLAs, and capital-light options."
+    ];
+
+    const FRAMEWORKS = [
+      { title: "Profitability Tree", items: ["Revenue = Price × Volume", "COGS + Opex breakdown", "Mix, discounting, leakage", "Capacity, utilization, productivity", "Quick wins vs. structural plays"] },
+      { title: "Market Entry", items: ["TAM-SAM-SOM", "Attractiveness (growth, margins)", "Competitive intensity", "Routes-to-market, partners", "Entry mode: build, buy, ally"] },
+      { title: "3C + STP + 4P", items: ["Customer segments & needs", "Company capabilities", "Competition moats", "Segment-Target-Position", "Product, Price, Place, Promotion"] },
+      { title: "Value Chain", items: ["Inbound logistics", "Operations", "Outbound logistics", "Marketing & sales", "Service (post-sale)"] },
+      { title: "Porter’s Five Forces", items: ["Threat of entrants", "Bargaining power of suppliers", "Bargaining power of buyers", "Threat of substitutes", "Rivalry among incumbents"] },
+      { title: "Pricing Architecture", items: ["Willingness-to-pay bands", "Good/Better/Best packaging", "Discount governance", "Elasticity experiments", "Monetize add-ons"] },
+      { title: "Cost Transformation", items: ["Should-cost baselining", "Zero-based budgeting", "Make vs. buy", "Automation opportunities", "Supplier negotiations"] }
+    ];
+
+    const ESTIMATIONS = [
+      "How many umbrellas are sold annually in London? Structure drivers: population × rainy days × purchase rate.",
+      "Estimate annual revenue of airport Wi‑Fi in Europe. Consider traveler volumes, attach rates, ARPU.",
+      "Market size for premium pet food in the US. Segment by households, pet ownership, spend per pet.",
+      "How many EV charging sessions per day in NYC? Vehicles in circulation × utilization × session length.",
+      "Size the ‘ghost kitchen’ market in a tier‑1 city. Demand density, order frequencies, AOV."
+    ];
+
+    const BRAINSTORMS = [
+      "10 ways to reduce churn in a SaaS product without cutting price.",
+      "Creative growth loops for a marketplace with cold-start problems.",
+      "Zero-capex ideas to increase retail basket size.",
+      "Cross-sell plays for a bank launching BNPL.",
+      "Boosting referral rates for a mobile subscription app."
+    ];
+
+    // Suggested tags per mode
+    const TAGS = {
+      case: ["Strategy", "MECE", "Client-ready"],
+      framework: ["Structured", "Reusable", "Decision-Ready"],
+      estimation: ["Assumptions", "Top-Down", "Sensitivity"],
+      brainstorm: ["Divergent", "Fast", "Practical"]
+    };
+
+    // =========================================================================
+    // Elements
+    // =========================================================================
+    const seg = document.getElementById("seg");
+    const segThumb = document.getElementById("segThumb");
+    const segButtons = Array.from(seg.querySelectorAll("button"));
+    const headline = document.getElementById("headline");
+    const tagRow = document.getElementById("tagRow");
+    const genBtn = document.getElementById("genBtn");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const copyTip = document.getElementById("copyTip");
+    const swap = document.getElementById("swap");
+    const paneA = document.getElementById("paneA");
+    const paneB = document.getElementById("paneB");
+    const historyRow = document.getElementById("history");
+
+    let mode = "case";          // case | framework | estimation | brainstorm
+    let activePane = paneA;     // currently visible pane element
+    let cacheLast = "";         // last rendered plain text (for copy)
+    let lock = false;           // simple re-entrancy guard
+
+    // =========================================================================
+    // Helpers
+    // =========================================================================
+    function setMode(newMode) {
+      mode = newMode;
+      // Update segmented visuals
+      segButtons.forEach((b, i) => {
+        const isActive = b.dataset.mode === newMode;
+        b.classList.toggle("active", isActive);
+        b.setAttribute("aria-selected", String(isActive));
+        if (isActive) moveThumbTo(i);
       });
+      // Headline + tags
+      const t = {
+        case: "Case Prompt",
+        framework: "Framework",
+        estimation: "Estimation",
+        brainstorm: "Brainstorm"
+      }[newMode];
+      headline.textContent = t;
+      renderTags(TAGS[newMode] || []);
+      // Generate fresh content on mode switch for immediacy
+      generate(true);
+    }
+
+    function moveThumbTo(index) {
+      const btn = segButtons[index];
+      if (!btn) return;
+      const segRect = seg.getBoundingClientRect();
+      const btnRect = btn.getBoundingClientRect();
+      const left = (btnRect.left - segRect.left) - 2; // padding delta
+      const width = btnRect.width + 4;
+      segThumb.style.transform = `translateX(${left}px)`;
+      segThumb.style.width = width + "px";
+      segThumb.style.left = "4px"; // initial anchor to keep consistent calc
+    }
+
+    function renderTags(tags) {
+      tagRow.innerHTML = "";
+      tags.forEach(t => {
+        const el = document.createElement("span");
+        el.className = "pill";
+        el.innerHTML = `<span class="dot-mini"></span>${t}`;
+        tagRow.appendChild(el);
+      });
+    }
+
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function buildFrameworkHTML(fw) {
+      const items = fw.items.map((it, i) => `
+        <div class="fw-item">
+          <div class="fw-bullet">${i+1}</div>
+          <div>${it}</div>
+        </div>
+      `).join("");
+      return `
+        <div class="prompt-title">${fw.title}</div>
+        <div class="fw-list">${items}</div>
+      `;
+    }
+
+    function buildPlainHTML(text, subtitle = "") {
+      return `
+        <div class="prompt-title">${text}</div>
+        ${subtitle ? `<div class="prompt-sub">${subtitle}</div>` : ""}
+      `;
+    }
+
+    function ripple(e, btnEl) {
+      const r = document.createElement("span");
+      r.className = "ripple";
+      const rect = btnEl.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      r.style.left = `${x}px`; r.style.top = `${y}px`;
+      btnEl.appendChild(r);
+      setTimeout(() => r.remove(), 700);
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        copyTip.classList.add("show");
+        setTimeout(() => copyTip.classList.remove("show"), 900);
+      });
+    }
+
+    function historyPush(label, data) {
+      const chip = document.createElement("button");
+      chip.className = "chip";
+      chip.title = "Restore";
+      chip.textContent = label;
+      chip.addEventListener("click", () => swapTo(data.html, data.text));
+      historyRow.prepend(chip);
+    }
+
+    function plainTextFromHTML(html) {
+      const tmp = document.createElement("div");
+      tmp.innerHTML = html;
+      return tmp.textContent || tmp.innerText || "";
+    }
+
+    // Core swap animation between panes
+    function swapTo(html, rawText) {
+      if (lock) return;
+      lock = true;
+
+      const nextPane = activePane === paneA ? paneB : paneA;
+      nextPane.innerHTML = html;
+
+      requestAnimationFrame(() => {
+        // Enter next
+        nextPane.classList.add("show");
+        // Exit prev
+        activePane.classList.add("exit");
+        activePane.classList.remove("show");
+
+        setTimeout(() => {
+          activePane.classList.remove("exit");
+          activePane.innerHTML = "";
+          activePane = nextPane;
+          cacheLast = rawText || plainTextFromHTML(html);
+          lock = false;
+        }, 550); // keep in sync with CSS
+      });
+    }
+
+    // =========================================================================
+    // Generate content
+    // =========================================================================
+    function generate(isModeSwitch = false) {
+      let html = "";
+      let textForCopy = "";
+
+      if (mode === "case") {
+        const t = pick(CASE_PROMPTS);
+        html = buildPlainHTML(t, "Structure: market, customer, product, economics, risk.");
+        textForCopy = t;
+        if (!isModeSwitch) historyPush("Case: " + t, { html, text: textForCopy });
+      }
+      else if (mode === "framework") {
+        const fw = pick(FRAMEWORKS);
+        html = buildFrameworkHTML(fw);
+        textForCopy = fw.title + " — " + fw.items.join("; ");
+        if (!isModeSwitch) historyPush("FW: " + fw.title, { html, text: textForCopy });
+      }
+      else if (mode === "estimation") {
+        const t = pick(ESTIMATIONS);
+        html = buildPlainHTML(t, "Approach: define drivers → estimate assumptions → sanity check.");
+        textForCopy = t;
+        if (!isModeSwitch) historyPush("Est: " + t, { html, text: textForCopy });
+      }
+      else {
+        const t = pick(BRAINSTORMS);
+        html = buildPlainHTML(t, "Aim for 10–20 ideas, then converge with ICE scoring.");
+        textForCopy = t;
+        if (!isModeSwitch) historyPush("Idea: " + t, { html, text: textForCopy });
+      }
+
+      swapTo(html, textForCopy);
+    }
+
+    // Variant = slight re-roll but same mode
+    function variant() { generate(false); }
+
+    // =========================================================================
+    // Events
+    // =========================================================================
+    segButtons.forEach((btn, i) => {
+      btn.addEventListener("click", () => setMode(btn.dataset.mode));
     });
+
+    genBtn.addEventListener("click", (e) => { ripple(e, genBtn); generate(false); });
+
+    shuffleBtn.addEventListener("click", (e) => { ripple(e, shuffleBtn); variant(); });
+
+    copyBtn.addEventListener("click", (e) => {
+      ripple(e, copyBtn);
+      copyToClipboard(cacheLast || ""); 
+    });
+
+    // Keyboard: Space to generate
+    window.addEventListener("keydown", (e) => {
+      if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+      if (e.code === "Space") { e.preventDefault(); generate(false); }
+      if (e.key.toLowerCase() === "c" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); copyToClipboard(cacheLast || ""); }
+    });
+
+    // Initial layout for segmented thumb
+    function initThumb() {
+      const activeIndex = segButtons.findIndex(b => b.classList.contains("active"));
+      moveThumbTo(activeIndex >= 0 ? activeIndex : 0);
+    }
+    window.addEventListener("resize", initThumb);
+
+    // Boot
+    initThumb();
+    generate(true);
   </script>
 </body>
 </html>
