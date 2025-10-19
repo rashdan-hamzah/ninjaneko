@@ -795,3 +795,53 @@ textarea:focus, input[type="text"]:focus{
     <button class="cta go-review" style="display:none;">Review</button>
   </div>
 </div>
+      const sample = document.createElement('div');
+      sample.className = 'review-card';
+      sample.innerHTML = `<h5>Q${i+1} — Sample answer</h5><pre>${escapeHTML(samples[i])}</pre>`;
+
+      grid.appendChild(your); grid.appendChild(sample);
+    }
+
+    frag.appendChild(grid);
+    reviewContent.replaceChildren(frag);
+
+    overlay.classList.add('open');
+  }
+
+  function closeReview(){
+    overlay.classList.remove('open');
+  }
+
+  closeOverlay.addEventListener('click', closeReview);
+  editBack.addEventListener('click', closeReview);
+  finishBtn.addEventListener('click', () => {
+    closeReview();
+    go(0);
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  exportBtn.addEventListener('click', () => {
+    const payload = {
+      title: 'Consulting Problem Solver',
+      timestamp: new Date().toISOString(),
+      answers: {...answers},
+      samples
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'consulting-problem-solver-answers.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  });
+
+  function escapeHTML(str){
+    return String(str).replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
+  }
+
+  // Sync top progress and bottom nav on load
+  go(0);
+})();
