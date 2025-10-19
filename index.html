@@ -2,123 +2,162 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Consulting Problem Solver</title>
+  <title>Consulting Problem Solver – Gamified Edition</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="light dark">
+  <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" content="#0e0f13" />
   <style>
-    /* =========================================================================
-       Apple-inspired, ultra-smooth single-file UI
-       Focus: CSS polish, glassmorphism, motion, micro-interactions
-       ========================================================================= */
-
     :root {
-      /* Surfaces */
-      --bg-0: #0e0f13;
-      --bg-1: #12141a;
-      --bg-2: #171a21;
-      --panel: rgba(255, 255, 255, 0.62);
-      --panel-strong: rgba(255, 255, 255, 0.82);
-      --hairline: rgba(10, 16, 26, 0.08);
+      --bg-0: #f6f9ff;
+      --bg-1: #e9f1fd;
+      --panel: rgba(255,255,255,0.92);
+      --panel-strong: rgba(255,255,255,0.97);
+      --hairline: rgba(10, 16, 26, 0.07);
       --stroke: rgba(10, 16, 26, 0.12);
-
-      /* Text */
-      --text: #0b0c10;
-      --text-weak: rgba(11, 12, 16, 0.62);
-      --text-inv: #ffffff;
-
-      /* Accents */
+      --text: #1a2540;
+      --text-weak: rgba(26,37,64,0.62);
+      --text-inv: #fff;
       --accent: #7aa8ff;
       --accent-2: #9b8cff;
-      --accent-3: #68e2ff;
-
-      /* Radii */
+      --accent-3: #30d158;
+      --accent-4: #ff7a7a;
       --r-lg: 22px;
       --r-md: 16px;
       --r-sm: 12px;
       --r-xs: 10px;
-
-      /* Shadows */
-      --sh-1: 0 12px 30px rgba(8, 10, 18, 0.14), 0 4px 14px rgba(8, 10, 18, 0.10);
-      --sh-2: 0 20px 55px rgba(8, 10, 18, 0.18), 0 6px 18px rgba(8, 10, 18, 0.10);
-
-      /* Motion */
-      --ease: cubic-bezier(.2, .6, .2, 1);
-      --spring: cubic-bezier(.18, .89, .21, 1.11);
-
-      /* Backdrop */
-      --blur: 22px;
-      --sat: 125%;
+      --sh-1: 0 12px 30px rgba(8, 10, 18, 0.10), 0 4px 14px rgba(8, 10, 18, 0.05);
+      --sh-2: 0 20px 55px rgba(8, 10, 18, 0.12), 0 6px 18px rgba(8, 10, 18, 0.07);
+      --ease: cubic-bezier(.2,.6,.2,1);
+      --spring: cubic-bezier(.18,.89,.21,1.11);
+      --blur: 24px;
+      --sat: 115%;
+      --progress: 0%;
     }
-
     @media (prefers-color-scheme: dark) {
       :root {
-        --panel: rgba(20, 24, 32, 0.56);
-        --panel-strong: rgba(28, 32, 42, 0.82);
-        --hairline: rgba(255, 255, 255, 0.06);
-        --stroke: rgba(255, 255, 255, 0.12);
+        --bg-0: #10131c;
+        --bg-1: #161b26;
+        --panel: rgba(28,32,42,0.96);
+        --panel-strong: rgba(36,40,50,0.97);
+        --hairline: rgba(255,255,255,0.06);
+        --stroke: rgba(255,255,255,0.12);
         --text: #e7e9ee;
-        --text-weak: rgba(231, 233, 238, 0.68);
+        --text-weak: rgba(231,233,238,0.68);
       }
     }
-
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    html,body{height:100%;}
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
-        Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
-      color: var(--text);
+      font-family: -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,system-ui,sans-serif;
+      color:var(--text);
       background:
-        radial-gradient(1200px 1200px at 20% 0%, #203248 0%, transparent 60%),
-        radial-gradient(900px 900px at 80% 10%, #14263a 0%, transparent 60%),
-        linear-gradient(180deg, var(--bg-0) 0%, var(--bg-1) 100%);
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      text-rendering: optimizeLegibility;
+        radial-gradient(1200px 800px at 10% -10%, #dde8ff 0%, transparent 70%),
+        radial-gradient(1000px 800px at 110% 10%, #e9f9f2 0%, transparent 70%),
+        linear-gradient(180deg, var(--bg-0), var(--bg-1));
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      text-rendering:optimizeLegibility;
+      overflow-x:hidden;
     }
-    ::selection{ background: color-mix(in oklab, var(--accent) 26%, transparent); }
-
-    /* Ambient glow orbs (subtle) */
-    .orb {
+    .orb, .orb-b {
       position: fixed;
-      inset: -10vh -20vw auto auto;
-      width: 70vw; height: 70vh;
       pointer-events: none;
-      filter: blur(52px) saturate(120%);
-      opacity: .25;
+      z-index: 0;
+      filter: blur(42px) saturate(120%);
+      opacity: .13;
       mix-blend-mode: screen;
       background:
         radial-gradient(closest-side at 30% 40%, rgba(140,115,255,.32), transparent 65%),
-        radial-gradient(closest-side at 70% 60%, rgba(72,165,255,.28), transparent 60%),
-        radial-gradient(closest-side at 50% 80%, rgba(60,220,255,.20), transparent 60%);
+        radial-gradient(closest-side at 70% 60%, rgba(72,165,255,.22), transparent 60%),
+        radial-gradient(closest-side at 50% 80%, rgba(60,220,255,.14), transparent 60%);
       animation: orbFloat 16s var(--ease) infinite alternate;
-      z-index: 0;
     }
-    .orb.orb-b {
+    .orb {
+      inset: -10vh -20vw auto auto;
+      width: 70vw; height: 70vh;
+    }
+    .orb-b {
       inset: auto auto -25vh -20vw;
       width: 60vw; height: 60vh;
-      opacity: .22;
-      transform: translate3d(0,0,0) scale(1.05);
+      opacity: .15;
+      transform: scale(1.02);
       animation: orbFloatB 18s var(--ease) infinite alternate;
     }
     @keyframes orbFloat { 0% { transform: translate3d(-2%, -1%, 0) } 100% { transform: translate3d(2%, 3%, 0) } }
     @keyframes orbFloatB { 0% { transform: translate3d(1%, -2%, 0) } 100% { transform: translate3d(-2%, 2%, 0) } }
 
-    /* Layout */
     .wrap {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      min-height: 100dvh;
+      position:relative;
+      z-index:1;
+      min-height:100dvh;
+      display:grid;
+      grid-template-rows:auto 1fr auto;
     }
-
-    /* Top bar */
+    .progress-wrap {
+      position:relative;
+      margin:auto; width:min(100vw,980px);
+      height:18px;
+      margin-top:32px;
+      margin-bottom:8px;
+    }
+    .progress-bar-bg {
+      position:absolute; left:0; right:0; top:0; height:18px;
+      border-radius:99px;
+      background:linear-gradient(90deg,#e4edfd 30%, #d7f7ea 100%);
+      box-shadow: 0 2px 6px rgba(100,168,255,0.08);
+      border:1px solid var(--hairline);
+      overflow:hidden;
+    }
+    .progress-bar-fill {
+      position:absolute; left:0; top:0; bottom:0;
+      border-radius:99px;
+      background:linear-gradient(90deg,#7aa8ff 0%, #30d158 100%);
+      box-shadow:0 2px 12px rgba(48,209,88,0.08);
+      width:var(--progress,0%);
+      transition:width .7s var(--spring),background .8s var(--ease);
+    }
+    .progress-label {
+      position:absolute; left:50%; top:50%; transform:translate(-50%,-45%);
+      color:var(--text-weak); font-size:13px; font-weight:700; letter-spacing:.2px;
+      z-index:2; user-select:none;
+    }
+    .streak {
+      display:flex;align-items:center;gap:8px;
+      font-weight:800;font-size:14px;color:var(--accent-3);
+      text-shadow:0 2px 16px #a8ffc2;
+      margin-left:auto;margin-right:0;
+      padding:2px 14px;
+      border-radius:999px;
+      background:linear-gradient(90deg,rgba(48,209,88,0.15),rgba(122,168,255,0.10));
+      box-shadow:0 2px 12px rgba(48,209,88,0.09);
+      animation: streakGlow 1.3s var(--spring) infinite alternate;
+    }
+    @keyframes streakGlow {
+      0%{ box-shadow:0 2px 12px rgba(48,209,88,0.09);}
+      100%{ box-shadow:0 2px 24px 8px rgba(48,209,88,0.18);}
+    }
+    .streak.hide { opacity:0; pointer-events:none;}
+    .confetti {
+      pointer-events:none;
+      position:fixed; left:0; top:0; width:100vw; height:100vh; z-index:999;
+      overflow:hidden;
+      display:none;
+    }
+    .confetti-piece {
+      position:absolute;
+      width:10px;height:18px;
+      border-radius:4px;
+      opacity:.85;
+      animation: confettiFall 1.8s cubic-bezier(.18,.89,.21,1.11) forwards;
+    }
+    @keyframes confettiFall {
+      0%{opacity:1;transform:translateY(-10vh) scale(1) rotate(0deg);}
+      50%{opacity:.9;}
+      100%{opacity:0;transform:translateY(60vh) scale(.7) rotate(320deg);}
+    }
     .topbar {
-      position: sticky;
-      top: 0;
+      position:sticky;
+      top:0;
       margin: 16px auto 0;
       max-width: 1080px;
       width: calc(100% - 32px);
@@ -153,8 +192,6 @@
       color: transparent;
       font-size: 15px;
     }
-
-    /* Segmented control */
     .seg {
       margin-left: auto;
       position: relative;
@@ -198,7 +235,7 @@
       border: 1px solid var(--stroke);
       transition: transform .5s var(--spring), width .25s var(--ease), left .5s var(--spring);
       will-change: transform, left;
-      left: 4px; /* anchor */
+      left: 4px;
     }
     @media (prefers-color-scheme: dark) {
       .seg .thumb {
@@ -206,8 +243,6 @@
         border-color: rgba(255,255,255,.08);
       }
     }
-
-    /* Main card */
     .main {
       margin: 26px auto;
       max-width: 980px;
@@ -254,7 +289,6 @@
       50% { transform: translateX(40%) rotate(12deg); opacity: .35; }
       100% { transform: translateX(90%) rotate(12deg); opacity: .12; }
     }
-
     .card-head {
       display: flex; align-items: center; justify-content: space-between;
       padding: 20px 22px 8px 22px;
@@ -270,18 +304,16 @@
       display: flex; gap: 10px; align-items: center;
       position: relative;
     }
-
     .card-body {
       padding: 10px 22px 22px 22px;
     }
-
-    /* Output window */
     .output {
       position: relative;
+      min-height: 160px;
       border-radius: var(--r-md);
       border: 1px solid var(--hairline);
       background:
-        linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.6));
+        linear-gradient(180deg, rgba(255,255,255,.80), rgba(255,255,255,.66));
       box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
       overflow: clip;
       padding: 20px 20px;
@@ -296,14 +328,13 @@
       }
     }
     .output:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 8px 28px rgba(8,10,18,.12); }
-
     .output-inner {
       position: relative;
+      min-height: 120px;
       display: grid;
       align-content: center;
       gap: 10px;
     }
-
     .prompt-title {
       font-size: clamp(20px, 2.6vw, 26px);
       font-weight: 800;
@@ -336,8 +367,6 @@
       background: linear-gradient(180deg, var(--accent), var(--accent-3));
       box-shadow: 0 4px 10px rgba(122,168,255,.5);
     }
-
-    /* Framework list styling */
     .fw-list { display: grid; gap: 8px; margin-top: 8px; }
     .fw-item {
       display: grid; grid-template-columns: 18px 1fr;
@@ -356,8 +385,6 @@
     @media (prefers-color-scheme: dark) {
       .fw-bullet { background: linear-gradient(180deg, #3a4a6d, #2f405f); color: #e9f1ff; border-color: rgba(255,255,255,.1); }
     }
-
-    /* Actions */
     .actions {
       display: flex; flex-wrap: wrap;
       gap: 12px; margin-top: 16px;
@@ -372,9 +399,8 @@
       font-size: 14px;
       letter-spacing: .3px;
       cursor: pointer;
-      transition: transform .5s var(--spring), box-shadow .5s var(--ease), background .3s var(--ease), color .3s var(--ease);
+      transition: transform .5s var(--spring), box-shadow .5s var(--ease), background .3s var(--ease);
       will-change: transform, box-shadow;
-      outline: none;
     }
     .btn-primary {
       color: #0b1020;
@@ -388,17 +414,14 @@
     }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 16px 34px rgba(122,168,255,.40), 0 6px 14px rgba(10,16,26,.12); }
     .btn-primary:active { transform: translateY(0); transition: transform .08s ease; }
-
     .btn-ghost {
       color: var(--text);
-      background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.7));
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.75));
       border: 1px solid var(--hairline);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 6px 18px rgba(8,10,18,.10);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 6px 18px rgba(8,10,18,.08);
     }
     .btn-ghost:hover { transform: translateY(-1px); }
     .btn-ghost:active { transform: translateY(0); transition: transform .08s ease; }
-
-    /* Ripple effect */
     .btn .ripple {
       position: absolute;
       border-radius: 999px;
@@ -413,8 +436,6 @@
       from { transform: translate(-50%, -50%) scale(.5); opacity: .6; }
       to { transform: translate(-50%, -50%) scale(18); opacity: 0; }
     }
-
-    /* Tooltip */
     .tip {
       position: absolute;
       top: -40px; right: 10px;
@@ -431,8 +452,6 @@
       transition: transform .35s var(--spring), opacity .35s var(--ease);
     }
     .tip.show { opacity: 1; transform: translateY(0) scale(1); }
-
-    /* History */
     .history {
       display: grid; gap: 10px;
       grid-template-columns: 1fr;
@@ -457,15 +476,13 @@
       color: var(--text-weak);
       font-size: 13px; font-weight: 700;
       cursor: pointer;
-      transition: transform .4s var(--spring), color .3s var(--ease));
+      transition: transform .4s var(--spring), color .3s var(--ease);
       box-shadow: inset 0 1px 0 rgba(255,255,255,.65), 0 8px 18px rgba(8,10,18,.08);
     }
     .chip:hover { transform: translateY(-2px); color: var(--text); }
     @media (prefers-color-scheme: dark) {
       .chip { background: linear-gradient(180deg, rgba(40,44,56,.92), rgba(34,38,48,.82)); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
     }
-
-    /* Swap animations for output content */
     .swap {
       position: relative;
       min-height: 120px;
@@ -486,33 +503,38 @@
       opacity: 0; transform: translateY(-10px) scale(.995);
       filter: blur(6px);
     }
-
-    /* Answer region (added) */
     .answer-controls {
       display: flex; align-items: center; gap: 10px;
       margin-top: 8px;
     }
     .btn-toggle {
       display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.8));
+      border: 1px solid var(--hairline);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 6px 18px rgba(8,10,18,.06);
+      font-weight: 800; font-size: 13px; letter-spacing: .2px; color: var(--text);
+      cursor: pointer;
+      transition: transform .3s var(--ease), box-shadow .3s var(--ease), background .3s var(--ease);
     }
+    .btn-toggle:hover { transform: translateY(-1px); }
+    .btn-toggle:active { transform: translateY(0); }
     .chev {
       width: 10px; height: 10px;
       border-right: 2px solid currentColor;
       border-bottom: 2px solid currentColor;
       transform: rotate(-45deg) translateY(-1px);
       transition: transform .35s var(--spring);
-      opacity: .9;
+      opacity: .85;
     }
-    .btn-toggle[aria-expanded="true"] .chev {
-      transform: rotate(45deg) translateY(1px);
-    }
-
+    .btn-toggle[aria-expanded="true"] .chev { transform: rotate(45deg) translateY(1px); }
     .answer-wrap {
-      overflow: clip;
+      overflow: hidden;
       height: 0;
-      transition: height .55s var(--spring), opacity .45s var(--ease), transform .45s var(--ease);
       opacity: 0;
       transform: translateY(-4px);
+      transition: height .55s var(--spring), opacity .45s var(--ease), transform .45s var(--ease);
     }
     .answer-wrap.open {
       opacity: 1;
@@ -523,9 +545,9 @@
       border-radius: var(--r-md);
       border: 1px solid var(--hairline);
       background:
-        linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.64));
+        linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.75));
       box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
-      padding: 16px 16px;
+      padding: 16px;
     }
     @media (prefers-color-scheme: dark) {
       .answer-card {
@@ -534,22 +556,14 @@
       }
     }
     .answer-title {
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: .22px;
-      color: var(--text-weak);
-      text-transform: uppercase;
-      margin-bottom: 8px;
+      font-size: 12px; font-weight: 800; letter-spacing: .22px;
+      color: var(--text-weak); text-transform: uppercase; margin-bottom: 8px;
     }
     .answer-content {
-      font-size: 14px;
-      line-height: 1.5;
-      color: var(--text);
+      font-size: 14px; line-height: 1.55; color: var(--text);
     }
-    .answer-content ul { margin: 8px 0 0 18px; }
+    .answer-content ul { margin: 6px 0 0 18px; }
     .answer-content li { margin: 4px 0; }
-
-    /* Footer */
     .foot {
       margin: 20px auto 30px;
       max-width: 980px; width: calc(100% - 32px);
@@ -557,30 +571,31 @@
       font-size: 12px; letter-spacing: .2px;
       text-align: center;
     }
-
-    /* Reduced motion */
     @media (prefers-reduced-motion: reduce) {
-      .orb, .orb-b, .card::after { animation: none !important; }
-      .btn, .seg .thumb, .pane, .answer-wrap { transition-duration: .01ms !important; }
+      .orb, .orb-b, .card::after, .confetti-piece { animation: none !important; }
+      .btn, .seg .thumb, .pane, .answer-wrap, .progress-bar-fill { transition-duration: .01ms !important; }
     }
   </style>
 </head>
 <body>
   <div class="orb"></div>
   <div class="orb orb-b"></div>
-
+  <div class="confetti" id="confetti"></div>
   <div class="wrap">
-    <!-- Topbar -->
+    <div class="progress-wrap">
+      <div class="progress-bar-bg"></div>
+      <div class="progress-bar-fill" id="progressBar"></div>
+      <div class="progress-label" id="progressLabel">0 / 10</div>
+      <div class="streak hide" id="streakBar"><span>🔥</span> <span id="streakCount">0</span> streak</div>
+    </div>
     <div class="topbar" role="navigation" aria-label="Mode selector">
       <div class="topbar-row">
         <div class="brand">
           <div class="dot" aria-hidden="true"></div>
           <div class="title">Consulting Problem Solver</div>
         </div>
-
-        <!-- Segmented control -->
         <div class="seg" id="seg" role="tablist" aria-label="Modes">
-          <div class="thumb" id="segThumb" aria-hidden="true"></div>
+          <div class="thumb" id="segThumb" aria-hidden="true" style="left:4px"></div>
           <button class="active" role="tab" aria-selected="true" data-mode="case">Case Prompt</button>
           <button role="tab" aria-selected="false" data-mode="framework">Framework</button>
           <button role="tab" aria-selected="false" data-mode="estimation">Estimation</button>
@@ -588,10 +603,7 @@
         </div>
       </div>
     </div>
-
-    <!-- Main -->
     <main class="main" role="main">
-      <!-- Output card -->
       <section class="card" aria-live="polite">
         <header class="card-head">
           <div class="headline" id="headline">Case Prompt</div>
@@ -600,48 +612,34 @@
             <div class="tip" id="copyTip">Copied!</div>
           </div>
         </header>
-
         <div class="card-body">
           <div class="output">
             <div class="output-inner">
-              <div class="pillrow" id="tagRow">
-                <span class="pill"><span class="dot-mini"></span> Strategy</span>
-                <span class="pill"><span class="dot-mini"></span> MECE</span>
-                <span class="pill"><span class="dot-mini"></span> Client-ready</span>
-              </div>
-
-              <!-- Swappable content panes -->
+              <div class="pillrow" id="tagRow"></div>
               <div class="swap" id="swap">
                 <div class="pane show" id="paneA"></div>
                 <div class="pane" id="paneB"></div>
               </div>
-
-              <!-- Answer: toggle + panel -->
               <div class="answer-controls">
-                <button class="btn btn-ghost btn-toggle" id="ansToggle" aria-expanded="false" aria-controls="answerWrap">
+                <button class="btn-toggle" id="ansToggle" aria-expanded="false" aria-controls="answerWrap">
                   <span class="chev" aria-hidden="true"></span>
-                  Show Sample Answer
+                  <span id="ansToggleText">Show Sample Answer</span>
                 </button>
               </div>
               <div class="answer-wrap" id="answerWrap" role="region" aria-label="Sample Answer">
                 <div class="answer-card">
                   <div class="answer-title">Sample Answer</div>
-                  <div class="answer-content" id="answerContent">
-                    <!-- filled by JS -->
-                  </div>
+                  <div class="answer-content" id="answerContent"></div>
                 </div>
               </div>
-
               <div class="actions">
-                <button class="btn btn-primary" id="genBtn" aria-label="Generate">Generate</button>
+                <button class="btn btn-primary" id="genBtn" aria-label="Generate">Next</button>
                 <button class="btn btn-ghost" id="shuffleBtn" aria-label="Generate variant">Variant</button>
               </div>
             </div>
           </div>
         </div>
       </section>
-
-      <!-- History card -->
       <section class="card">
         <header class="card-head">
           <div class="headline">History</div>
@@ -653,518 +651,493 @@
         </div>
       </section>
     </main>
-
     <footer class="foot">
-      Tip: Space = Generate • Cmd/Ctrl+C = Copy • A = Toggle Answer • 1/2/3/4 = Switch modes
+      Tip: Space = Next • A = Toggle Answer • 1/2/3/4 = Switch modes • Streaks & Progress animate when you play!
     </footer>
   </div>
-
- <script>
-// =========================================================================
-// Content pools and sample answers
-// =========================================================================
-const CASE_PROMPTS = [
-  "A premium coffee chain faces declining same-store sales. How would you diagnose and reverse the trend?",
-  "A medical devices firm considers entering Southeast Asia. Outline a market entry strategy and key risks.",
-  "A B2B SaaS startup has strong adoption but rising churn. Build a plan to improve retention by 30%.",
-  "A national grocer is losing market share to discounters. What are the growth levers and how to prioritize?",
-  "A mobility app wants profitability in 12 months. Where do you focus: pricing, costs, or product mix?",
-  "An industrial manufacturer sees margin compression. Dissect COGS and propose cost-out opportunities.",
-  "A luxury apparel brand wants to launch resale. Evaluate cannibalization, economics, and operating model.",
-  "A telecom provider considers bundling streaming. Size the prize and define partnership structure.",
-  "A fintech wallet plans credit offerings. Assess risk, unit economics, and regulatory implications.",
-  "A logistics firm targets last-mile expansion. Design the network, SLAs, and capital-light options."
-];
-
-const FRAMEWORKS = [
-  { title: "Profitability Tree", items: ["Revenue = Price × Volume", "COGS + Opex breakdown", "Mix, discounting, leakage", "Capacity, utilization, productivity", "Quick wins vs. structural plays"], answer:
-    `<ul>
-      <li><strong>When to use:</strong> Diagnose margin issues, isolate drivers quickly.</li>
-      <li><strong>How:</strong> Split into Revenue vs. Cost; decompose drivers (price, volume, mix; fixed vs. variable).</li>
-      <li><strong>Example:</strong> Retail: plug discount leakage (-150 bps), labor productivity (+80 bps).</li>
-    </ul>` },
-  { title: "Market Entry", items: ["TAM-SAM-SOM", "Attractiveness (growth, margins)", "Competitive intensity", "Routes-to-market, partners", "Entry mode: build, buy, ally"], answer:
-    `<ul>
-      <li><strong>Approach:</strong> Size and score markets, shortlist by attractiveness/capability fit.</li>
-      <li><strong>Entry mode:</strong> Build vs. buy vs. ally based on speed, control, capital.</li>
-      <li><strong>Example:</strong> SEA med devices: distributor-led entry; phase SG/MY/TH; parallel reg filings.</li>
-    </ul>` },
-  { title: "3C + STP + 4P", items: ["Customer segments & needs", "Company capabilities", "Competition moats", "Segment-Target-Position", "Product, Price, Place, Promotion"], answer:
-    `<ul>
-      <li><strong>Why:</strong> Full go-to-market from insight to execution.</li>
-      <li><strong>Output:</strong> Clear ICP, sharp positioning, pricing guardrails, channel plan.</li>
-      <li><strong>Example:</strong> SMB SaaS: PLG motion + partner resellers; Good/Better/Best packages.</li>
-    </ul>` },
-  { title: "Value Chain", items: ["Inbound logistics", "Operations", "Outbound logistics", "Marketing & sales", "Service (post-sale)"], answer:
-    `<ul>
-      <li><strong>Use:</strong> Find bottlenecks and cost/experience gaps E2E.</li>
-      <li><strong>Example:</strong> Ops (OEE), inbound (supplier terms), outbound (route density), service (NPS).</li>
-    </ul>` },
-  { title: "Porter’s Five Forces", items: ["Threat of entrants", "Bargaining power of suppliers", "Bargaining power of buyers", "Threat of substitutes", "Rivalry among incumbents"], answer:
-    `<ul>
-      <li><strong>Goal:</strong> Assess structural profitability.</li>
-      <li><strong>Tip:</strong> Quantify via HHI, churn, price dispersion, switching costs.</li>
-    </ul>` },
-  { title: "Pricing Architecture", items: ["Willingness-to-pay bands", "Good/Better/Best packaging", "Discount governance", "Elasticity experiments", "Monetize add-ons"], answer:
-    `<ul>
-      <li><strong>Stack:</strong> WTP research → packaging → policy → A/B tests → dashboards.</li>
-      <li><strong>Example:</strong> Add paid priority support; tighten discount rules; upsell add-ons.</li>
-    </ul>` },
-  { title: "Cost Transformation", items: ["Should-cost baselining", "Zero-based budgeting", "Make vs. buy", "Automation opportunities", "Supplier negotiations"], answer:
-    `<ul>
-      <li><strong>Playbook:</strong> 13-week waves; governance; quantified business cases.</li>
-      <li><strong>Outcome:</strong> 8–12% opex, 3–6% COGS reduction typical.</li>
-    </ul>` }
-];
-
-const ESTIMATIONS = [
-  "How many umbrellas are sold annually in London? Structure drivers: population × rainy days × purchase rate.",
-  "Estimate annual revenue of airport Wi‑Fi in Europe. Consider traveler volumes, attach rates, ARPU.",
-  "Market size for premium pet food in the US. Segment by households, pet ownership, spend per pet.",
-  "How many EV charging sessions per day in NYC? Vehicles in circulation × utilization × session length.",
-  "Size the ‘ghost kitchen’ market in a tier‑1 city. Demand density, order frequencies, AOV."
-];
-
-const BRAINSTORMS = [
-  "10 ways to reduce churn in a SaaS product without cutting price.",
-  "Creative growth loops for a marketplace with cold-start problems.",
-  "Zero-capex ideas to increase retail basket size.",
-  "Cross-sell plays for a bank launching BNPL.",
-  "Boosting referral rates for a mobile subscription app."
-];
-
-// Sample answers for prompts
-const CASE_ANSWERS = {
-  "A premium coffee chain faces declining same-store sales. How would you diagnose and reverse the trend?":
-    `<ul>
-      <li><strong>Diagnose:</strong> Decompose SSS into traffic vs. ticket; cohort trends; daypart/store clusters.</li>
-      <li><strong>Levers:</strong> Menu mix (attach breakfast), pricing A/B, queue time reduction, hyperlocal promos.</li>
-      <li><strong>Pilot:</strong> 20 stores, 8 weeks; target +4–6% SSS; scale with playbooks.</li>
-    </ul>`,
-  "A medical devices firm considers entering Southeast Asia. Outline a market entry strategy and key risks.":
-    `<ul>
-      <li><strong>Prioritize:</strong> SG/MY/TH (private spend growth, regulatory ease).</li>
-      <li><strong>Mode:</strong> Distributor-led entry; SLAs on coverage, training, after‑sales.</li>
-      <li><strong>Risks:</strong> Registration delays, reimbursement variability; mitigate via dual distributors.</li>
-    </ul>`,
-  "A B2B SaaS startup has strong adoption but rising churn. Build a plan to improve retention by 30%.":
-    `<ul>
-      <li><strong>Causes:</strong> Onboarding gaps; value unrealized; support latency.</li>
-      <li><strong>Plays:</strong> Guided onboarding, health scoring, D30/60/90 success check-ins.</li>
-      <li><strong>Economics:</strong> NRR +8–12 pts; payback &lt; 12 months.</li>
-    </ul>`,
-  "A national grocer is losing market share to discounters. What are the growth levers and how to prioritize?":
-    `<ul>
-      <li><strong>Compete:</strong> KVI price parity; own‑label +5 pts; fresh quality uplift.</li>
-      <li><strong>Omni:</strong> Pickup density; app UX; personalized offers.</li>
-      <li><strong>Capex-light:</strong> Space resets; shrink reduction; prioritize by ROI.</li>
-    </ul>`,
-  "A mobility app wants profitability in 12 months. Where do you focus: pricing, costs, or product mix?":
-    `<ul>
-      <li><strong>Monetize:</strong> Peak pricing; subscriptions; reduce incentive leakage.</li>
-      <li><strong>Cost:</strong> Support automation; fraud controls; marketing efficiency.</li>
-      <li><strong>Mix:</strong> Push higher-margin categories; prune low-density geos.</li>
-    </ul>`,
-  "An industrial manufacturer sees margin compression. Dissect COGS and propose cost-out opportunities.":
-    `<ul>
-      <li><strong>Should-cost:</strong> Material indexation; VA/VE; supplier consolidation.</li>
-      <li><strong>Ops:</strong> OEE +5 pts; scrap -30%; setup reduction; energy contracts.</li>
-      <li><strong>Outcome:</strong> 250–400 bps margin recovery in 12–18 months.</li>
-    </ul>`,
-  "A luxury apparel brand wants to launch resale. Evaluate cannibalization, economics, and operating model.":
-    `<ul>
-      <li><strong>Model:</strong> Consignment marketplace with authentication partners.</li>
-      <li><strong>Economics:</strong> Take rate 15–25%; brand halo lifts first‑party sales.</li>
-      <li><strong>Risks:</strong> Channel conflict; mitigate with exclusives/tiering.</li>
-    </ul>`,
-  "A telecom provider considers bundling streaming. Size the prize and define partnership structure.":
-    `<ul>
-      <li><strong>Prize:</strong> ARPU +$3–$5; churn -70–120 bps (attach-rate dependent).</li>
-      <li><strong>Deal:</strong> Rev share vs. wholesale; co‑marketing KPIs; data rights.</li>
-    </ul>`,
-  "A fintech wallet plans credit offerings. Assess risk, unit economics, and regulatory implications.":
-    `<ul>
-      <li><strong>Unit econ:</strong> APR, loss rates, funding cost, servicing.</li>
-      <li><strong>Risk:</strong> Alt‑data underwriting; staged limits; collections playbook.</li>
-    </ul>`,
-  "A logistics firm targets last-mile expansion. Design the network, SLAs, and capital-light options.":
-    `<ul>
-      <li><strong>Network:</strong> Micro‑fulfilment hubs; dynamic routing; density first.</li>
-      <li><strong>SLAs:</strong> 95% on‑time; tiered windows; partner couriers to stay asset‑light.</li>
-    </ul>`
-};
-
-const EST_ANSWERS = {
-  "How many umbrellas are sold annually in London? Structure drivers: population × rainy days × purchase rate.":
-    `<ul>
-      <li>Pop ~9M; rainy days ~150; purchase rate ~0.6 umbrellas/adult/year.</li>
-      <li><strong>Back‑of‑envelope:</strong> ~5–6M units/yr; sanity check vs. scanner data.</li>
-    </ul>`,
-  "Estimate annual revenue of airport Wi‑Fi in Europe. Consider traveler volumes, attach rates, ARPU.":
-    `<ul>
-      <li>Passengers ~1B; paid attach ~3–6%; ARPU €4–€6.</li>
-      <li><strong>Rev:</strong> 1B × 4% × €5 ≈ €200M; adjust for lounges/free tiers.</li>
-    </ul>`,
-  "Market size for premium pet food in the US. Segment by households, pet ownership, spend per pet.":
-    `<ul>
-      <li>HH ~130M; pet HH ~70M; premium share ~35%.</li>
-      <li>Spend/pet ~$400/yr; dog vs. cat mix.</li>
-      <li><strong>TAM:</strong> ~$10–12B; triangulate with Nielsen/IRI.</li>
-    </ul>`,
-  "How many EV charging sessions per day in NYC? Vehicles in circulation × utilization × session length.":
-    `<ul>
-      <li>EVs ~2–3% of ~2M vehicles; sessions ~0.2/day per EV.</li>
-      <li><strong>Sessions:</strong> ~8–12k/day; split L2 vs. DCFC.</li>
-    </ul>`,
-  "Size the ‘ghost kitchen’ market in a tier‑1 city. Demand density, order frequencies, AOV.":
-    `<ul>
-      <li>Orders/HH/mo × HH × AOV × ghost share.</li>
-      <li><strong>Illustrative:</strong> 1.5M HH × 3 × $22 × 12% ≈ $1.2B/y.</li>
-    </ul>`
-};
-
-function listify(items){ return `<ul>${items.map(i=>`<li>${i}</li>`).join("")}</ul>`; }
-
-const BRAIN_ANSWERS = {
-  "10 ways to reduce churn in a SaaS product without cutting price.": listify([
-    "Guided onboarding with success checklists.",
-    "Lifecycle emails triggered by usage gaps.",
-    "Customer councils; ship top 3 asks quarterly.",
-    "Proactive outreach on at‑risk health scores.",
-    "Annual plans with value add‑ons (no price cuts).",
-    "Champion enablement kits to spread adoption.",
-    "In‑product nudges to discover sticky features.",
-    "Community and templates gallery.",
-    "Office hours with PMs/CSMs.",
-    "Renewal playbook with QBRs."
-  ]),
-  "Creative growth loops for a marketplace with cold-start problems.": listify([
-    "Supply‑led seeding with exclusive inventory.",
-    "Two‑sided referrals with milestone rewards.",
-    "UGC reviews → SEO loop.",
-    "Partner widgets that embed supply on sites.",
-    "CRM/calendar integrations for lock‑in.",
-    "Waitlist dynamics with early access perks.",
-    "Creator/influencer co‑drops.",
-    "Public API to foster ecosystem tools."
-  ]),
-  "Zero-capex ideas to increase retail basket size.": listify([
-    "Personalized bundles at checkout.",
-    "End‑cap rotations for high‑margin cross‑sell.",
-    "Recipe‑based shopping lists in app.",
-    "Digital coupons for complements.",
-    "Associate prompts for cross‑sell cues.",
-    "A/B optimized aisle signage copy.",
-    "Subscription for refillables.",
-    "Pre‑visit reminders of rundown items."
-  ]),
-  "Cross-sell plays for a bank launching BNPL.": listify([
-    "Auto‑enroll debit users with pre‑approved limits.",
-    "Bundle with credit monitoring and alerts.",
-    "Merchant co‑marketing; exclusive offers.",
-    "Instant virtual card post on‑time history.",
-    "0% promos on higher‑ticket categories.",
-    "Cashback tiers for multi‑product usage."
-  ]),
-  "Boosting referral rates for a mobile subscription app.": listify([
-    "Time‑boxed friend passes with premium features.",
-    "Milestone badges unlock referral boosts.",
-    "Creator kits to share results on socials.",
-    "Co‑created challenges users invite friends to.",
-    "Tiered rewards: 1/3/5 referrals unlock perks.",
-    "Smart share sheets with tailored copy."
-  ])
-};
-
-const TAGS = {
-  case: ["Strategy", "MECE", "Client-ready"],
-  framework: ["Structured", "Reusable", "Decision-Ready"],
-  estimation: ["Assumptions", "Top-Down", "Sensitivity"],
-  brainstorm: ["Divergent", "Fast", "Practical"]
-};
-
-// =========================================================================
-// DOM Elements
-// =========================================================================
-const seg = document.getElementById("seg");
-const segThumb = document.getElementById("segThumb");
-const segButtons = Array.from(seg.querySelectorAll("button"));
-const headline = document.getElementById("headline");
-const tagRow = document.getElementById("tagRow");
-const genBtn = document.getElementById("genBtn");
-const shuffleBtn = document.getElementById("shuffleBtn");
-const copyBtn = document.getElementById("copyBtn");
-const copyTip = document.getElementById("copyTip");
-const swap = document.getElementById("swap");
-const paneA = document.getElementById("paneA");
-const paneB = document.getElementById("paneB");
-const historyRow = document.getElementById("history");
-const ansToggle = document.getElementById("ansToggle");
-const ansToggleText = document.getElementById("ansToggleText");
-const answerWrap = document.getElementById("answerWrap");
-const answerContent = document.getElementById("answerContent");
-
-// =========================================================================
-// State
-// =========================================================================
-let mode = "case";          // case | framework | estimation | brainstorm
-let activePane = paneA;     // currently visible pane element
-let cacheLast = "";         // last rendered plain text (for copy)
-let lock = false;           // re-entrancy guard
-let answerOpen = false;     // answer panel state
-
-// =========================================================================
-// Helpers and UI
-// =========================================================================
-function setMode(newMode) {
-  mode = newMode;
-  segButtons.forEach((b, i) => {
-    const isActive = b.dataset.mode === newMode;
-    b.classList.toggle("active", isActive);
-    b.setAttribute("aria-selected", String(isActive));
-    if (isActive) moveThumbTo(i);
-  });
-  const t = { case: "Case Prompt", framework: "Framework", estimation: "Estimation", brainstorm: "Brainstorm" }[newMode];
-  headline.textContent = t;
-  renderTags(TAGS[newMode] || []);
-  generate(true);
-}
-
-function moveThumbTo(index) {
-  const btn = segButtons[index];
-  if (!btn) return;
-  const segRect = seg.getBoundingClientRect();
-  const btnRect = btn.getBoundingClientRect();
-  const left = (btnRect.left - segRect.left) - 2;
-  const width = btnRect.width + 4;
-  segThumb.style.transform = `translateX(${left}px)`;
-  segThumb.style.width = width + "px";
-}
-
-function renderTags(tags) {
-  tagRow.innerHTML = "";
-  tags.forEach(t => {
-    const el = document.createElement("span");
-    el.className = "pill";
-    el.innerHTML = `<span class="dot-mini"></span>${t}`;
-    tagRow.appendChild(el);
-  });
-}
-
-function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-function buildFrameworkHTML(fw) {
-  const items = fw.items.map((it, i) => `
-    <div class="fw-item">
-      <div class="fw-bullet">${i+1}</div>
-      <div>${it}</div>
-    </div>
-  `).join("");
-  return `
-    <div class="prompt-title">${fw.title}</div>
-    <div class="fw-list">${items}</div>
-  `;
-}
-
-function buildPlainHTML(text, subtitle = "") {
-  return `
-    <div class="prompt-title">${text}</div>
-    ${subtitle ? `<div class="prompt-sub">${subtitle}</div>` : ""}
-  `;
-}
-
-function ripple(e, btnEl) {
-  const r = document.createElement("span");
-  r.className = "ripple";
-  const rect = btnEl.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  r.style.left = `${x}px`; r.style.top = `${y}px`;
-  btnEl.appendChild(r);
-  setTimeout(() => r.remove(), 700);
-}
-
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    copyTip.classList.add("show");
-    setTimeout(() => copyTip.classList.remove("show"), 900);
-  });
-}
-
-function historyPush(label, data) {
-  const chip = document.createElement("button");
-  chip.className = "chip";
-  chip.title = "Restore";
-  chip.textContent = label;
-  chip.addEventListener("click", () => {
-    swapTo(data.html, data.text);
-    setAnswerForCurrent(mode, data.text, data.html);
-  });
-  historyRow.prepend(chip);
-}
-
-function plainTextFromHTML(html) {
-  const tmp = document.createElement("div");
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || "";
-}
-
-// Answer panel controls
-function openAnswer() {
-  answerWrap.classList.add('open');
-  answerWrap.style.height = answerWrap.scrollHeight + 'px';
-  ansToggle.setAttribute('aria-expanded', 'true');
-  ansToggleText.textContent = 'Hide Sample Answer';
-  answerOpen = true;
-}
-function closeAnswer() {
-  answerWrap.style.height = '0px';
-  ansToggle.setAttribute('aria-expanded', 'false');
-  ansToggleText.textContent = 'Show Sample Answer';
-  answerOpen = false;
-}
-function toggleAnswer() {
-  if (answerOpen) closeAnswer();
-  else {
-    answerWrap.style.height = 'auto';
-    const h = answerWrap.scrollHeight;
-    answerWrap.style.height = '0px';
-    requestAnimationFrame(() => {
+  <script>
+    // Content pools
+    const CASE_PROMPTS = [
+      "A premium coffee chain faces declining same-store sales. How would you diagnose and reverse the trend?",
+      "A medical devices firm considers entering Southeast Asia. Outline a market entry strategy and key risks.",
+      "A B2B SaaS startup has strong adoption but rising churn. Build a plan to improve retention by 30%.",
+      "A national grocer is losing market share to discounters. What are the growth levers and how to prioritize?",
+      "A mobility app wants profitability in 12 months. Where do you focus: pricing, costs, or product mix?",
+      "An industrial manufacturer sees margin compression. Dissect COGS and propose cost-out opportunities.",
+      "A luxury apparel brand wants to launch resale. Evaluate cannibalization, economics, and operating model.",
+      "A telecom provider considers bundling streaming. Size the prize and define partnership structure.",
+      "A fintech wallet plans credit offerings. Assess risk, unit economics, and regulatory implications.",
+      "A logistics firm targets last-mile expansion. Design the network, SLAs, and capital-light options."
+    ];
+    const FRAMEWORKS = [
+      { title: "Profitability Tree", items: ["Revenue = Price × Volume", "COGS + Opex breakdown", "Mix, discounting, leakage", "Capacity, utilization, productivity", "Quick wins vs. structural plays"], answer:
+        `<ul>
+          <li><strong>When to use:</strong> Diagnose margin issues, isolate drivers quickly.</li>
+          <li><strong>How:</strong> Split into Revenue vs. Cost; decompose drivers (price, volume, mix; fixed vs. variable).</li>
+          <li><strong>Example:</strong> Retail: plug discount leakage (-150 bps), labor productivity (+80 bps).</li>
+        </ul>` },
+      { title: "Market Entry", items: ["TAM-SAM-SOM", "Attractiveness (growth, margins)", "Competitive intensity", "Routes-to-market, partners", "Entry mode: build, buy, ally"], answer:
+        `<ul>
+          <li><strong>Approach:</strong> Size and score markets, shortlist by attractiveness/capability fit.</li>
+          <li><strong>Entry mode:</strong> Build vs. buy vs. ally based on speed, control, capital.</li>
+          <li><strong>Example:</strong> SEA med devices: distributor-led entry; phase SG/MY/TH; parallel reg filings.</li>
+        </ul>` },
+      { title: "3C + STP + 4P", items: ["Customer segments & needs", "Company capabilities", "Competition moats", "Segment-Target-Position", "Product, Price, Place, Promotion"], answer:
+        `<ul>
+          <li><strong>Why:</strong> Full go-to-market from insight to execution.</li>
+          <li><strong>Output:</strong> Clear ICP, sharp positioning, pricing guardrails, channel plan.</li>
+          <li><strong>Example:</strong> SMB SaaS: PLG motion + partner resellers; Good/Better/Best packages.</li>
+        </ul>` },
+      { title: "Value Chain", items: ["Inbound logistics", "Operations", "Outbound logistics", "Marketing & sales", "Service (post-sale)"], answer:
+        `<ul>
+          <li><strong>Use:</strong> Find bottlenecks and cost/experience gaps E2E.</li>
+          <li><strong>Example:</strong> Ops (OEE), inbound (supplier terms), outbound (route density), service (NPS).</li>
+        </ul>` },
+      { title: "Porter’s Five Forces", items: ["Threat of entrants", "Bargaining power of suppliers", "Bargaining power of buyers", "Threat of substitutes", "Rivalry among incumbents"], answer:
+        `<ul>
+          <li><strong>Goal:</strong> Assess structural profitability.</li>
+          <li><strong>Tip:</strong> Quantify via HHI, churn, price dispersion, switching costs.</li>
+        </ul>` },
+      { title: "Pricing Architecture", items: ["Willingness-to-pay bands", "Good/Better/Best packaging", "Discount governance", "Elasticity experiments", "Monetize add-ons"], answer:
+        `<ul>
+          <li><strong>Stack:</strong> WTP research → packaging → policy → A/B tests → dashboards.</li>
+          <li><strong>Example:</strong> Add paid priority support; tighten discount rules; upsell add-ons.</li>
+        </ul>` },
+      { title: "Cost Transformation", items: ["Should-cost baselining", "Zero-based budgeting", "Make vs. buy", "Automation opportunities", "Supplier negotiations"], answer:
+        `<ul>
+          <li><strong>Playbook:</strong> 13-week waves; governance; quantified business cases.</li>
+          <li><strong>Outcome:</strong> 8–12% opex, 3–6% COGS reduction typical.</li>
+        </ul>` }
+    ];
+    const ESTIMATIONS = [
+      "How many umbrellas are sold annually in London? Structure drivers: population × rainy days × purchase rate.",
+      "Estimate annual revenue of airport Wi‑Fi in Europe. Consider traveler volumes, attach rates, ARPU.",
+      "Market size for premium pet food in the US. Segment by households, pet ownership, spend per pet.",
+      "How many EV charging sessions per day in NYC? Vehicles in circulation × utilization × session length.",
+      "Size the ‘ghost kitchen’ market in a tier‑1 city. Demand density, order frequencies, AOV."
+    ];
+    const BRAINSTORMS = [
+      "10 ways to reduce churn in a SaaS product without cutting price.",
+      "Creative growth loops for a marketplace with cold-start problems.",
+      "Zero-capex ideas to increase retail basket size.",
+      "Cross-sell plays for a bank launching BNPL.",
+      "Boosting referral rates for a mobile subscription app."
+    ];
+    const CASE_ANSWERS = {
+      "A premium coffee chain faces declining same-store sales. How would you diagnose and reverse the trend?":
+        `<ul>
+          <li><strong>Diagnose:</strong> Decompose SSS into traffic vs. ticket; cohort trends; daypart/store clusters.</li>
+          <li><strong>Levers:</strong> Menu mix (attach breakfast), pricing A/B, queue time reduction, hyperlocal promos.</li>
+          <li><strong>Pilot:</strong> 20 stores, 8 weeks; target +4–6% SSS; scale with playbooks.</li>
+        </ul>`,
+      "A medical devices firm considers entering Southeast Asia. Outline a market entry strategy and key risks.":
+        `<ul>
+          <li><strong>Prioritize:</strong> SG/MY/TH (private spend growth, regulatory ease).</li>
+          <li><strong>Mode:</strong> Distributor-led entry; SLAs on coverage, training, after‑sales.</li>
+          <li><strong>Risks:</strong> Registration delays, reimbursement variability; mitigate via dual distributors.</li>
+        </ul>`,
+      "A B2B SaaS startup has strong adoption but rising churn. Build a plan to improve retention by 30%.":
+        `<ul>
+          <li><strong>Causes:</strong> Onboarding gaps; value unrealized; support latency.</li>
+          <li><strong>Plays:</strong> Guided onboarding, health scoring, D30/60/90 success check-ins.</li>
+          <li><strong>Economics:</strong> NRR +8–12 pts; payback &lt; 12 months.</li>
+        </ul>`,
+      "A national grocer is losing market share to discounters. What are the growth levers and how to prioritize?":
+        `<ul>
+          <li><strong>Compete:</strong> KVI price parity; own‑label +5 pts; fresh quality uplift.</li>
+          <li><strong>Omni:</strong> Pickup density; app UX; personalized offers.</li>
+          <li><strong>Capex-light:</strong> Space resets; shrink reduction; prioritize by ROI.</li>
+        </ul>`,
+      "A mobility app wants profitability in 12 months. Where do you focus: pricing, costs, or product mix?":
+        `<ul>
+          <li><strong>Monetize:</strong> Peak pricing; subscriptions; reduce incentive leakage.</li>
+          <li><strong>Cost:</strong> Support automation; fraud controls; marketing efficiency.</li>
+          <li><strong>Mix:</strong> Push higher-margin categories; prune low-density geos.</li>
+        </ul>`,
+      "An industrial manufacturer sees margin compression. Dissect COGS and propose cost-out opportunities.":
+        `<ul>
+          <li><strong>Should-cost:</strong> Material indexation; VA/VE; supplier consolidation.</li>
+          <li><strong>Ops:</strong> OEE +5 pts; scrap -30%; setup reduction; energy contracts.</li>
+          <li><strong>Outcome:</strong> 250–400 bps margin recovery in 12–18 months.</li>
+        </ul>`,
+      "A luxury apparel brand wants to launch resale. Evaluate cannibalization, economics, and operating model.":
+        `<ul>
+          <li><strong>Model:</strong> Consignment marketplace with authentication partners.</li>
+          <li><strong>Economics:</strong> Take rate 15–25%; brand halo lifts first‑party sales.</li>
+          <li><strong>Risks:</strong> Channel conflict; mitigate with exclusives/tiering.</li>
+        </ul>`,
+      "A telecom provider considers bundling streaming. Size the prize and define partnership structure.":
+        `<ul>
+          <li><strong>Prize:</strong> ARPU +$3–$5; churn -70–120 bps (attach-rate dependent).</li>
+          <li><strong>Deal:</strong> Rev share vs. wholesale; co‑marketing KPIs; data rights.</li>
+        </ul>`,
+      "A fintech wallet plans credit offerings. Assess risk, unit economics, and regulatory implications.":
+        `<ul>
+          <li><strong>Unit econ:</strong> APR, loss rates, funding cost, servicing.</li>
+          <li><strong>Risk:</strong> Alt‑data underwriting; staged limits; collections playbook.</li>
+        </ul>`,
+      "A logistics firm targets last-mile expansion. Design the network, SLAs, and capital-light options.":
+        `<ul>
+          <li><strong>Network:</strong> Micro‑fulfilment hubs; dynamic routing; density first.</li>
+          <li><strong>SLAs:</strong> 95% on‑time; tiered windows; partner couriers to stay asset‑light.</li>
+        </ul>`
+    };
+    const EST_ANSWERS = {
+      "How many umbrellas are sold annually in London? Structure drivers: population × rainy days × purchase rate.":
+        `<ul>
+          <li>Pop ~9M; rainy days ~150; purchase rate ~0.6 umbrellas/adult/year.</li>
+          <li><strong>Back‑of‑envelope:</strong> ~5–6M units/yr; sanity check vs. scanner data.</li>
+        </ul>`,
+      "Estimate annual revenue of airport Wi‑Fi in Europe. Consider traveler volumes, attach rates, ARPU.":
+        `<ul>
+          <li>Passengers ~1B; paid attach ~3–6%; ARPU €4–€6.</li>
+          <li><strong>Rev:</strong> 1B × 4% × €5 ≈ €200M; adjust for lounges/free tiers.</li>
+        </ul>`,
+      "Market size for premium pet food in the US. Segment by households, pet ownership, spend per pet.":
+        `<ul>
+          <li>HH ~130M; pet HH ~70M; premium share ~35%.</li>
+          <li>Spend/pet ~$400/yr; dog vs. cat mix.</li>
+          <li><strong>TAM:</strong> ~$10–12B; triangulate with Nielsen/IRI.</li>
+        </ul>`,
+      "How many EV charging sessions per day in NYC? Vehicles in circulation × utilization × session length.":
+        `<ul>
+          <li>EVs ~2–3% of ~2M vehicles; sessions ~0.2/day per EV.</li>
+          <li><strong>Sessions:</strong> ~8–12k/day; split L2 vs. DCFC.</li>
+        </ul>`,
+      "Size the ‘ghost kitchen’ market in a tier‑1 city. Demand density, order frequencies, AOV.":
+        `<ul>
+          <li>Orders/HH/mo × HH × AOV × ghost share.</li>
+          <li><strong>Illustrative:</strong> 1.5M HH × 3 × $22 × 12% ≈ $1.2B/y.</li>
+        </ul>`
+    };
+    function listify(items){ return `<ul>${items.map(i=>`<li>${i}</li>`).join("")}</ul>`; }
+    const BRAIN_ANSWERS = {
+      "10 ways to reduce churn in a SaaS product without cutting price.": listify([
+        "Guided onboarding with success checklists.",
+        "Lifecycle emails triggered by usage gaps.",
+        "Customer councils; ship top 3 asks quarterly.",
+        "Proactive outreach on at‑risk health scores.",
+        "Annual plans with value add‑ons (no price cuts).",
+        "Champion enablement kits to spread adoption.",
+        "In‑product nudges to discover sticky features.",
+        "Community and templates gallery.",
+        "Office hours with PMs/CSMs.",
+        "Renewal playbook with QBRs."
+      ]),
+      "Creative growth loops for a marketplace with cold-start problems.": listify([
+        "Supply‑led seeding with exclusive inventory.",
+        "Two‑sided referrals with milestone rewards.",
+        "UGC reviews → SEO loop.",
+        "Partner widgets that embed supply on sites.",
+        "CRM/calendar integrations for lock‑in.",
+        "Waitlist dynamics with early access perks.",
+        "Creator/influencer co‑drops.",
+        "Public API to foster ecosystem tools."
+      ]),
+      "Zero-capex ideas to increase retail basket size.": listify([
+        "Personalized bundles at checkout.",
+        "End‑cap rotations for high‑margin cross‑sell.",
+        "Recipe‑based shopping lists in app.",
+        "Digital coupons for complements.",
+        "Associate prompts for cross‑sell cues.",
+        "A/B optimized aisle signage copy.",
+        "Subscription for refillables.",
+        "Pre‑visit reminders of rundown items."
+      ]),
+      "Cross-sell plays for a bank launching BNPL.": listify([
+        "Auto‑enroll debit users with pre‑approved limits.",
+        "Bundle with credit monitoring and alerts.",
+        "Merchant co‑marketing; exclusive offers.",
+        "Instant virtual card post on‑time history.",
+        "0% promos on higher‑ticket categories.",
+        "Cashback tiers for multi‑product usage."
+      ]),
+      "Boosting referral rates for a mobile subscription app.": listify([
+        "Time‑boxed friend passes with premium features.",
+        "Milestone badges unlock referral boosts.",
+        "Creator kits to share results on socials.",
+        "Co‑created challenges users invite friends to.",
+        "Tiered rewards: 1/3/5 referrals unlock perks.",
+        "Smart share sheets with tailored copy."
+      ])
+    };
+    const TAGS = {
+      case: ["Strategy", "MECE", "Client-ready"],
+      framework: ["Structured", "Reusable", "Decision-Ready"],
+      estimation: ["Assumptions", "Top-Down", "Sensitivity"],
+      brainstorm: ["Divergent", "Fast", "Practical"]
+    };
+    // Elements
+    const seg = document.getElementById("seg");
+    const segThumb = document.getElementById("segThumb");
+    const segButtons = Array.from(seg.querySelectorAll("button"));
+    const headline = document.getElementById("headline");
+    const tagRow = document.getElementById("tagRow");
+    const genBtn = document.getElementById("genBtn");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const copyTip = document.getElementById("copyTip");
+    const swap = document.getElementById("swap");
+    const paneA = document.getElementById("paneA");
+    const paneB = document.getElementById("paneB");
+    const historyRow = document.getElementById("history");
+    const ansToggle = document.getElementById("ansToggle");
+    const ansToggleText = document.getElementById("ansToggleText");
+    const answerWrap = document.getElementById("answerWrap");
+    const answerContent = document.getElementById("answerContent");
+    const progressBar = document.getElementById("progressBar");
+    const progressLabel = document.getElementById("progressLabel");
+    const streakBar = document.getElementById("streakBar");
+    const streakCountEl = document.getElementById("streakCount");
+    const confettiDiv = document.getElementById("confetti");
+    // State
+    let mode = "case";
+    let activePane = paneA;
+    let cacheLast = "";
+    let lock = false;
+    let answerOpen = false;
+    let streak = 0, progress = 0, maxProgress = 10;
+    function setProgress(val) {
+      progress = Math.max(0, Math.min(maxProgress, val));
+      let pct = ((progress / maxProgress) * 100).toFixed(1) + '%';
+      progressBar.style.width = pct;
+      progressLabel.textContent = `${progress} / ${maxProgress}`;
+      document.documentElement.style.setProperty("--progress", pct);
+    }
+    function setStreak(val) {
+      streak = val;
+      streakCountEl.textContent = streak;
+      if (streak >= 2) streakBar.classList.remove('hide');
+      else streakBar.classList.add('hide');
+      if (streak > 0 && streak % 5 === 0) spawnConfetti();
+    }
+    function spawnConfetti() {
+      confettiDiv.innerHTML = '';
+      confettiDiv.style.display = 'block';
+      for (let i = 0; i < 32; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti-piece';
+        p.style.left = Math.random()*100+'vw';
+        p.style.top = (Math.random()*8)+'vh';
+        p.style.background = `linear-gradient(90deg,${i%2? '#7aa8ff':'#30d158'},${i%3? '#9b8cff':'#ff7a7a'})`;
+        confettiDiv.appendChild(p);
+        setTimeout(()=>p.remove(),1800);
+      }
+      setTimeout(()=>confettiDiv.style.display='none',1800);
+    }
+    function setMode(newMode) {
+      mode = newMode;
+      segButtons.forEach((b, i) => {
+        const isActive = b.dataset.mode === newMode;
+        b.classList.toggle("active", isActive);
+        b.setAttribute("aria-selected", String(isActive));
+        if (isActive) moveThumbTo(i);
+      });
+      const t = { case: "Case Prompt", framework: "Framework", estimation: "Estimation", brainstorm: "Brainstorm" }[newMode];
+      headline.textContent = t;
+      renderTags(TAGS[newMode] || []);
+      generate(true);
+      setStreak(0);
+      setProgress(0);
+    }
+    function moveThumbTo(index) {
+      const btn = segButtons[index];
+      if (!btn) return;
+      const segRect = seg.getBoundingClientRect();
+      const btnRect = btn.getBoundingClientRect();
+      const left = (btnRect.left - segRect.left) - 2;
+      const width = btnRect.width + 4;
+      segThumb.style.transform = `translateX(${left}px)`;
+      segThumb.style.width = width + "px";
+    }
+    function renderTags(tags) {
+      tagRow.innerHTML = "";
+      tags.forEach(t => {
+        const el = document.createElement("span");
+        el.className = "pill";
+        el.innerHTML = `<span class="dot-mini"></span>${t}`;
+        tagRow.appendChild(el);
+      });
+    }
+    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function buildFrameworkHTML(fw) {
+      const items = fw.items.map((it, i) => `<div class="fw-item"><div class="fw-bullet">${i+1}</div><div>${it}</div></div>`).join("");
+      return `<div class="prompt-title">${fw.title}</div><div class="fw-list">${items}</div>`;
+    }
+    function buildPlainHTML(text, subtitle = "") {
+      return `<div class="prompt-title">${text}</div>${subtitle ? `<div class="prompt-sub">${subtitle}</div>` : ""}`;
+    }
+    function ripple(e, btnEl) {
+      const r = document.createElement("span");
+      r.className = "ripple";
+      const rect = btnEl.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      r.style.left = `${x}px`; r.style.top = `${y}px`;
+      btnEl.appendChild(r);
+      setTimeout(() => r.remove(), 700);
+    }
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        copyTip.classList.add("show");
+        setTimeout(() => copyTip.classList.remove("show"), 900);
+      });
+    }
+    function historyPush(label, data) {
+      const chip = document.createElement("button");
+      chip.className = "chip";
+      chip.title = "Restore";
+      chip.textContent = label;
+      chip.addEventListener("click", () => {
+        swapTo(data.html, data.text);
+        setAnswerForCurrent(mode, data.text, data.html);
+      });
+      historyRow.prepend(chip);
+    }
+    function plainTextFromHTML(html) {
+      const tmp = document.createElement("div");
+      tmp.innerHTML = html;
+      return tmp.textContent || tmp.innerText || "";
+    }
+    function openAnswer() {
       answerWrap.classList.add('open');
-      answerWrap.style.height = h + 'px';
+      answerWrap.style.height = answerWrap.scrollHeight + 'px';
       ansToggle.setAttribute('aria-expanded', 'true');
       ansToggleText.textContent = 'Hide Sample Answer';
       answerOpen = true;
+    }
+    function closeAnswer() {
+      answerWrap.style.height = '0px';
+      ansToggle.setAttribute('aria-expanded', 'false');
+      ansToggleText.textContent = 'Show Sample Answer';
+      answerOpen = false;
+    }
+    function toggleAnswer() {
+      if (answerOpen) closeAnswer();
+      else {
+        answerWrap.style.height = 'auto';
+        const h = answerWrap.scrollHeight;
+        answerWrap.style.height = '0px';
+        requestAnimationFrame(() => {
+          answerWrap.classList.add('open');
+          answerWrap.style.height = h + 'px';
+          ansToggle.setAttribute('aria-expanded', 'true');
+          ansToggleText.textContent = 'Hide Sample Answer';
+          answerOpen = true;
+        });
+      }
+    }
+    function setAnswer(html) {
+      answerContent.innerHTML = html || "<em>No sample answer available.</em>";
+      if (answerOpen) {
+        answerWrap.style.height = 'auto';
+        const h = answerWrap.scrollHeight;
+        answerWrap.style.height = h + 'px';
+      }
+    }
+    function setAnswerForCurrent(mode, textOrHTML, htmlIfFrameworkPane) {
+      let ansHTML = "";
+      if (mode === 'case') {
+        ansHTML = CASE_ANSWERS[textOrHTML] || `<ul><li>Structure: market → customer → product → economics → risk.</li><li>Prioritize high-ROI levers; test and scale.</li></ul>`;
+      } else if (mode === 'framework') {
+        const fw = FRAMEWORKS.find(f => (htmlIfFrameworkPane || '').includes(`<div class="prompt-title">${f.title}</div>`));
+        ansHTML = (fw && fw.answer) ? fw.answer : `<ul><li>Adapt framework to context; quantify wherever possible.</li></ul>`;
+      } else if (mode === 'estimation') {
+        ansHTML = EST_ANSWERS[textOrHTML] || `<ul><li>Define drivers → estimate assumptions → triangulate → sanity check.</li></ul>`;
+      } else {
+        ansHTML = BRAIN_ANSWERS[textOrHTML] || `<ul><li>Generate 10–20 ideas; converge via ICE scoring.</li></ul>`;
+      }
+      setAnswer(ansHTML);
+    }
+    function swapTo(html, rawText) {
+      if (lock) return;
+      lock = true;
+      const nextPane = activePane === paneA ? paneB : paneA;
+      nextPane.innerHTML = html;
+      requestAnimationFrame(() => {
+        nextPane.classList.add("show");
+        activePane.classList.add("exit");
+        activePane.classList.remove("show");
+        setTimeout(() => {
+          activePane.classList.remove("exit");
+          activePane.innerHTML = "";
+          activePane = nextPane;
+          cacheLast = rawText || plainTextFromHTML(html);
+          lock = false;
+        }, 550);
+      });
+    }
+    function generate(isModeSwitch = false) {
+      let html = "";
+      let textForCopy = "";
+      if (mode === "case") {
+        const t = pick(CASE_PROMPTS);
+        html = buildPlainHTML(t, "Structure: market, customer, product, economics, risk.");
+        textForCopy = t;
+        if (!isModeSwitch) historyPush("Case: " + t, { html, text: textForCopy });
+        swapTo(html, textForCopy);
+        setAnswerForCurrent('case', t);
+      }
+      else if (mode === "framework") {
+        const fw = pick(FRAMEWORKS);
+        html = buildFrameworkHTML(fw);
+        textForCopy = fw.title + " — " + fw.items.join("; ");
+        if (!isModeSwitch) historyPush("FW: " + fw.title, { html, text: textForCopy });
+        swapTo(html, textForCopy);
+        setAnswer(fw.answer || "");
+      }
+      else if (mode === "estimation") {
+        const t = pick(ESTIMATIONS);
+        html = buildPlainHTML(t, "Approach: define drivers → estimate assumptions → sanity check.");
+        textForCopy = t;
+        if (!isModeSwitch) historyPush("Est: " + t, { html, text: textForCopy });
+        swapTo(html, textForCopy);
+        setAnswerForCurrent('estimation', t);
+      }
+      else {
+        const t = pick(BRAINSTORMS);
+        html = buildPlainHTML(t, "Aim for 10–20 ideas, then converge with ICE scoring.");
+        textForCopy = t;
+        if (!isModeSwitch) historyPush("Idea: " + t, { html, text: textForCopy });
+        swapTo(html, textForCopy);
+        setAnswerForCurrent('brainstorm', t);
+      }
+      if (!isModeSwitch) {
+        setProgress(progress+1);
+        setStreak(streak+1);
+      }
+      if (answerOpen) {
+        answerWrap.style.height = 'auto';
+        const h = answerWrap.scrollHeight;
+        answerWrap.style.height = h + 'px';
+      }
+    }
+    function variant() { generate(false); }
+    segButtons.forEach((btn) => { btn.addEventListener("click", () => setMode(btn.dataset.mode)); });
+    genBtn.addEventListener("click", (e) => { ripple(e, genBtn); generate(false); });
+    shuffleBtn.addEventListener("click", (e) => { ripple(e, shuffleBtn); variant(); });
+    copyBtn.addEventListener("click", (e) => { ripple(e, copyBtn); copyToClipboard(cacheLast || ""); });
+    ansToggle.addEventListener('click', toggleAnswer);
+    window.addEventListener("keydown", (e) => {
+      if (["INPUT","TEXTAREA"].includes(document.activeElement.tagName)) return;
+      if (e.code==="Space") {e.preventDefault();generate(false);}
+      if ((e.key==='a'||e.key==='A')) {e.preventDefault();toggleAnswer();}
+      if (e.key==='1') setMode('case');
+      if (e.key==='2') setMode('framework');
+      if (e.key==='3') setMode('estimation');
+      if (e.key==='4') setMode('brainstorm');
+      if (e.key.toLowerCase()==="c"&&(e.metaKey||e.ctrlKey)) {e.preventDefault();copyToClipboard(cacheLast||"");}
     });
-  }
-}
-function setAnswer(html) {
-  answerContent.innerHTML = html || "<em>No sample answer available.</em>";
-  if (answerOpen) {
-    answerWrap.style.height = 'auto';
-    const h = answerWrap.scrollHeight;
-    answerWrap.style.height = h + 'px';
-  }
-}
-function setAnswerForCurrent(mode, textOrHTML, htmlIfFrameworkPane) {
-  let ansHTML = "";
-  if (mode === 'case') {
-    ansHTML = CASE_ANSWERS[textOrHTML] || `<ul><li>Structure: market → customer → product → economics → risk.</li><li>Prioritize high-ROI levers; test and scale.</li></ul>`;
-  } else if (mode === 'framework') {
-    const fw = FRAMEWORKS.find(f => (htmlIfFrameworkPane || '').includes(`<div class="prompt-title">${f.title}</div>`));
-    ansHTML = (fw && fw.answer) ? fw.answer : `<ul><li>Adapt framework to context; quantify wherever possible.</li></ul>`;
-  } else if (mode === 'estimation') {
-    ansHTML = EST_ANSWERS[textOrHTML] || `<ul><li>Define drivers → estimate assumptions → triangulate → sanity check.</li></ul>`;
-  } else {
-    ansHTML = BRAIN_ANSWERS[textOrHTML] || `<ul><li>Generate 10–20 ideas; converge via ICE scoring.</li></ul>`;
-  }
-  setAnswer(ansHTML);
-}
-
-// Core swap animation between panes
-function swapTo(html, rawText) {
-  if (lock) return;
-  lock = true;
-
-  const nextPane = activePane === paneA ? paneB : paneA;
-  nextPane.innerHTML = html;
-
-  requestAnimationFrame(() => {
-    nextPane.classList.add("show");
-    activePane.classList.add("exit");
-    activePane.classList.remove("show");
-
-    setTimeout(() => {
-      activePane.classList.remove("exit");
-      activePane.innerHTML = "";
-      activePane = nextPane;
-      cacheLast = rawText || plainTextFromHTML(html);
-      lock = false;
-    }, 550);
-  });
-}
-
-// =========================================================================
-// Generate content
-// =========================================================================
-function generate(isModeSwitch = false) {
-  let html = "";
-  let textForCopy = "";
-
-  if (mode === "case") {
-    const t = pick(CASE_PROMPTS);
-    html = buildPlainHTML(t, "Structure: market, customer, product, economics, risk.");
-    textForCopy = t;
-    if (!isModeSwitch) historyPush("Case: " + t, { html, text: textForCopy });
-    swapTo(html, textForCopy);
-    setAnswerForCurrent('case', t);
-  }
-  else if (mode === "framework") {
-    const fw = pick(FRAMEWORKS);
-    html = buildFrameworkHTML(fw);
-    textForCopy = fw.title + " — " + fw.items.join("; ");
-    if (!isModeSwitch) historyPush("FW: " + fw.title, { html, text: textForCopy });
-    swapTo(html, textForCopy);
-    setAnswer(fw.answer || "");
-  }
-  else if (mode === "estimation") {
-    const t = pick(ESTIMATIONS);
-    html = buildPlainHTML(t, "Approach: define drivers → estimate assumptions → sanity check.");
-    textForCopy = t;
-    if (!isModeSwitch) historyPush("Est: " + t, { html, text: textForCopy });
-    swapTo(html, textForCopy);
-    setAnswerForCurrent('estimation', t);
-  }
-  else {
-    const t = pick(BRAINSTORMS);
-    html = buildPlainHTML(t, "Aim for 10–20 ideas, then converge with ICE scoring.");
-    textForCopy = t;
-    if (!isModeSwitch) historyPush("Idea: " + t, { html, text: textForCopy });
-    swapTo(html, textForCopy);
-    setAnswerForCurrent('brainstorm', t);
-  }
-
-  if (answerOpen) {
-    answerWrap.style.height = 'auto';
-    const h = answerWrap.scrollHeight;
-    answerWrap.style.height = h + 'px';
-  }
-}
-
-// Variant
-function variant() { generate(false); }
-
-// =========================================================================
-// Events
-// =========================================================================
-segButtons.forEach((btn) => { btn.addEventListener("click", () => setMode(btn.dataset.mode)); });
-genBtn.addEventListener("click", (e) => { ripple(e, genBtn); generate(false); });
-shuffleBtn.addEventListener("click", (e) => { ripple(e, shuffleBtn); variant(); });
-copyBtn.addEventListener("click", (e) => { ripple(e, copyBtn); copyToClipboard(cacheLast || ""); });
-ansToggle.addEventListener('click', toggleAnswer);
-
-// Keyboard: Space generate; A toggle answer; 1-4 mode; Cmd/Ctrl+C copy
-window.addEventListener("keydown", (e) => {
-  if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
-  if (e.code === "Space") { e.preventDefault(); generate(false); }
-  if (e.key === 'a' || e.key === 'A') { e.preventDefault(); toggleAnswer(); }
-  if (e.key === '1') setMode('case');
-  if (e.key === '2') setMode('framework');
-  if (e.key === '3') setMode('estimation');
-  if (e.key === '4') setMode('brainstorm');
-  if (e.key.toLowerCase() === "c" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); copyToClipboard(cacheLast || ""); }
-});
-
-// Initial layout for segmented thumb
-function initThumb() {
-  const activeIndex = segButtons.findIndex(b => b.classList.contains("active"));
-  moveThumbTo(activeIndex >= 0 ? activeIndex : 0);
-}
-window.addEventListener("resize", initThumb);
-
-// Boot
-initThumb();
-generate(true);
-</script>
+    function initThumb() {
+      const activeIndex = segButtons.findIndex(b => b.classList.contains("active"));
+      moveThumbTo(activeIndex >= 0 ? activeIndex : 0);
+    }
+    window.addEventListener("resize", initThumb);
+    initThumb();
+    renderTags(TAGS[mode]);
+    setProgress(0);
+    setStreak(0);
+    generate(true);
+  </script>
 </body>
 </html>
