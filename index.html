@@ -11,325 +11,495 @@
        Apple-inspired, ultra-smooth single-file UI
        Focus: CSS polish, glassmorphism, motion, micro-interactions
        ========================================================================= */
-@media (prefers-reduced-motion: reduce) {
-  :root { --duration: 0ms; --easing: linear; --easing-fast: linear; }
-  * { animation: none !important; transition: none !important; }
-}
 
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-body{
-  margin: 0;
-  font: 15px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: var(--text);
-  background: radial-gradient(1200px 600px at 80% -10%, rgba(10,132,255,0.08), transparent 60%),
-              radial-gradient(900px 500px at -10% 0%, rgba(90,200,250,0.08), transparent 60%),
-              var(--bg);
-  letter-spacing: -0.2px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+    :root {
+      /* Surfaces */
+      --bg-0: #0e0f13;
+      --bg-1: #12141a;
+      --bg-2: #171a21;
+      --panel: rgba(255, 255, 255, 0.62);
+      --panel-strong: rgba(255, 255, 255, 0.82);
+      --hairline: rgba(10, 16, 26, 0.08);
+      --stroke: rgba(10, 16, 26, 0.12);
 
-.app{
-  min-height: 100%;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 18px;
-  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
-}
+      /* Text */
+      --text: #0b0c10;
+      --text-weak: rgba(11, 12, 16, 0.62);
+      --text-inv: #ffffff;
 
-/* Topbar */
-.topbar{
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: linear-gradient(to bottom, rgba(248,249,251,0.8), rgba(248,249,251,0.4));
-  backdrop-filter: saturate(1.4) blur(12px);
-  -webkit-backdrop-filter: saturate(1.4) blur(12px);
-  border: 1px solid var(--hairline);
-  border-radius: calc(var(--radius-lg) + 6px);
-  box-shadow: var(--shadow);
-  padding: 18px 18px 14px;
-}
-.brand{
-  display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
-}
-.brand-badge{
-  width: 36px; height: 36px; border-radius: 12px;
-  background: conic-gradient(from 210deg, #0a84ff, #5ac8fa);
-  position: relative; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6), 0 6px 18px rgba(10,132,255,0.28);
-  display: grid; place-items: center; color: white; font-weight: 700; letter-spacing: .5px;
-}
-.brand h1{
-  font-size: 18px; margin: 0; font-weight: 700; letter-spacing: -0.2px;
-}
-.brand p{
-  margin: 0; color: var(--muted); font-size: 13px;
-}
+      /* Accents */
+      --accent: #7aa8ff;
+      --accent-2: #9b8cff;
+      --accent-3: #68e2ff;
 
-/* Progress */
-.progress{
-  position: relative; height: 8px; background: #ffffffaa; border: 1px solid var(--hairline);
-  border-radius: 999px; overflow: hidden;
-}
-.progress .bar{
-  height: 100%;
-  width: calc(var(--p, 0) * 100%);
-  background: linear-gradient(90deg, rgba(10,132,255,0.95), rgba(90,200,250,0.95));
-  box-shadow: 0 0 0 1px rgba(10,132,255,0.24) inset, 0 6px 12px rgba(10,132,255,0.25);
-  transition: width var(--duration) var(--easing);
-}
-.progress .shine{
-  position: absolute; inset: 0;
-  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.65) 35%, transparent 70%);
-  transform: translateX(-100%);
-  animation: shine 2.6s var(--easing) infinite;
-  pointer-events: none;
-}
-@keyframes shine { 0% { transform: translateX(-100%);} 100% { transform: translateX(100%);} }
+      /* Radii */
+      --r-lg: 22px;
+      --r-md: 16px;
+      --r-sm: 12px;
+      --r-xs: 10px;
 
-/* Main container */
-.shell{
-  position: relative;
-  display: grid; place-items: center;
-  padding: 8px;
-}
-.stage{
-  position: relative;
-  width: min(1100px, 100%);
-  perspective: 1600px;
-}
+      /* Shadows */
+      --sh-1: 0 12px 30px rgba(8, 10, 18, 0.14), 0 4px 14px rgba(8, 10, 18, 0.10);
+      --sh-2: 0 20px 55px rgba(8, 10, 18, 0.18), 0 6px 18px rgba(8, 10, 18, 0.10);
 
-/* Carousel cards */
-.carousel{
-  position: relative; height: 640px;
-}
-.card{
-  position: absolute; inset: 0;
-  background: radial-gradient(120% 140% at 110% -10%, rgba(10,132,255,0.06), transparent 40%),
-              var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  padding: clamp(18px, 3.6vw, 28px);
-  display: grid; grid-template-rows: auto 1fr auto;
-  opacity: 0; pointer-events: none;
-  transform: translateX(calc((var(--i) - var(--active, 0)) * 64%)) scale(calc(1 - (abs(var(--i) - var(--active, 0)) * 0.06)));
-  filter: saturate(calc(1 - (abs(var(--i) - var(--active, 0)) * 0.25)));
-  transition: transform var(--duration) var(--easing), opacity var(--duration) var(--easing), filter var(--duration) var(--easing);
-  will-change: transform, opacity, filter;
-}
-.card.active{ opacity: 1; pointer-events: auto; }
-.card::after{
-  content: "";
-  position: absolute; inset: 0;
-  border-radius: inherit;
-  box-shadow: var(--glow);
-  transition: box-shadow var(--duration) var(--easing);
-  pointer-events: none;
-}
-.card:hover::after{
-  box-shadow: 0 0 0 10px rgba(10,132,255,0.06);
-}
+      /* Motion */
+      --ease: cubic-bezier(.2, .6, .2, 1);
+      --spring: cubic-bezier(.18, .89, .21, 1.11);
 
-.q-head{ display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-.q-kicker{ color: var(--muted); font-size: 12px; letter-spacing: .4px; text-transform: uppercase; }
-.q-title{ font-size: clamp(18px, 2.6vw, 24px); line-height: 1.25; font-weight: 700; margin: 0 0 4px; }
-.q-sub{ color: var(--muted); margin: 0 0 14px; }
+      /* Backdrop */
+      --blur: 22px;
+      --sat: 125%;
+    }
 
-.meta{
-  display:flex; gap:8px; align-items:center; color: var(--muted); font-size: 12px;
-}
-.pill{
-  border: 1px solid var(--hairline); background: #fff; border-radius: 999px; padding: 6px 10px; display:inline-flex; gap: 8px; align-items:center;
-}
-.dot{ width:10px; height:10px; border-radius:50%; background: linear-gradient(180deg, var(--accent), var(--accent-2)); box-shadow: 0 2px 6px rgba(10,132,255,0.35); }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --panel: rgba(20, 24, 32, 0.56);
+        --panel-strong: rgba(28, 32, 42, 0.82);
+        --hairline: rgba(255, 255, 255, 0.06);
+        --stroke: rgba(255, 255, 255, 0.12);
+        --text: #e7e9ee;
+        --text-weak: rgba(231, 233, 238, 0.68);
+      }
+    }
 
-/* Flip block (front: input; back: sample answer) */
-.flip{
-  position: relative; border-radius: var(--radius-md); overflow: hidden;
-  perspective: 1400px; transform-style: preserve-3d;
-  border: 1px solid var(--hairline);
-  background: #fff;
-  min-height: 360px;
-}
-.flip-inner{
-  position: relative; width: 100%; height: 100%;
-  transform-style: preserve-3d;
-  transition: transform var(--duration) var(--easing);
-}
-.flip.flipped .flip-inner{ transform: rotateY(180deg); }
-.face{
-  position: absolute; inset: 0; padding: clamp(12px, 2.4vw, 20px);
-  backface-visibility: hidden; -webkit-backface-visibility: hidden;
-  display: grid; grid-template-rows: auto 1fr; gap: 12px;
-}
-.face.front{
-  background:
-    radial-gradient(70% 60% at 100% 0%, rgba(10,132,255,0.08), transparent 60%),
-    linear-gradient(to bottom, #fff, #fff);
-}
-.face.back{
-  transform: rotateY(180deg);
-  background:
-    radial-gradient(70% 60% at 0% 0%, rgba(90,200,250,0.08), transparent 60%),
-    linear-gradient(to bottom, #ffffff, #ffffff);
-}
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+        Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 800px at 10% -10%, #2b2e39 0%, transparent 60%),
+        radial-gradient(1000px 800px at 110% 10%, #212536 0%, transparent 60%),
+        linear-gradient(180deg, var(--bg-0), var(--bg-1));
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-/* Inputs */
-.field{
-  display: grid; gap: 10px;
-  grid-template-rows: auto 1fr;
-}
-label{ font-size: 13px; color: var(--muted); }
-textarea, input[type="text"]{
-  width: 100%; resize: none; min-height: 220px;
-  background: #fff;
-  border: 1px solid var(--hairline);
-  border-radius: 14px;
-  padding: 14px 14px 14px 16px;
-  color: var(--text);
-  outline: none;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 0 rgba(0,0,0,0.02);
-  transition: border-color var(--duration) var(--easing), box-shadow var(--duration) var(--easing), transform 160ms var(--easing-fast);
-  line-height: 1.55;
-}
-textarea:focus, input[type="text"]:focus{
-  border-color: rgba(10,132,255,0.35);
-  box-shadow: 0 0 0 8px var(--ring), inset 0 1px 0 rgba(255,255,255,0.7);
-}
-.hint{
-  font-size: 13px; color: var(--muted);
-  background: #f6f7f9; border: 1px solid var(--hairline);
-  padding: 10px 12px; border-radius: 12px;
-}
+    /* Ambient orbs (subtle glow, screen blend) */
+    .orb {
+      position: fixed;
+      inset: -10vh -20vw auto auto;
+      width: 70vw; height: 70vh;
+      pointer-events: none;
+      filter: blur(52px) saturate(120%);
+      opacity: .25;
+      mix-blend-mode: screen;
+      background:
+        radial-gradient(closest-side at 30% 40%, rgba(140,115,255,.32), transparent 65%),
+        radial-gradient(closest-side at 70% 60%, rgba(72,165,255,.28), transparent 60%),
+        radial-gradient(closest-side at 50% 80%, rgba(60,220,255,.20), transparent 60%);
+      animation: orbFloat 16s var(--ease) infinite alternate;
+      z-index: 0;
+    }
+    .orb.orb-b {
+      inset: auto auto -25vh -20vw;
+      width: 60vw; height: 60vh;
+      opacity: .22;
+      transform: translate3d(0,0,0) scale(1.05);
+      animation: orbFloatB 18s var(--ease) infinite alternate;
+    }
+    @keyframes orbFloat { 0% { transform: translate3d(-2%, -1%, 0) } 100% { transform: translate3d(2%, 3%, 0) } }
+    @keyframes orbFloatB { 0% { transform: translate3d(1%, -2%, 0) } 100% { transform: translate3d(-2%, 2%, 0) } }
 
-/* Sample Answer content */
-.sample{
-  display: grid; grid-template-rows: auto 1fr; gap: 8px;
-}
-.sample h4{ margin: 0; font-size: 14px; letter-spacing: .2px; color: var(--text); }
-.sample .block{
-  border: 1px dashed rgba(10,132,255,0.35);
-  background: #f7fbff;
-  padding: 12px; border-radius: 12px; color: #0f1221;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
-}
-.sample ul{ margin: 8px 0 0 18px; padding: 0; }
-.sample li{ margin: 6px 0; }
+    /* Layout */
+    .wrap {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100dvh;
+    }
 
-/* Controls */
-.controls{
-  display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px;
-}
-.btns{ display:flex; gap: 10px; }
-.ghost, .primary, .soft{
-  -webkit-tap-highlight-color: transparent;
-  appearance: none; border: 1px solid var(--hairline);
-  background: #fff; color: var(--text);
-  padding: 10px 14px; border-radius: 12px; font-weight: 600;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.8), 0 6px 16px rgba(0,0,0,0.04);
-  transition: transform 160ms var(--easing-fast), box-shadow 220ms var(--easing), border-color var(--duration) var(--easing), background var(--duration) var(--easing);
-  cursor: pointer; letter-spacing: .2px;
-}
-.ghost:hover{ transform: translateY(-1px); }
-.ghost:active{ transform: translateY(0); }
-.soft{
-  background: #f6f8fb; border-color: var(--border); color: #0a3e7d;
-}
-.soft:hover{ box-shadow: 0 2px 12px rgba(10,132,255,0.12); }
-.primary{
-  border-color: rgba(10,132,255,0.35);
-  background: linear-gradient(180deg, #fff, #f7fbff);
-  color: #0a3e7d;
-}
-.primary .bubble{
-  background: linear-gradient(90deg, #0a84ff, #5ac8fa);
-  color: white; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .3px;
-  box-shadow: 0 6px 12px rgba(10,132,255,0.35);
-}
-.cta{
-  background: linear-gradient(90deg, #0a84ff, #5ac8fa);
-  border: none; color: #fff; padding: 11px 16px; border-radius: 12px;
-  box-shadow: 0 8px 22px rgba(10,132,255,0.35);
-}
-.cta:hover{ transform: translateY(-1px); }
-.cta:active{ transform: translateY(0); }
+    /* Top bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      margin: 16px auto 0;
+      max-width: 1080px;
+      width: calc(100% - 32px);
+      backdrop-filter: saturate(var(--sat)) blur(var(--blur));
+      -webkit-backdrop-filter: saturate(var(--sat)) blur(var(--blur));
+      background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-lg);
+      box-shadow: var(--sh-1);
+      overflow: clip;
+    }
+    .topbar-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: linear-gradient(180deg, #9db6ff, #7aa8ff);
+      box-shadow: 0 4px 10px rgba(122,168,255,.55);
+    }
+    .title {
+      font-weight: 700;
+      letter-spacing: .2px;
+      background: linear-gradient(90deg, #cfd9ff, #9fb4ff 35%, #a89cff 70%, #8fe6ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-size: 15px;
+    }
 
-/* Bottom nav */
-.nav{
-  position: sticky;
-  bottom: 0;
-  z-index: 5;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  background: linear-gradient(to top, rgba(248,249,251,0.9), rgba(248,249,251,0.5));
-  border: 1px solid var(--hairline);
-  border-radius: calc(var(--radius-lg) + 6px);
-  backdrop-filter: saturate(1.4) blur(12px);
-  -webkit-backdrop-filter: saturate(1.4) blur(12px);
-  box-shadow: var(--shadow);
-  padding: 14px 16px;
-}
+    /* Segmented control */
+    .seg {
+      margin-left: auto;
+      position: relative;
+      display: inline-grid;
+      grid-auto-flow: column;
+      gap: 6px;
+      background: rgba(255,255,255,.4);
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      padding: 6px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
+    }
+    @media (prefers-color-scheme: dark) {
+      .seg { background: rgba(255,255,255,.06); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+    }
+    .seg button {
+      position: relative;
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: var(--text-weak);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: .2px;
+      cursor: pointer;
+      transition: color .35s var(--ease);
+      z-index: 1;
+    }
+    .seg button.active { color: var(--text); }
+    .seg .thumb {
+      position: absolute;
+      top: 4px; bottom: 4px;
+      width: 25%;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.65));
+      box-shadow: 0 8px 20px rgba(10,10,20,.10), inset 0 1px 0 rgba(255,255,255,.8);
+      border: 1px solid var(--stroke);
+      transition: transform .5s var(--spring), width .25s var(--ease), left .5s var(--spring);
+      will-change: transform, left;
+    }
+    @media (prefers-color-scheme: dark) {
+      .seg .thumb {
+        background: linear-gradient(180deg, rgba(40,44,56,.95), rgba(34,38,48,.85));
+        border-color: rgba(255,255,255,.08);
+      }
+    }
 
-.mini-status{
-  display:flex; align-items:center; gap: 10px; color: var(--muted); font-size: 13px;
-}
-.step-dot{
-  width: 8px; height: 8px; border-radius: 50%;
-  background: linear-gradient(180deg, #0a84ff, #5ac8fa);
-  box-shadow: 0 1px 4px rgba(10,132,255,0.4);
-}
+    /* Main card */
+    .main {
+      margin: 26px auto;
+      max-width: 980px;
+      width: calc(100% - 32px);
+      display: grid;
+      gap: 18px;
+      grid-template-columns: 1fr;
+    }
+    .card {
+      position: relative;
+      background: linear-gradient(180deg, var(--panel-strong), var(--panel));
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-lg);
+      box-shadow: var(--sh-2);
+      backdrop-filter: saturate(var(--sat)) blur(var(--blur));
+      -webkit-backdrop-filter: saturate(var(--sat)) blur(var(--blur));
+      overflow: clip;
+      transform: translateZ(0);
+    }
+    /* Hairline gradient edge */
+    .card::before {
+      content: "";
+      position: absolute; inset: -1px;
+      border-radius: calc(var(--r-lg) + 1px);
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0) 40%),
+        linear-gradient(0deg, rgba(255,255,255,.25), rgba(255,255,255,0) 60%);
+      mix-blend-mode: overlay;
+    }
+    /* Sheen */
+    .card::after {
+      content: "";
+      position: absolute;
+      top: -60%; left: -20%;
+      width: 60%; height: 220%;
+      transform: rotate(12deg);
+      background: linear-gradient(90deg, rgba(255,255,255,.12), rgba(255,255,255,0), rgba(255,255,255,.14));
+      filter: blur(14px);
+      opacity: .35;
+      pointer-events: none;
+      animation: sheen 9s var(--ease) infinite;
+    }
+    @keyframes sheen {
+      0% { transform: translateX(-10%) rotate(12deg); opacity: .15; }
+      50% { transform: translateX(40%) rotate(12deg); opacity: .35; }
+      100% { transform: translateX(90%) rotate(12deg); opacity: .12; }
+    }
 
-/* Review overlay */
-.overlay{
-  position: fixed; inset: 0; z-index: 30;
-  display: grid; place-items: center; padding: 20px;
-  background: radial-gradient(1200px 600px at 80% -10%, rgba(10,132,255,0.10), transparent 60%),
-              rgba(248,249,251,0.75);
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  opacity: 0; pointer-events: none;
-  transition: opacity var(--duration) var(--easing);
-}
-.overlay.open{ opacity: 1; pointer-events: auto; }
-.sheet{
-  width: min(1100px, 100%); max-height: 86vh; overflow: hidden; border-radius: 22px;
-  background: #fff; border: 1px solid var(--border); box-shadow: var(--shadow);
-  display: grid; grid-template-rows: auto 1fr auto;
-  transform: translateY(24px);
-  animation: slideUp var(--duration) var(--easing) forwards;
-}
-@keyframes slideUp { to { transform: translateY(0); } }
-.sheet header{ padding: 18px 18px 10px; border-bottom: 1px solid var(--hairline); }
-.sheet header h3{ margin: 0; font-size: 18px; }
-.sheet .content{ padding: 16px; overflow: auto; }
-.review-grid{
-  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
-}
-.review-card{
-  border: 1px solid var(--hairline); border-radius: 14px; overflow: hidden;
-  background: #fff;
-}
-.review-card h5{
-  margin: 0; padding: 10px 12px; background: #f7fbff; border-bottom: 1px solid var(--hairline);
-  font-size: 13px; color: #0a3e7d; letter-spacing: .2px;
-}
-.review-card pre{
-  margin: 0; padding: 12px; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  white-space: pre-wrap; word-wrap: break-word; background: #fff;
-}
-.sheet footer{ padding: 12px 16px; border-top: 1px solid var(--hairline); display:flex; justify-content: space-between; align-items:center; gap: 10px; }
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 22px 8px 22px;
+    }
+    .headline {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .22px;
+      color: var(--text-weak);
+      text-transform: uppercase;
+    }
+    .controls {
+      display: flex; gap: 10px; align-items: center;
+    }
 
-/* Helpers */
-.row{ display:flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.spacer{ flex: 1; }
+    .card-body {
+      padding: 10px 22px 22px 22px;
+    }
 
-/* Small screens */
-@media (max-width: 820px){
-  .carousel{ height: 72vh; }
-  .review-grid{ grid-template-columns: 1fr; }
-}
-    
+    /* Output window */
+    .output {
+      position: relative;
+      min-height: 160px;
+      border-radius: var(--r-md);
+      border: 1px solid var(--hairline);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.6));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+      overflow: clip;
+      padding: 20px 20px;
+      transition: transform .5s var(--spring), box-shadow .5s var(--ease);
+      will-change: transform, box-shadow;
+    }
+    @media (prefers-color-scheme: dark) {
+      .output {
+        background:
+          linear-gradient(180deg, rgba(34,38,48,.92), rgba(30,34,44,.82));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+      }
+    }
+    .output:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 8px 28px rgba(8,10,18,.12); }
+
+    .output-inner {
+      position: relative;
+      min-height: 120px;
+      display: grid;
+      align-content: center;
+      gap: 10px;
+    }
+
+    .prompt-title {
+      font-size: clamp(20px, 2.6vw, 26px);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: .2px;
+      color: var(--text);
+      text-wrap: balance;
+      transform-origin: 50% 100%;
+    }
+    .prompt-sub {
+      color: var(--text-weak);
+      font-size: 14px;
+    }
+    .pillrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.6));
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      font-size: 12px; font-weight: 700; color: var(--text-weak);
+      letter-spacing: .2px;
+      box-shadow: 0 4px 12px rgba(8,10,18,.06), inset 0 1px 0 rgba(255,255,255,.4);
+    }
+    @media (prefers-color-scheme: dark) {
+      .pill { background: linear-gradient(180deg, rgba(42,46,58,.9), rgba(34,38,48,.8)); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+    }
+    .dot-mini {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(180deg, var(--accent), var(--accent-3));
+      box-shadow: 0 4px 10px rgba(122,168,255,.5);
+    }
+
+    /* Framework list styling */
+    .fw-list { display: grid; gap: 8px; margin-top: 8px; }
+    .fw-item {
+      display: grid; grid-template-columns: 18px 1fr;
+      gap: 10px; align-items: start;
+      color: var(--text);
+      font-size: 15px;
+    }
+    .fw-bullet {
+      width: 18px; height: 18px; border-radius: 50%;
+      display: inline-grid; place-content: center;
+      background: linear-gradient(180deg, #cfe0ff, #a8c1ff);
+      color: #0e1a33; font-weight: 900; font-size: 11px;
+      box-shadow: 0 6px 14px rgba(122,168,255,.35), inset 0 1px 0 rgba(255,255,255,.8);
+      border: 1px solid rgba(10,16,26,.16);
+    }
+    @media (prefers-color-scheme: dark) {
+      .fw-bullet { background: linear-gradient(180deg, #3a4a6d, #2f405f); color: #e9f1ff; border-color: rgba(255,255,255,.1); }
+    }
+
+    /* Actions */
+    .actions {
+      display: flex; flex-wrap: wrap;
+      gap: 12px; margin-top: 16px;
+    }
+    .btn {
+      position: relative;
+      appearance: none;
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: .3px;
+      cursor: pointer;
+      transition: transform .5s var(--spring), box-shadow .5s var(--ease), background .3s var(--ease);
+      will-change: transform, box-shadow;
+    }
+    .btn-primary {
+      color: #0b1020;
+      background:
+        linear-gradient(180deg, #cfe0ff, #a8c1ff 60%, #9fc4ff);
+      border: 1px solid rgba(10,16,26,.16);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.9),
+        0 12px 28px rgba(122,168,255,.35),
+        0 4px 10px rgba(10,16,26,.10);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 16px 34px rgba(122,168,255,.40), 0 6px 14px rgba(10,16,26,.12); }
+    .btn-primary:active { transform: translateY(0); transition: transform .08s ease; }
+
+    .btn-ghost {
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.7));
+      border: 1px solid var(--hairline);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 6px 18px rgba(8,10,18,.10);
+    }
+    .btn-ghost:hover { transform: translateY(-1px); }
+    .btn-ghost:active { transform: translateY(0); transition: transform .08s ease; }
+
+    /* Ripple effect */
+    .btn .ripple {
+      position: absolute;
+      border-radius: 999px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      width: 8px; height: 8px;
+      background: radial-gradient(circle at center, rgba(255,255,255,.8), rgba(255,255,255,0) 70%);
+      animation: ripple .7s var(--ease);
+      opacity: .7;
+    }
+    @keyframes ripple {
+      from { transform: translate(-50%, -50%) scale(.5); opacity: .6; }
+      to { transform: translate(-50%, -50%) scale(18); opacity: 0; }
+    }
+
+    /* Tooltip */
+    .tip {
+      position: absolute;
+      top: -40px; right: 10px;
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.86));
+      color: #0b0c10;
+      padding: 6px 10px;
+      border-radius: 9px;
+      font-size: 12px; font-weight: 700; letter-spacing: .2px;
+      border: 1px solid var(--hairline);
+      box-shadow: 0 10px 24px rgba(8,10,18,.14), inset 0 1px 0 rgba(255,255,255,.85);
+      transform-origin: 100% 100%;
+      transform: translateY(6px) scale(.92);
+      opacity: 0; pointer-events: none;
+      transition: transform .35s var(--spring), opacity .35s var(--ease);
+    }
+    .tip.show { opacity: 1; transform: translateY(0) scale(1); }
+
+    /* History */
+    .history {
+      display: grid; gap: 10px;
+      grid-template-columns: 1fr;
+    }
+    .row-scroll {
+      display: grid; grid-auto-flow: column; grid-auto-columns: max-content;
+      gap: 10px; padding-bottom: 2px;
+      overflow-x: auto; overscroll-behavior-x: contain;
+      scrollbar-width: thin;
+      scroll-snap-type: x proximity;
+    }
+    .chip {
+      scroll-snap-align: start;
+      white-space: nowrap;
+      max-width: 360px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--hairline);
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.7));
+      color: var(--text-weak);
+      font-size: 13px; font-weight: 700;
+      cursor: pointer;
+      transition: transform .4s var(--spring), color .3s var(--ease);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.65), 0 8px 18px rgba(8,10,18,.08);
+    }
+    .chip:hover { transform: translateY(-2px); color: var(--text); }
+    @media (prefers-color-scheme: dark) {
+      .chip { background: linear-gradient(180deg, rgba(40,44,56,.92), rgba(34,38,48,.82)); box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+    }
+
+    /* Swap animations for output content */
+    .swap {
+      position: relative;
+      min-height: 120px;
+    }
+    .pane {
+      position: absolute; inset: 0;
+      display: grid; align-content: center; gap: 10px;
+      opacity: 0; transform: translateY(10px) scale(.98);
+      transition: opacity .55s var(--ease), transform .55s var(--spring), filter .55s var(--ease);
+      filter: blur(6px);
+      will-change: transform, opacity, filter;
+    }
+    .pane.show {
+      opacity: 1; transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+    .pane.exit {
+      opacity: 0; transform: translateY(-10px) scale(.995);
+      filter: blur(6px);
+    }
+
+    /* Footer */
+    .foot {
+      margin: 20px auto 30px;
+      max-width: 980px; width: calc(100% - 32px);
+      color: var(--text-weak);
+      font-size: 12px; letter-spacing: .2px;
+      text-align: center;
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .orb, .orb-b, .card::after { animation: none !important; }
+      .btn, .seg .thumb, .pane { transition-duration: .01ms !important; }
+    }
   </style>
 </head>
 <body>
@@ -345,550 +515,343 @@ textarea:focus, input[type="text"]:focus{
           <div class="title">Consulting Problem Solver</div>
         </div>
 
-            <!-- Segmented control -->
-    <div class="seg" id="seg" role="tablist" aria-label="Modes">
-      <div class="thumb" id="segThumb" aria-hidden="true" style="left:4px"></div>
-      <button class="active" role="tab" aria-selected="true" data-mode="case">Case Prompt</button>
-      <button role="tab" aria-selected="false" data-mode="framework">Framework</button>
-      <button role="tab" aria-selected="false" data-mode="estimation">Estimation</button>
-      <button role="tab" aria-selected="false" data-mode="brainstorm">Brainstorm</button>
+        <!-- Segmented control -->
+        <div class="seg" id="seg" role="tablist" aria-label="Modes">
+          <div class="thumb" id="segThumb" aria-hidden="true" style="left:4px"></div>
+          <button class="active" role="tab" aria-selected="true" data-mode="case">Case Prompt</button>
+          <button role="tab" aria-selected="false" data-mode="framework">Framework</button>
+          <button role="tab" aria-selected="false" data-mode="estimation">Estimation</button>
+          <button role="tab" aria-selected="false" data-mode="brainstorm">Brainstorm</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<!-- Main -->
-<main class="shell">
-  <div class="stage">
-    <section id="carousel" class="carousel" style="--active:0">
-      <!-- Q1 -->
-      <article class="card active" style="--i:0">
-        <div>
-          <div class="q-head">
-            <div>
-              <div class="q-kicker">01 — Objective</div>
-              <h2 class="q-title">State the client’s core objective in one sentence.</h2>
-              <p class="q-sub">Make it outcome-focused and time-bound (SMART).</p>
-            </div>
-            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
-          </div>
-          <div class="flip">
-            <div class="flip-inner">
-              <div class="face front">
-                <div class="field">
-                  <label for="q1">Your answer</label>
-                  <textarea id="q1" placeholder="Example: Grow quarterly net new revenue by 15% within 12 months while maintaining CAC payback under 12 months."></textarea>
-                </div>
-                <div class="hint">Tip: Use a verb + metric + timeline + constraint format.</div>
-              </div>
-              <div class="face back">
-                <div class="sample">
-                  <h4>Sample answer</h4>
-                  <div class="block">
-                    Increase annual recurring revenue (ARR) by 20% within the next 12 months while keeping gross margin above 65% and NPS above 50.
-                  </div>
-                  <ul>
-                    <li>Clear metric (ARR +20%)</li>
-                    <li>Time-bound (12 months)</li>
-                    <li>Constraints (margin, NPS)</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
+    <!-- Main -->
+    <main class="main" role="main">
+      <!-- Output card -->
+      <section class="card" aria-live="polite">
+        <header class="card-head">
+          <div class="headline" id="headline">Case Prompt</div>
           <div class="controls">
-            <div class="btns">
-              <button class="ghost prev" disabled>Back</button>
-              <button class="primary next">Next <span class="bubble">2</span></button>
-            </div>
-            <div class="row">
-              <span class="pill">Objective clarity matters.</span>
+            <button class="btn btn-ghost" id="copyBtn" aria-label="Copy to clipboard">Copy</button>
+            <div class="tip" id="copyTip">Copied!</div>
+          </div>
+        </header>
+        <div class="card-body">
+          <div class="output">
+            <div class="output-inner">
+              <div class="pillrow" id="tagRow">
+                <span class="pill"><span class="dot-mini"></span> Strategy</span>
+                <span class="pill"><span class="dot-mini"></span> MECE</span>
+                <span class="pill"><span class="dot-mini"></span> Client-ready</span>
+              </div>
+
+              <!-- Swappable content panes -->
+              <div class="swap" id="swap">
+                <div class="pane show" id="paneA"></div>
+                <div class="pane" id="paneB"></div>
+              </div>
+
+              <div class="actions">
+                <button class="btn btn-primary" id="genBtn" aria-label="Generate">Generate</button>
+                <button class="btn btn-ghost" id="shuffleBtn" aria-label="Generate variant">Variant</button>
+              </div>
             </div>
           </div>
         </div>
-      </article>
+      </section>
 
-      <!-- Q2 -->
-      <article class="card" style="--i:1">
-        <div>
-          <div class="q-head">
-            <div>
-              <div class="q-kicker">02 — Profitability</div>
-              <h2 class="q-title">Profits are down. Outline a MECE diagnostic plan.</h2>
-              <p class="q-sub">Structure a revenue/cost tree and hypotheses.</p>
-            </div>
-            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
-          </div>
-          <div class="flip">
-            <div class="flip-inner">
-              <div class="face front">
-                <div class="field">
-                  <label for="q2">Your plan</label>
-                  <textarea id="q2" placeholder="Revenue: price x volume → price (mix, discounts), volume (channel, churn, funnel). Cost: fixed vs variable → COGS (input, yield), OPEX (sales efficiency)…"></textarea>
-                </div>
-                <div class="hint">Be hypothesis-led, data-backed, and time-boxed.</div>
-              </div>
-              <div class="face back">
-                <div class="sample">
-                  <h4>Sample answer</h4>
-                  <div class="block">
-                    Revenue: Price (discounting, mix, promos), Volume (acquisition funnel by channel, conversion, churn).<br>
-                    Cost: COGS (input inflation, waste), OPEX (sales productivity, marketing ROI, support workload).<br>
-                    Prioritize by impact x ease; run cohort analyses for churn; decompose CAC and LTV.
-                  </div>
-                  <ul>
-                    <li>Tree is MECE</li>
-                    <li>Explicit hypotheses per branch</li>
-                    <li>Prioritization framework</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="btns">
-              <button class="ghost prev">Back</button>
-              <button class="primary next">Next <span class="bubble">3</span></button>
-            </div>
-            <span class="pill">Aim for quick wins + root-cause.</span>
+      <!-- History card -->
+      <section class="card">
+        <header class="card-head">
+          <div class="headline">History</div>
+        </header>
+        <div class="card-body">
+          <div class="history">
+            <div class="row-scroll" id="history"></div>
           </div>
         </div>
-      </article>
+      </section>
+    </main>
 
-      <!-- Q3 -->
-      <article class="card" style="--i:2">
-        <div>
-          <div class="q-head">
-            <div>
-              <div class="q-kicker">03 — Market Sizing</div>
-              <h2 class="q-title">Guesstimate annual coffee cups consumed in the US.</h2>
-              <p class="q-sub">State assumptions and compute.</p>
-            </div>
-            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
-          </div>
-          <div class="flip">
-            <div class="flip-inner">
-              <div class="face front">
-                <div class="field">
-                  <label for="q3">Your approach</label>
-                  <textarea id="q3" placeholder="Population x penetration x frequency x cups per occasion…"></textarea>
-                </div>
-                <div class="hint">Top-down or bottom-up; keep numbers round.</div>
-              </div>
-              <div class="face back">
-                <div class="sample">
-                  <h4>Sample answer</h4>
-                  <div class="block">
-                    Population ~330M; 70% drink coffee → 231M. Avg 1.2 cups/day → ~420 cups/year. 231M × 420 ≈ 97B cups/year.
-                  </div>
-                  <ul>
-                    <li>Assumptions stated</li>
-                    <li>Simple multiplication</li>
-                    <li>Sensitivity: ±10–20%</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="btns">
-              <button class="ghost prev">Back</button>
-              <button class="primary next">Next <span class="bubble">4</span></button>
-            </div>
-            <span class="pill">Round numbers → faster math.</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Q4 -->
-      <article class="card" style="--i:3">
-        <div>
-          <div class="q-head">
-            <div>
-              <div class="q-kicker">04 — Break-even</div>
-              <h2 class="q-title">Calculate break-even units.</h2>
-              <p class="q-sub">Fixed cost $2M, price $50, variable cost $20.</p>
-            </div>
-            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
-          </div>
-          <div class="flip">
-            <div class="flip-inner">
-              <div class="face front">
-                <div class="row">
-                  <div class="field" style="flex:1;">
-                    <label for="q4">Show your calculation</label>
-                    <textarea id="q4" placeholder="BE units = Fixed / (Price - Variable) = 2,000,000 / (50 - 20) = 66,667"></textarea>
-                  </div>
-                </div>
-                <div class="hint">Contribution margin per unit = price − variable.</div>
-              </div>
-              <div class="face back">
-                <div class="sample">
-                  <h4>Sample answer</h4>
-                  <div class="block">
-                    BE units = 2,000,000 / (50 − 20) = 66,666.7 ≈ 66,667 units.
-                  </div>
-                  <ul>
-                    <li>Contribution margin = $30</li>
-                    <li>Interpretation: need ~66.7k units to cover fixed costs</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="btns">
-              <button class="ghost prev">Back</button>
-              <button class="primary next">Next <span class="bubble">5</span></button>
-            </div>
-            <span class="pill">Always sanity-check magnitude.</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Q5 -->
-      <article class="card" style="--i:4">
-        <div>
-          <div class="q-head">
-            <div>
-              <div class="q-kicker">05 — Pricing</div>
-              <h2 class="q-title">Outline a pricing strategy for a B2B SaaS tool.</h2>
-              <p class="q-sub">Include value metrics and packaging.</p>
-            </div>
-            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
-          </div>
-          <div class="flip">
-            <div class="flip-inner">
-              <div class="face front">
-                <div class="field">
-                  <label for="q5">Your strategy</label>
-                  <textarea id="q5" placeholder="Segmentation, value metric (seats/usage), 3 tiers, add-ons, annual discounts, price fences…"></textarea>
-                </div>
-                <div class="hint">Anchor, good-better-best, guardrails.</div>
-              </div>
-              <div class="face back">
-                <div class="sample">
-                  <h4>Sample answer</h4>
-                  <div class="block">
-                    Value metric: seats + tracked projects. Tiers: Starter ($), Growth ($$), Enterprise ($$$) with SSO, audit logs, premium support. Annual 15% discount; usage-based overages; regional price fences.
-                  </div>
-                  <ul>
-                    <li>Value-based metric</li>
-                    <li>3–4 SKUs max</li>
-                    <li>Clear fences and add-ons</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="btns">
-              <button class="ghost prev">Back</button>
-              <button class="primary next">Next <span class="bubble">6</span></button>
-            </div>
-            <span class="pill">Price follows value realized.</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Q6 -->
-      <article class="card" style="--i:5">
-        <div>
-          <div class="q-head">
-            <div>
-              <div class="q-kicker">06 — Prioritization</div>
-              <h2 class="q-title">Pick 2 of 5 initiatives using Impact x Effort.</h2>
-              <p class="q-sub">Explain trade-offs.</p>
-            </div>
-            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
-          </div>
-          <div class="flip">
-            <div class="flip-inner">
-              <div class="face front">
-                <div class="field">
-                  <label for="q6">Your selection and why</label>
-                  <textarea id="q6" placeholder="A: Referral program (High impact, Low effort); B: Onboarding revamp (Med impact, Med effort)… Choose A + B; delay C…"></textarea>
-                </div>
-                <div class="hint">Be explicit on impact, risk, and time-to-value.</div>
-              </div>
-              <div class="face back">
-                <div class="sample">
-                  <h4>Sample answer</h4>
-                  <div class="block">
-                    Choose Referral (H/L) and Onboarding (M/M) for near-term lift and compounding effects. Defer Data Warehouse Migration (H/H) pending resourcing; park Brand Refresh (L/M).
-                  </div>
-                  <ul>
-                    <li>Uses a simple scorecard</li>
-                    <li>Balancing quick wins with foundations</li>
-                    <li>States what not to do</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="btns">
-              <button class="ghost prev">Back</button>
-              <button class="primary next">Next <span class="bubble">7</span></button>
-            </div>
-            <span class="pill">Saying no is strategy.</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Q7 -->
-      <article class="card" style="--i:6">
-        <div>
-          <div class="q-head">
-            <div>
-              <div class="q-kicker">07 — Root Cause</div>
-              <h2 class="q-title">Churn spiked in APAC by 3 pts. Diagnose.</h2>
-              <p class="q-sub">Frame leading hypotheses and tests.</p>
-            </div>
-            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
-          </div>
-          <div class="flip">
-            <div class="flip-inner">
-              <div class="face front">
-                <div class="field">
-                  <label for="q7">Your plan</label>
-                  <textarea id="q7" placeholder="Cohorts by country/segment, reasons codes, CSAT, latency, billing failures… Run logit on churn drivers; A/B save offers…"></textarea>
-                </div>
-                <div class="hint">Combine quant cohorts with qual calls.</div>
-              </div>
-              <div class="face back">
-                <div class="sample">
-                  <h4>Sample answer</h4>
-                  <div class="block">
-                    Hypotheses: payment failures post price rise; localized latency; competitor promo. Tests: failed payments % trend, RUM metrics, win-loss, NPS themes. Actions: grace periods, APAC CDN POP, promo parity.
-                  </div>
-                  <ul>
-                    <li>3 hypotheses</li>
-                    <li>Evidence and quick mitigations</li>
-                    <li>Owner + timeline</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="btns">
-              <button class="ghost prev">Back</button>
-              <button class="primary next">Next <span class="bubble">8</span></button>
-            </div>
-            <span class="pill">Define success metrics early.</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Q8 -->
-      <article class="card" style="--i:7">
-        <div>
-          <div class="q-head">
-            <div>
-              <div class="q-kicker">08 — Growth Levers</div>
-              <h2 class="q-title">Name 3 growth levers for a marketplace.</h2>
-              <p class="q-sub">Briefly justify each.</p>
-            </div>
-            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
-          </div>
-          <div class="flip">
-            <div class="flip-inner">
-              <div class="face front">
-                <div class="field">
-                  <label for="q8">Your levers</label>
-                  <textarea id="q8" placeholder="Supply acquisition, demand activation, trust & safety, liquidity by geo/category, fees optimization…"></textarea>
-                </div>
-                <div class="hint">Think liquidity: match rate, time to match, fill rate.</div>
-              </div>
-              <div class="face back">
-                <div class="sample">
-                  <h4>Sample answer</h4>
-                  <div class="block">
-                    1) Supply density in top geos to improve fill rate. 2) Repeat demand via subscriptions and reactivation CRM. 3) Trust & safety to reduce multi-homing and increase conversion.
-                  </div>
-                  <ul>
-                    <li>Targets marketplace constraints</li>
-                    <li>Metrics: match time, fill rate</li>
-                    <li>Expect spillover effects</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="btns">
-              <button class="ghost prev">Back</button>
-              <button class="primary next">Next <span class="bubble">9</span></button>
-            </div>
-            <span class="pill">Design for network effects.</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Q9 -->
-      <article class="card" style="--i:8">
-        <div>
-          <div class="q-head">
-            <div>
-              <div class="q-kicker">09 — KPI Design</div>
-              <h2 class="q-title">Draft a KPI dashboard for a freemium app.</h2>
-              <p class="q-sub">Define north star, input metrics, and guardrails.</p>
-            </div>
-            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
-          </div>
-          <div class="flip">
-            <div class="flip-inner">
-              <div class="face front">
-                <div class="field">
-                  <label for="q9">Your dashboard</label>
-                  <textarea id="q9" placeholder="North star: WAU × retention × monetization… Input: activation, a-ha time, day 1/7/30 retention… Guardrails: latency, crash rate, abuse…"></textarea>
-                </div>
-                <div class="hint">Link inputs → outcomes. Avoid vanity metrics.</div>
-              </div>
-              <div class="face back">
-                <div class="sample">
-                  <h4>Sample answer</h4>
-                  <div class="block">
-                    North star: Weekly Active Teams. Inputs: new team creations, activation rate, day-7 retention, collab actions/week. Monetization: upgrade rate, ARPPU. Guardrails: p95 latency, crash free %, abuse reports.
-                  </div>
-                  <ul>
-                    <li>One north star metric</li>
-                    <li>Few causal inputs</li>
-                    <li>Quality guardrails</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="btns">
-              <button class="ghost prev">Back</button>
-              <button class="primary next">Next <span class="bubble">10</span></button>
-            </div>
-            <span class="pill">Make it actionable.</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- Q10 -->
-      <article class="card" style="--i:9">
-        <div>
-          <div class="q-head">
-            <div>
-              <div class="q-kicker">10 — Recommendation</div>
-              <h2 class="q-title">Give a 60-second executive recommendation (SCQA).</h2>
-              <p class="q-sub">Situation, Complication, Question, Answer.</p>
-            </div>
-            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
-          </div>
-          <div class="flip">
-            <div class="flip-inner">
-              <div class="face front">
-                <div class="field">
-                  <label for="q10">Your SCQA</label>
-                  <textarea id="q10" placeholder="S: … C: … Q: … A: … with 2–3 actions, risks, next steps…"></textarea>
-                </div>
-                <div class="hint">Lead with the answer; support with 2–3 bullets.</div>
-              </div>
-              <div class="face back">
-                <div class="sample">
-                  <h4>Sample answer</h4>
-                  <div class="block">
-                    S: Growth slowed post price rise. C: Churn up 3 pts in APAC; conversion down 8% in SMB. Q: How to restore growth in 2Q?<br>
-                    A: Roll back APAC price 5% + add local CDN; launch referral + onboarding refinements. Expect +10% net growth in 90 days.
-                  </div>
-                  <ul>
-                    <li>2–3 crisp actions</li>
-                    <li>Timeline and ownership</li>
-                    <li>Risks + mitigations</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="controls">
-            <div class="btns">
-              <button class="ghost prev">Back</button>
-              <button class="cta submit">Review</button>
-            </div>
-            <span class="pill">Lead with the answer.</span>
-          </div>
-        </div>
-      </article>
-    </section>
-  </div>
-</main>
-
-<div class="nav">
-  <div class="mini-status">
-    <span class="step-dot"></span>
-    <span><strong><span id="stepNow">1</span>/10</strong> in progress</span>
-  </div>
-  <div class="row">
-    <button class="ghost go-prev" disabled>Back</button>
-    <button class="primary go-next">Next</button>
-    <button class="cta go-review" style="display:none;">Review</button>
-  </div>
-</div>
-  </section>
-</main>
-
-<footer class="foot">
-  Tip: Space = Generate • Cmd/Ctrl+C = Copy • A = Toggle Answer • 1/2/3/4 = Switch modes
-</footer>
+    <footer class="foot">
+      Tip: Press Space to generate. Smooth animations, thoughtful defaults, and client-ready prompts.
+    </footer>
   </div>
 
   <script>
-          const sample = document.createElement('div');
-      sample.className = 'review-card';
-      sample.innerHTML = `<h5>Q${i+1} — Sample answer</h5><pre>${escapeHTML(samples[i])}</pre>`;
+    // =========================================================================
+    // Content pools
+    // =========================================================================
+    const CASE_PROMPTS = [
+      "A premium coffee chain faces declining same-store sales. How would you diagnose and reverse the trend?",
+      "A medical devices firm considers entering Southeast Asia. Outline a market entry strategy and key risks.",
+      "A B2B SaaS startup has strong adoption but rising churn. Build a plan to improve retention by 30%.",
+      "A national grocer is losing market share to discounters. What are the growth levers and how to prioritize?",
+      "A mobility app wants profitability in 12 months. Where do you focus: pricing, costs, or product mix?",
+      "An industrial manufacturer sees margin compression. Dissect COGS and propose cost-out opportunities.",
+      "A luxury apparel brand wants to launch resale. Evaluate cannibalization, economics, and operating model.",
+      "A telecom provider considers bundling streaming. Size the prize and define partnership structure.",
+      "A fintech wallet plans credit offerings. Assess risk, unit economics, and regulatory implications.",
+      "A logistics firm targets last-mile expansion. Design the network, SLAs, and capital-light options."
+    ];
 
-      grid.appendChild(your); grid.appendChild(sample);
+    const FRAMEWORKS = [
+      { title: "Profitability Tree", items: ["Revenue = Price × Volume", "COGS + Opex breakdown", "Mix, discounting, leakage", "Capacity, utilization, productivity", "Quick wins vs. structural plays"] },
+      { title: "Market Entry", items: ["TAM-SAM-SOM", "Attractiveness (growth, margins)", "Competitive intensity", "Routes-to-market, partners", "Entry mode: build, buy, ally"] },
+      { title: "3C + STP + 4P", items: ["Customer segments & needs", "Company capabilities", "Competition moats", "Segment-Target-Position", "Product, Price, Place, Promotion"] },
+      { title: "Value Chain", items: ["Inbound logistics", "Operations", "Outbound logistics", "Marketing & sales", "Service (post-sale)"] },
+      { title: "Porter’s Five Forces", items: ["Threat of entrants", "Bargaining power of suppliers", "Bargaining power of buyers", "Threat of substitutes", "Rivalry among incumbents"] },
+      { title: "Pricing Architecture", items: ["Willingness-to-pay bands", "Good/Better/Best packaging", "Discount governance", "Elasticity experiments", "Monetize add-ons"] },
+      { title: "Cost Transformation", items: ["Should-cost baselining", "Zero-based budgeting", "Make vs. buy", "Automation opportunities", "Supplier negotiations"] }
+    ];
+
+    const ESTIMATIONS = [
+      "How many umbrellas are sold annually in London? Structure drivers: population × rainy days × purchase rate.",
+      "Estimate annual revenue of airport Wi‑Fi in Europe. Consider traveler volumes, attach rates, ARPU.",
+      "Market size for premium pet food in the US. Segment by households, pet ownership, spend per pet.",
+      "How many EV charging sessions per day in NYC? Vehicles in circulation × utilization × session length.",
+      "Size the ‘ghost kitchen’ market in a tier‑1 city. Demand density, order frequencies, AOV."
+    ];
+
+    const BRAINSTORMS = [
+      "10 ways to reduce churn in a SaaS product without cutting price.",
+      "Creative growth loops for a marketplace with cold-start problems.",
+      "Zero-capex ideas to increase retail basket size.",
+      "Cross-sell plays for a bank launching BNPL.",
+      "Boosting referral rates for a mobile subscription app."
+    ];
+
+    // Suggested tags per mode
+    const TAGS = {
+      case: ["Strategy", "MECE", "Client-ready"],
+      framework: ["Structured", "Reusable", "Decision-Ready"],
+      estimation: ["Assumptions", "Top-Down", "Sensitivity"],
+      brainstorm: ["Divergent", "Fast", "Practical"]
+    };
+
+    // =========================================================================
+    // Elements
+    // =========================================================================
+    const seg = document.getElementById("seg");
+    const segThumb = document.getElementById("segThumb");
+    const segButtons = Array.from(seg.querySelectorAll("button"));
+    const headline = document.getElementById("headline");
+    const tagRow = document.getElementById("tagRow");
+    const genBtn = document.getElementById("genBtn");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const copyTip = document.getElementById("copyTip");
+    const swap = document.getElementById("swap");
+    const paneA = document.getElementById("paneA");
+    const paneB = document.getElementById("paneB");
+    const historyRow = document.getElementById("history");
+
+    let mode = "case";          // case | framework | estimation | brainstorm
+    let activePane = paneA;     // currently visible pane element
+    let cacheLast = "";         // last rendered plain text (for copy)
+    let lock = false;           // simple re-entrancy guard
+
+    // =========================================================================
+    // Helpers
+    // =========================================================================
+    function setMode(newMode) {
+      mode = newMode;
+      // Update segmented visuals
+      segButtons.forEach((b, i) => {
+        const isActive = b.dataset.mode === newMode;
+        b.classList.toggle("active", isActive);
+        b.setAttribute("aria-selected", String(isActive));
+        if (isActive) moveThumbTo(i);
+      });
+      // Headline + tags
+      const t = {
+        case: "Case Prompt",
+        framework: "Framework",
+        estimation: "Estimation",
+        brainstorm: "Brainstorm"
+      }[newMode];
+      headline.textContent = t;
+      renderTags(TAGS[newMode] || []);
+      // Generate fresh content on mode switch for immediacy
+      generate(true);
     }
 
-    frag.appendChild(grid);
-    reviewContent.replaceChildren(frag);
+    function moveThumbTo(index) {
+      const btn = segButtons[index];
+      if (!btn) return;
+      const segRect = seg.getBoundingClientRect();
+      const btnRect = btn.getBoundingClientRect();
+      const left = (btnRect.left - segRect.left) - 2; // padding delta
+      const width = btnRect.width + 4;
+      segThumb.style.transform = `translateX(${left}px)`;
+      segThumb.style.width = width + "px";
+      segThumb.style.left = "4px"; // initial anchor to keep consistent calc
+    }
 
-    overlay.classList.add('open');
-  }
+    function renderTags(tags) {
+      tagRow.innerHTML = "";
+      tags.forEach(t => {
+        const el = document.createElement("span");
+        el.className = "pill";
+        el.innerHTML = `<span class="dot-mini"></span>${t}`;
+        tagRow.appendChild(el);
+      });
+    }
 
-  function closeReview(){
-    overlay.classList.remove('open');
-  }
+    function pick(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
 
-  closeOverlay.addEventListener('click', closeReview);
-  editBack.addEventListener('click', closeReview);
-  finishBtn.addEventListener('click', () => {
-    closeReview();
-    go(0);
-    window.scrollTo({top:0, behavior:'smooth'});
-  });
+    function buildFrameworkHTML(fw) {
+      const items = fw.items.map((it, i) => `
+        <div class="fw-item">
+          <div class="fw-bullet">${i+1}</div>
+          <div>${it}</div>
+        </div>
+      `).join("");
+      return `
+        <div class="prompt-title">${fw.title}</div>
+        <div class="fw-list">${items}</div>
+      `;
+    }
 
-  exportBtn.addEventListener('click', () => {
-    const payload = {
-      title: 'Consulting Problem Solver',
-      timestamp: new Date().toISOString(),
-      answers: {...answers},
-      samples
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'consulting-problem-solver-answers.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 1000);
-  });
+    function buildPlainHTML(text, subtitle = "") {
+      return `
+        <div class="prompt-title">${text}</div>
+        ${subtitle ? `<div class="prompt-sub">${subtitle}</div>` : ""}
+      `;
+    }
 
-  function escapeHTML(str){
-    return String(str).replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
-  }
+    function ripple(e, btnEl) {
+      const r = document.createElement("span");
+      r.className = "ripple";
+      const rect = btnEl.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      r.style.left = `${x}px`; r.style.top = `${y}px`;
+      btnEl.appendChild(r);
+      setTimeout(() => r.remove(), 700);
+    }
 
-  // Sync top progress and bottom nav on load
-  go(0);
-})();
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        copyTip.classList.add("show");
+        setTimeout(() => copyTip.classList.remove("show"), 900);
+      });
+    }
+
+    function historyPush(label, data) {
+      const chip = document.createElement("button");
+      chip.className = "chip";
+      chip.title = "Restore";
+      chip.textContent = label;
+      chip.addEventListener("click", () => swapTo(data.html, data.text));
+      historyRow.prepend(chip);
+    }
+
+    function plainTextFromHTML(html) {
+      const tmp = document.createElement("div");
+      tmp.innerHTML = html;
+      return tmp.textContent || tmp.innerText || "";
+    }
+
+    // Core swap animation between panes
+    function swapTo(html, rawText) {
+      if (lock) return;
+      lock = true;
+
+      const nextPane = activePane === paneA ? paneB : paneA;
+      nextPane.innerHTML = html;
+
+      requestAnimationFrame(() => {
+        // Enter next
+        nextPane.classList.add("show");
+        // Exit prev
+        activePane.classList.add("exit");
+        activePane.classList.remove("show");
+
+        setTimeout(() => {
+          activePane.classList.remove("exit");
+          activePane.innerHTML = "";
+          activePane = nextPane;
+          cacheLast = rawText || plainTextFromHTML(html);
+          lock = false;
+        }, 550); // keep in sync with CSS
+      });
+    }
+
+    // =========================================================================
+    // Generate content
+    // =========================================================================
+    function generate(isModeSwitch = false) {
+      let html = "";
+      let textForCopy = "";
+
+      if (mode === "case") {
+        const t = pick(CASE_PROMPTS);
+        html = buildPlainHTML(t, "Structure: market, customer, product, economics, risk.");
+        textForCopy = t;
+        if (!isModeSwitch) historyPush("Case: " + t, { html, text: textForCopy });
+      }
+      else if (mode === "framework") {
+        const fw = pick(FRAMEWORKS);
+        html = buildFrameworkHTML(fw);
+        textForCopy = fw.title + " — " + fw.items.join("; ");
+        if (!isModeSwitch) historyPush("FW: " + fw.title, { html, text: textForCopy });
+      }
+      else if (mode === "estimation") {
+        const t = pick(ESTIMATIONS);
+        html = buildPlainHTML(t, "Approach: define drivers → estimate assumptions → sanity check.");
+        textForCopy = t;
+        if (!isModeSwitch) historyPush("Est: " + t, { html, text: textForCopy });
+      }
+      else {
+        const t = pick(BRAINSTORMS);
+        html = buildPlainHTML(t, "Aim for 10–20 ideas, then converge with ICE scoring.");
+        textForCopy = t;
+        if (!isModeSwitch) historyPush("Idea: " + t, { html, text: textForCopy });
+      }
+
+      swapTo(html, textForCopy);
+    }
+
+    // Variant = slight re-roll but same mode
+    function variant() { generate(false); }
+
+    // =========================================================================
+    // Events
+    // =========================================================================
+    segButtons.forEach((btn, i) => {
+      btn.addEventListener("click", () => setMode(btn.dataset.mode));
+    });
+
+    genBtn.addEventListener("click", (e) => { ripple(e, genBtn); generate(false); });
+
+    shuffleBtn.addEventListener("click", (e) => { ripple(e, shuffleBtn); variant(); });
+
+    copyBtn.addEventListener("click", (e) => {
+      ripple(e, copyBtn);
+      copyToClipboard(cacheLast || ""); 
+    });
+
+    // Keyboard: Space to generate
+    window.addEventListener("keydown", (e) => {
+      if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+      if (e.code === "Space") { e.preventDefault(); generate(false); }
+      if (e.key.toLowerCase() === "c" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); copyToClipboard(cacheLast || ""); }
+    });
+
+    // Initial layout for segmented thumb
+    function initThumb() {
+      const activeIndex = segButtons.findIndex(b => b.classList.contains("active"));
+      moveThumbTo(activeIndex >= 0 ? activeIndex : 0);
+    }
+    window.addEventListener("resize", initThumb);
+
+    // Boot
+    initThumb();
+    generate(true);
   </script>
 </body>
 </html>
