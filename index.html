@@ -659,4 +659,510 @@
     </footer>
   </div>
 
- 
+ <script>
+// =========================================================================
+// Content pools and sample answers
+// =========================================================================
+const CASE_PROMPTS = [
+  "A premium coffee chain faces declining same-store sales. How would you diagnose and reverse the trend?",
+  "A medical devices firm considers entering Southeast Asia. Outline a market entry strategy and key risks.",
+  "A B2B SaaS startup has strong adoption but rising churn. Build a plan to improve retention by 30%.",
+  "A national grocer is losing market share to discounters. What are the growth levers and how to prioritize?",
+  "A mobility app wants profitability in 12 months. Where do you focus: pricing, costs, or product mix?",
+  "An industrial manufacturer sees margin compression. Dissect COGS and propose cost-out opportunities.",
+  "A luxury apparel brand wants to launch resale. Evaluate cannibalization, economics, and operating model.",
+  "A telecom provider considers bundling streaming. Size the prize and define partnership structure.",
+  "A fintech wallet plans credit offerings. Assess risk, unit economics, and regulatory implications.",
+  "A logistics firm targets last-mile expansion. Design the network, SLAs, and capital-light options."
+];
+
+const FRAMEWORKS = [
+  { title: "Profitability Tree", items: ["Revenue = Price × Volume", "COGS + Opex breakdown", "Mix, discounting, leakage", "Capacity, utilization, productivity", "Quick wins vs. structural plays"], answer:
+    `<ul>
+      <li><strong>When to use:</strong> Diagnose margin issues, isolate drivers quickly.</li>
+      <li><strong>How:</strong> Split into Revenue vs. Cost; decompose drivers (price, volume, mix; fixed vs. variable).</li>
+      <li><strong>Example:</strong> Retail: plug discount leakage (-150 bps), labor productivity (+80 bps).</li>
+    </ul>` },
+  { title: "Market Entry", items: ["TAM-SAM-SOM", "Attractiveness (growth, margins)", "Competitive intensity", "Routes-to-market, partners", "Entry mode: build, buy, ally"], answer:
+    `<ul>
+      <li><strong>Approach:</strong> Size and score markets, shortlist by attractiveness/capability fit.</li>
+      <li><strong>Entry mode:</strong> Build vs. buy vs. ally based on speed, control, capital.</li>
+      <li><strong>Example:</strong> SEA med devices: distributor-led entry; phase SG/MY/TH; parallel reg filings.</li>
+    </ul>` },
+  { title: "3C + STP + 4P", items: ["Customer segments & needs", "Company capabilities", "Competition moats", "Segment-Target-Position", "Product, Price, Place, Promotion"], answer:
+    `<ul>
+      <li><strong>Why:</strong> Full go-to-market from insight to execution.</li>
+      <li><strong>Output:</strong> Clear ICP, sharp positioning, pricing guardrails, channel plan.</li>
+      <li><strong>Example:</strong> SMB SaaS: PLG motion + partner resellers; Good/Better/Best packages.</li>
+    </ul>` },
+  { title: "Value Chain", items: ["Inbound logistics", "Operations", "Outbound logistics", "Marketing & sales", "Service (post-sale)"], answer:
+    `<ul>
+      <li><strong>Use:</strong> Find bottlenecks and cost/experience gaps E2E.</li>
+      <li><strong>Example:</strong> Ops (OEE), inbound (supplier terms), outbound (route density), service (NPS).</li>
+    </ul>` },
+  { title: "Porter’s Five Forces", items: ["Threat of entrants", "Bargaining power of suppliers", "Bargaining power of buyers", "Threat of substitutes", "Rivalry among incumbents"], answer:
+    `<ul>
+      <li><strong>Goal:</strong> Assess structural profitability.</li>
+      <li><strong>Tip:</strong> Quantify via HHI, churn, price dispersion, switching costs.</li>
+    </ul>` },
+  { title: "Pricing Architecture", items: ["Willingness-to-pay bands", "Good/Better/Best packaging", "Discount governance", "Elasticity experiments", "Monetize add-ons"], answer:
+    `<ul>
+      <li><strong>Stack:</strong> WTP research → packaging → policy → A/B tests → dashboards.</li>
+      <li><strong>Example:</strong> Add paid priority support; tighten discount rules; upsell add-ons.</li>
+    </ul>` },
+  { title: "Cost Transformation", items: ["Should-cost baselining", "Zero-based budgeting", "Make vs. buy", "Automation opportunities", "Supplier negotiations"], answer:
+    `<ul>
+      <li><strong>Playbook:</strong> 13-week waves; governance; quantified business cases.</li>
+      <li><strong>Outcome:</strong> 8–12% opex, 3–6% COGS reduction typical.</li>
+    </ul>` }
+];
+
+const ESTIMATIONS = [
+  "How many umbrellas are sold annually in London? Structure drivers: population × rainy days × purchase rate.",
+  "Estimate annual revenue of airport Wi‑Fi in Europe. Consider traveler volumes, attach rates, ARPU.",
+  "Market size for premium pet food in the US. Segment by households, pet ownership, spend per pet.",
+  "How many EV charging sessions per day in NYC? Vehicles in circulation × utilization × session length.",
+  "Size the ‘ghost kitchen’ market in a tier‑1 city. Demand density, order frequencies, AOV."
+];
+
+const BRAINSTORMS = [
+  "10 ways to reduce churn in a SaaS product without cutting price.",
+  "Creative growth loops for a marketplace with cold-start problems.",
+  "Zero-capex ideas to increase retail basket size.",
+  "Cross-sell plays for a bank launching BNPL.",
+  "Boosting referral rates for a mobile subscription app."
+];
+
+// Sample answers for prompts
+const CASE_ANSWERS = {
+  "A premium coffee chain faces declining same-store sales. How would you diagnose and reverse the trend?":
+    `<ul>
+      <li><strong>Diagnose:</strong> Decompose SSS into traffic vs. ticket; cohort trends; daypart/store clusters.</li>
+      <li><strong>Levers:</strong> Menu mix (attach breakfast), pricing A/B, queue time reduction, hyperlocal promos.</li>
+      <li><strong>Pilot:</strong> 20 stores, 8 weeks; target +4–6% SSS; scale with playbooks.</li>
+    </ul>`,
+  "A medical devices firm considers entering Southeast Asia. Outline a market entry strategy and key risks.":
+    `<ul>
+      <li><strong>Prioritize:</strong> SG/MY/TH (private spend growth, regulatory ease).</li>
+      <li><strong>Mode:</strong> Distributor-led entry; SLAs on coverage, training, after‑sales.</li>
+      <li><strong>Risks:</strong> Registration delays, reimbursement variability; mitigate via dual distributors.</li>
+    </ul>`,
+  "A B2B SaaS startup has strong adoption but rising churn. Build a plan to improve retention by 30%.":
+    `<ul>
+      <li><strong>Causes:</strong> Onboarding gaps; value unrealized; support latency.</li>
+      <li><strong>Plays:</strong> Guided onboarding, health scoring, D30/60/90 success check-ins.</li>
+      <li><strong>Economics:</strong> NRR +8–12 pts; payback &lt; 12 months.</li>
+    </ul>`,
+  "A national grocer is losing market share to discounters. What are the growth levers and how to prioritize?":
+    `<ul>
+      <li><strong>Compete:</strong> KVI price parity; own‑label +5 pts; fresh quality uplift.</li>
+      <li><strong>Omni:</strong> Pickup density; app UX; personalized offers.</li>
+      <li><strong>Capex-light:</strong> Space resets; shrink reduction; prioritize by ROI.</li>
+    </ul>`,
+  "A mobility app wants profitability in 12 months. Where do you focus: pricing, costs, or product mix?":
+    `<ul>
+      <li><strong>Monetize:</strong> Peak pricing; subscriptions; reduce incentive leakage.</li>
+      <li><strong>Cost:</strong> Support automation; fraud controls; marketing efficiency.</li>
+      <li><strong>Mix:</strong> Push higher-margin categories; prune low-density geos.</li>
+    </ul>`,
+  "An industrial manufacturer sees margin compression. Dissect COGS and propose cost-out opportunities.":
+    `<ul>
+      <li><strong>Should-cost:</strong> Material indexation; VA/VE; supplier consolidation.</li>
+      <li><strong>Ops:</strong> OEE +5 pts; scrap -30%; setup reduction; energy contracts.</li>
+      <li><strong>Outcome:</strong> 250–400 bps margin recovery in 12–18 months.</li>
+    </ul>`,
+  "A luxury apparel brand wants to launch resale. Evaluate cannibalization, economics, and operating model.":
+    `<ul>
+      <li><strong>Model:</strong> Consignment marketplace with authentication partners.</li>
+      <li><strong>Economics:</strong> Take rate 15–25%; brand halo lifts first‑party sales.</li>
+      <li><strong>Risks:</strong> Channel conflict; mitigate with exclusives/tiering.</li>
+    </ul>`,
+  "A telecom provider considers bundling streaming. Size the prize and define partnership structure.":
+    `<ul>
+      <li><strong>Prize:</strong> ARPU +$3–$5; churn -70–120 bps (attach-rate dependent).</li>
+      <li><strong>Deal:</strong> Rev share vs. wholesale; co‑marketing KPIs; data rights.</li>
+    </ul>`,
+  "A fintech wallet plans credit offerings. Assess risk, unit economics, and regulatory implications.":
+    `<ul>
+      <li><strong>Unit econ:</strong> APR, loss rates, funding cost, servicing.</li>
+      <li><strong>Risk:</strong> Alt‑data underwriting; staged limits; collections playbook.</li>
+    </ul>`,
+  "A logistics firm targets last-mile expansion. Design the network, SLAs, and capital-light options.":
+    `<ul>
+      <li><strong>Network:</strong> Micro‑fulfilment hubs; dynamic routing; density first.</li>
+      <li><strong>SLAs:</strong> 95% on‑time; tiered windows; partner couriers to stay asset‑light.</li>
+    </ul>`
+};
+
+const EST_ANSWERS = {
+  "How many umbrellas are sold annually in London? Structure drivers: population × rainy days × purchase rate.":
+    `<ul>
+      <li>Pop ~9M; rainy days ~150; purchase rate ~0.6 umbrellas/adult/year.</li>
+      <li><strong>Back‑of‑envelope:</strong> ~5–6M units/yr; sanity check vs. scanner data.</li>
+    </ul>`,
+  "Estimate annual revenue of airport Wi‑Fi in Europe. Consider traveler volumes, attach rates, ARPU.":
+    `<ul>
+      <li>Passengers ~1B; paid attach ~3–6%; ARPU €4–€6.</li>
+      <li><strong>Rev:</strong> 1B × 4% × €5 ≈ €200M; adjust for lounges/free tiers.</li>
+    </ul>`,
+  "Market size for premium pet food in the US. Segment by households, pet ownership, spend per pet.":
+    `<ul>
+      <li>HH ~130M; pet HH ~70M; premium share ~35%.</li>
+      <li>Spend/pet ~$400/yr; dog vs. cat mix.</li>
+      <li><strong>TAM:</strong> ~$10–12B; triangulate with Nielsen/IRI.</li>
+    </ul>`,
+  "How many EV charging sessions per day in NYC? Vehicles in circulation × utilization × session length.":
+    `<ul>
+      <li>EVs ~2–3% of ~2M vehicles; sessions ~0.2/day per EV.</li>
+      <li><strong>Sessions:</strong> ~8–12k/day; split L2 vs. DCFC.</li>
+    </ul>`,
+  "Size the ‘ghost kitchen’ market in a tier‑1 city. Demand density, order frequencies, AOV.":
+    `<ul>
+      <li>Orders/HH/mo × HH × AOV × ghost share.</li>
+      <li><strong>Illustrative:</strong> 1.5M HH × 3 × $22 × 12% ≈ $1.2B/y.</li>
+    </ul>`
+};
+
+function listify(items){ return `<ul>${items.map(i=>`<li>${i}</li>`).join("")}</ul>`; }
+
+const BRAIN_ANSWERS = {
+  "10 ways to reduce churn in a SaaS product without cutting price.": listify([
+    "Guided onboarding with success checklists.",
+    "Lifecycle emails triggered by usage gaps.",
+    "Customer councils; ship top 3 asks quarterly.",
+    "Proactive outreach on at‑risk health scores.",
+    "Annual plans with value add‑ons (no price cuts).",
+    "Champion enablement kits to spread adoption.",
+    "In‑product nudges to discover sticky features.",
+    "Community and templates gallery.",
+    "Office hours with PMs/CSMs.",
+    "Renewal playbook with QBRs."
+  ]),
+  "Creative growth loops for a marketplace with cold-start problems.": listify([
+    "Supply‑led seeding with exclusive inventory.",
+    "Two‑sided referrals with milestone rewards.",
+    "UGC reviews → SEO loop.",
+    "Partner widgets that embed supply on sites.",
+    "CRM/calendar integrations for lock‑in.",
+    "Waitlist dynamics with early access perks.",
+    "Creator/influencer co‑drops.",
+    "Public API to foster ecosystem tools."
+  ]),
+  "Zero-capex ideas to increase retail basket size.": listify([
+    "Personalized bundles at checkout.",
+    "End‑cap rotations for high‑margin cross‑sell.",
+    "Recipe‑based shopping lists in app.",
+    "Digital coupons for complements.",
+    "Associate prompts for cross‑sell cues.",
+    "A/B optimized aisle signage copy.",
+    "Subscription for refillables.",
+    "Pre‑visit reminders of rundown items."
+  ]),
+  "Cross-sell plays for a bank launching BNPL.": listify([
+    "Auto‑enroll debit users with pre‑approved limits.",
+    "Bundle with credit monitoring and alerts.",
+    "Merchant co‑marketing; exclusive offers.",
+    "Instant virtual card post on‑time history.",
+    "0% promos on higher‑ticket categories.",
+    "Cashback tiers for multi‑product usage."
+  ]),
+  "Boosting referral rates for a mobile subscription app.": listify([
+    "Time‑boxed friend passes with premium features.",
+    "Milestone badges unlock referral boosts.",
+    "Creator kits to share results on socials.",
+    "Co‑created challenges users invite friends to.",
+    "Tiered rewards: 1/3/5 referrals unlock perks.",
+    "Smart share sheets with tailored copy."
+  ])
+};
+
+const TAGS = {
+  case: ["Strategy", "MECE", "Client-ready"],
+  framework: ["Structured", "Reusable", "Decision-Ready"],
+  estimation: ["Assumptions", "Top-Down", "Sensitivity"],
+  brainstorm: ["Divergent", "Fast", "Practical"]
+};
+
+// =========================================================================
+// DOM Elements
+// =========================================================================
+const seg = document.getElementById("seg");
+const segThumb = document.getElementById("segThumb");
+const segButtons = Array.from(seg.querySelectorAll("button"));
+const headline = document.getElementById("headline");
+const tagRow = document.getElementById("tagRow");
+const genBtn = document.getElementById("genBtn");
+const shuffleBtn = document.getElementById("shuffleBtn");
+const copyBtn = document.getElementById("copyBtn");
+const copyTip = document.getElementById("copyTip");
+const swap = document.getElementById("swap");
+const paneA = document.getElementById("paneA");
+const paneB = document.getElementById("paneB");
+const historyRow = document.getElementById("history");
+const ansToggle = document.getElementById("ansToggle");
+const ansToggleText = document.getElementById("ansToggleText");
+const answerWrap = document.getElementById("answerWrap");
+const answerContent = document.getElementById("answerContent");
+
+// =========================================================================
+// State
+// =========================================================================
+let mode = "case";          // case | framework | estimation | brainstorm
+let activePane = paneA;     // currently visible pane element
+let cacheLast = "";         // last rendered plain text (for copy)
+let lock = false;           // re-entrancy guard
+let answerOpen = false;     // answer panel state
+
+// =========================================================================
+// Helpers and UI
+// =========================================================================
+function setMode(newMode) {
+  mode = newMode;
+  segButtons.forEach((b, i) => {
+    const isActive = b.dataset.mode === newMode;
+    b.classList.toggle("active", isActive);
+    b.setAttribute("aria-selected", String(isActive));
+    if (isActive) moveThumbTo(i);
+  });
+  const t = { case: "Case Prompt", framework: "Framework", estimation: "Estimation", brainstorm: "Brainstorm" }[newMode];
+  headline.textContent = t;
+  renderTags(TAGS[newMode] || []);
+  generate(true);
+}
+
+function moveThumbTo(index) {
+  const btn = segButtons[index];
+  if (!btn) return;
+  const segRect = seg.getBoundingClientRect();
+  const btnRect = btn.getBoundingClientRect();
+  const left = (btnRect.left - segRect.left) - 2;
+  const width = btnRect.width + 4;
+  segThumb.style.transform = `translateX(${left}px)`;
+  segThumb.style.width = width + "px";
+}
+
+function renderTags(tags) {
+  tagRow.innerHTML = "";
+  tags.forEach(t => {
+    const el = document.createElement("span");
+    el.className = "pill";
+    el.innerHTML = `<span class="dot-mini"></span>${t}`;
+    tagRow.appendChild(el);
+  });
+}
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function buildFrameworkHTML(fw) {
+  const items = fw.items.map((it, i) => `
+    <div class="fw-item">
+      <div class="fw-bullet">${i+1}</div>
+      <div>${it}</div>
+    </div>
+  `).join("");
+  return `
+    <div class="prompt-title">${fw.title}</div>
+    <div class="fw-list">${items}</div>
+  `;
+}
+
+function buildPlainHTML(text, subtitle = "") {
+  return `
+    <div class="prompt-title">${text}</div>
+    ${subtitle ? `<div class="prompt-sub">${subtitle}</div>` : ""}
+  `;
+}
+
+function ripple(e, btnEl) {
+  const r = document.createElement("span");
+  r.className = "ripple";
+  const rect = btnEl.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  r.style.left = `${x}px`; r.style.top = `${y}px`;
+  btnEl.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    copyTip.classList.add("show");
+    setTimeout(() => copyTip.classList.remove("show"), 900);
+  });
+}
+
+function historyPush(label, data) {
+  const chip = document.createElement("button");
+  chip.className = "chip";
+  chip.title = "Restore";
+  chip.textContent = label;
+  chip.addEventListener("click", () => {
+    swapTo(data.html, data.text);
+    setAnswerForCurrent(mode, data.text, data.html);
+  });
+  historyRow.prepend(chip);
+}
+
+function plainTextFromHTML(html) {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || "";
+}
+
+// Answer panel controls
+function openAnswer() {
+  answerWrap.classList.add('open');
+  answerWrap.style.height = answerWrap.scrollHeight + 'px';
+  ansToggle.setAttribute('aria-expanded', 'true');
+  ansToggleText.textContent = 'Hide Sample Answer';
+  answerOpen = true;
+}
+function closeAnswer() {
+  answerWrap.style.height = '0px';
+  ansToggle.setAttribute('aria-expanded', 'false');
+  ansToggleText.textContent = 'Show Sample Answer';
+  answerOpen = false;
+}
+function toggleAnswer() {
+  if (answerOpen) closeAnswer();
+  else {
+    answerWrap.style.height = 'auto';
+    const h = answerWrap.scrollHeight;
+    answerWrap.style.height = '0px';
+    requestAnimationFrame(() => {
+      answerWrap.classList.add('open');
+      answerWrap.style.height = h + 'px';
+      ansToggle.setAttribute('aria-expanded', 'true');
+      ansToggleText.textContent = 'Hide Sample Answer';
+      answerOpen = true;
+    });
+  }
+}
+function setAnswer(html) {
+  answerContent.innerHTML = html || "<em>No sample answer available.</em>";
+  if (answerOpen) {
+    answerWrap.style.height = 'auto';
+    const h = answerWrap.scrollHeight;
+    answerWrap.style.height = h + 'px';
+  }
+}
+function setAnswerForCurrent(mode, textOrHTML, htmlIfFrameworkPane) {
+  let ansHTML = "";
+  if (mode === 'case') {
+    ansHTML = CASE_ANSWERS[textOrHTML] || `<ul><li>Structure: market → customer → product → economics → risk.</li><li>Prioritize high-ROI levers; test and scale.</li></ul>`;
+  } else if (mode === 'framework') {
+    const fw = FRAMEWORKS.find(f => (htmlIfFrameworkPane || '').includes(`<div class="prompt-title">${f.title}</div>`));
+    ansHTML = (fw && fw.answer) ? fw.answer : `<ul><li>Adapt framework to context; quantify wherever possible.</li></ul>`;
+  } else if (mode === 'estimation') {
+    ansHTML = EST_ANSWERS[textOrHTML] || `<ul><li>Define drivers → estimate assumptions → triangulate → sanity check.</li></ul>`;
+  } else {
+    ansHTML = BRAIN_ANSWERS[textOrHTML] || `<ul><li>Generate 10–20 ideas; converge via ICE scoring.</li></ul>`;
+  }
+  setAnswer(ansHTML);
+}
+
+// Core swap animation between panes
+function swapTo(html, rawText) {
+  if (lock) return;
+  lock = true;
+
+  const nextPane = activePane === paneA ? paneB : paneA;
+  nextPane.innerHTML = html;
+
+  requestAnimationFrame(() => {
+    nextPane.classList.add("show");
+    activePane.classList.add("exit");
+    activePane.classList.remove("show");
+
+    setTimeout(() => {
+      activePane.classList.remove("exit");
+      activePane.innerHTML = "";
+      activePane = nextPane;
+      cacheLast = rawText || plainTextFromHTML(html);
+      lock = false;
+    }, 550);
+  });
+}
+
+// =========================================================================
+// Generate content
+// =========================================================================
+function generate(isModeSwitch = false) {
+  let html = "";
+  let textForCopy = "";
+
+  if (mode === "case") {
+    const t = pick(CASE_PROMPTS);
+    html = buildPlainHTML(t, "Structure: market, customer, product, economics, risk.");
+    textForCopy = t;
+    if (!isModeSwitch) historyPush("Case: " + t, { html, text: textForCopy });
+    swapTo(html, textForCopy);
+    setAnswerForCurrent('case', t);
+  }
+  else if (mode === "framework") {
+    const fw = pick(FRAMEWORKS);
+    html = buildFrameworkHTML(fw);
+    textForCopy = fw.title + " — " + fw.items.join("; ");
+    if (!isModeSwitch) historyPush("FW: " + fw.title, { html, text: textForCopy });
+    swapTo(html, textForCopy);
+    setAnswer(fw.answer || "");
+  }
+  else if (mode === "estimation") {
+    const t = pick(ESTIMATIONS);
+    html = buildPlainHTML(t, "Approach: define drivers → estimate assumptions → sanity check.");
+    textForCopy = t;
+    if (!isModeSwitch) historyPush("Est: " + t, { html, text: textForCopy });
+    swapTo(html, textForCopy);
+    setAnswerForCurrent('estimation', t);
+  }
+  else {
+    const t = pick(BRAINSTORMS);
+    html = buildPlainHTML(t, "Aim for 10–20 ideas, then converge with ICE scoring.");
+    textForCopy = t;
+    if (!isModeSwitch) historyPush("Idea: " + t, { html, text: textForCopy });
+    swapTo(html, textForCopy);
+    setAnswerForCurrent('brainstorm', t);
+  }
+
+  if (answerOpen) {
+    answerWrap.style.height = 'auto';
+    const h = answerWrap.scrollHeight;
+    answerWrap.style.height = h + 'px';
+  }
+}
+
+// Variant
+function variant() { generate(false); }
+
+// =========================================================================
+// Events
+// =========================================================================
+segButtons.forEach((btn) => { btn.addEventListener("click", () => setMode(btn.dataset.mode)); });
+genBtn.addEventListener("click", (e) => { ripple(e, genBtn); generate(false); });
+shuffleBtn.addEventListener("click", (e) => { ripple(e, shuffleBtn); variant(); });
+copyBtn.addEventListener("click", (e) => { ripple(e, copyBtn); copyToClipboard(cacheLast || ""); });
+ansToggle.addEventListener('click', toggleAnswer);
+
+// Keyboard: Space generate; A toggle answer; 1-4 mode; Cmd/Ctrl+C copy
+window.addEventListener("keydown", (e) => {
+  if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+  if (e.code === "Space") { e.preventDefault(); generate(false); }
+  if (e.key === 'a' || e.key === 'A') { e.preventDefault(); toggleAnswer(); }
+  if (e.key === '1') setMode('case');
+  if (e.key === '2') setMode('framework');
+  if (e.key === '3') setMode('estimation');
+  if (e.key === '4') setMode('brainstorm');
+  if (e.key.toLowerCase() === "c" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); copyToClipboard(cacheLast || ""); }
+});
+
+// Initial layout for segmented thumb
+function initThumb() {
+  const activeIndex = segButtons.findIndex(b => b.classList.contains("active"));
+  moveThumbTo(activeIndex >= 0 ? activeIndex : 0);
+}
+window.addEventListener("resize", initThumb);
+
+// Boot
+initThumb();
+generate(true);
+</script>
