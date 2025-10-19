@@ -581,68 +581,82 @@ body {
           <div class="title">Consulting Problem Solver</div>
         </div>
 
-        <!-- Segmented control -->
-        <div class="seg" id="seg" role="tablist" aria-label="Modes">
-          <div class="thumb" id="segThumb" aria-hidden="true" style="left:4px"></div>
-          <button class="active" role="tab" aria-selected="true" data-mode="case">Case Prompt</button>
-          <button role="tab" aria-selected="false" data-mode="framework">Framework</button>
-          <button role="tab" aria-selected="false" data-mode="estimation">Estimation</button>
-          <button role="tab" aria-selected="false" data-mode="brainstorm">Brainstorm</button>
+            <!-- Segmented control -->
+    <div class="seg" id="seg" role="tablist" aria-label="Modes">
+      <div class="thumb" id="segThumb" aria-hidden="true" style="left:4px"></div>
+      <button class="active" role="tab" aria-selected="true" data-mode="case">Case Prompt</button>
+      <button role="tab" aria-selected="false" data-mode="framework">Framework</button>
+      <button role="tab" aria-selected="false" data-mode="estimation">Estimation</button>
+      <button role="tab" aria-selected="false" data-mode="brainstorm">Brainstorm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Main -->
+<main class="main" role="main">
+  <!-- Output card -->
+  <section class="card" aria-live="polite">
+    <header class="card-head">
+      <div class="headline" id="headline">Case Prompt</div>
+      <div class="controls">
+        <button class="btn btn-ghost" id="copyBtn" aria-label="Copy to clipboard">Copy</button>
+        <div class="tip" id="copyTip">Copied!</div>
+      </div>
+    </header>
+    <div class="card-body">
+      <div class="output">
+        <div class="output-inner">
+          <div class="pillrow" id="tagRow">
+            <span class="pill"><span class="dot-mini"></span> Strategy</span>
+            <span class="pill"><span class="dot-mini"></span> MECE</span>
+            <span class="pill"><span class="dot-mini"></span> Client-ready</span>
+          </div>
+
+          <!-- Swappable content panes -->
+          <div class="swap" id="swap">
+            <div class="pane show" id="paneA"></div>
+            <div class="pane" id="paneB"></div>
+          </div>
+
+          <!-- Answer toggle + panel -->
+          <div class="answer-controls">
+            <button class="btn-toggle" id="ansToggle" aria-expanded="false" aria-controls="answerWrap">
+              <span class="chev" aria-hidden="true"></span>
+              <span id="ansToggleText">Show Sample Answer</span>
+            </button>
+          </div>
+          <div class="answer-wrap" id="answerWrap" role="region" aria-label="Sample Answer">
+            <div class="answer-card">
+              <div class="answer-title">Sample Answer</div>
+              <div class="answer-content" id="answerContent"></div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-primary" id="genBtn" aria-label="Generate">Generate</button>
+            <button class="btn btn-ghost" id="shuffleBtn" aria-label="Generate variant">Variant</button>
+          </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <!-- Main -->
-    <main class="main" role="main">
-      <!-- Output card -->
-      <section class="card" aria-live="polite">
-        <header class="card-head">
-          <div class="headline" id="headline">Case Prompt</div>
-          <div class="controls">
-            <button class="btn btn-ghost" id="copyBtn" aria-label="Copy to clipboard">Copy</button>
-            <div class="tip" id="copyTip">Copied!</div>
-          </div>
-        </header>
-        <div class="card-body">
-          <div class="output">
-            <div class="output-inner">
-              <div class="pillrow" id="tagRow">
-                <span class="pill"><span class="dot-mini"></span> Strategy</span>
-                <span class="pill"><span class="dot-mini"></span> MECE</span>
-                <span class="pill"><span class="dot-mini"></span> Client-ready</span>
-              </div>
+  <!-- History card -->
+  <section class="card">
+    <header class="card-head">
+      <div class="headline">History</div>
+    </header>
+    <div class="card-body">
+      <div class="history">
+        <div class="row-scroll" id="history"></div>
+      </div>
+    </div>
+  </section>
+</main>
 
-              <!-- Swappable content panes -->
-              <div class="swap" id="swap">
-                <div class="pane show" id="paneA"></div>
-                <div class="pane" id="paneB"></div>
-              </div>
-
-              <div class="actions">
-                <button class="btn btn-primary" id="genBtn" aria-label="Generate">Generate</button>
-                <button class="btn btn-ghost" id="shuffleBtn" aria-label="Generate variant">Variant</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- History card -->
-      <section class="card">
-        <header class="card-head">
-          <div class="headline">History</div>
-        </header>
-        <div class="card-body">
-          <div class="history">
-            <div class="row-scroll" id="history"></div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="foot">
-      Tip: Press Space to generate. Smooth animations, thoughtful defaults, and client-ready prompts.
-    </footer>
+<footer class="foot">
+  Tip: Space = Generate • Cmd/Ctrl+C = Copy • A = Toggle Answer • 1/2/3/4 = Switch modes
+</footer>
   </div>
 
   <script>
