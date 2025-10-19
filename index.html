@@ -660,278 +660,56 @@ body {
   </div>
 
   <script>
-    // =========================================================================
-    // Content pools
-    // =========================================================================
-    const CASE_PROMPTS = [
-      "A premium coffee chain faces declining same-store sales. How would you diagnose and reverse the trend?",
-      "A medical devices firm considers entering Southeast Asia. Outline a market entry strategy and key risks.",
-      "A B2B SaaS startup has strong adoption but rising churn. Build a plan to improve retention by 30%.",
-      "A national grocer is losing market share to discounters. What are the growth levers and how to prioritize?",
-      "A mobility app wants profitability in 12 months. Where do you focus: pricing, costs, or product mix?",
-      "An industrial manufacturer sees margin compression. Dissect COGS and propose cost-out opportunities.",
-      "A luxury apparel brand wants to launch resale. Evaluate cannibalization, economics, and operating model.",
-      "A telecom provider considers bundling streaming. Size the prize and define partnership structure.",
-      "A fintech wallet plans credit offerings. Assess risk, unit economics, and regulatory implications.",
-      "A logistics firm targets last-mile expansion. Design the network, SLAs, and capital-light options."
-    ];
+          const sample = document.createElement('div');
+      sample.className = 'review-card';
+      sample.innerHTML = `<h5>Q${i+1} — Sample answer</h5><pre>${escapeHTML(samples[i])}</pre>`;
 
-    const FRAMEWORKS = [
-      { title: "Profitability Tree", items: ["Revenue = Price × Volume", "COGS + Opex breakdown", "Mix, discounting, leakage", "Capacity, utilization, productivity", "Quick wins vs. structural plays"] },
-      { title: "Market Entry", items: ["TAM-SAM-SOM", "Attractiveness (growth, margins)", "Competitive intensity", "Routes-to-market, partners", "Entry mode: build, buy, ally"] },
-      { title: "3C + STP + 4P", items: ["Customer segments & needs", "Company capabilities", "Competition moats", "Segment-Target-Position", "Product, Price, Place, Promotion"] },
-      { title: "Value Chain", items: ["Inbound logistics", "Operations", "Outbound logistics", "Marketing & sales", "Service (post-sale)"] },
-      { title: "Porter’s Five Forces", items: ["Threat of entrants", "Bargaining power of suppliers", "Bargaining power of buyers", "Threat of substitutes", "Rivalry among incumbents"] },
-      { title: "Pricing Architecture", items: ["Willingness-to-pay bands", "Good/Better/Best packaging", "Discount governance", "Elasticity experiments", "Monetize add-ons"] },
-      { title: "Cost Transformation", items: ["Should-cost baselining", "Zero-based budgeting", "Make vs. buy", "Automation opportunities", "Supplier negotiations"] }
-    ];
+      grid.appendChild(your); grid.appendChild(sample);
+    }
 
-    const ESTIMATIONS = [
-      "How many umbrellas are sold annually in London? Structure drivers: population × rainy days × purchase rate.",
-      "Estimate annual revenue of airport Wi‑Fi in Europe. Consider traveler volumes, attach rates, ARPU.",
-      "Market size for premium pet food in the US. Segment by households, pet ownership, spend per pet.",
-      "How many EV charging sessions per day in NYC? Vehicles in circulation × utilization × session length.",
-      "Size the ‘ghost kitchen’ market in a tier‑1 city. Demand density, order frequencies, AOV."
-    ];
+    frag.appendChild(grid);
+    reviewContent.replaceChildren(frag);
 
-    const BRAINSTORMS = [
-      "10 ways to reduce churn in a SaaS product without cutting price.",
-      "Creative growth loops for a marketplace with cold-start problems.",
-      "Zero-capex ideas to increase retail basket size.",
-      "Cross-sell plays for a bank launching BNPL.",
-      "Boosting referral rates for a mobile subscription app."
-    ];
+    overlay.classList.add('open');
+  }
 
-    // Suggested tags per mode
-    const TAGS = {
-      case: ["Strategy", "MECE", "Client-ready"],
-      framework: ["Structured", "Reusable", "Decision-Ready"],
-      estimation: ["Assumptions", "Top-Down", "Sensitivity"],
-      brainstorm: ["Divergent", "Fast", "Practical"]
+  function closeReview(){
+    overlay.classList.remove('open');
+  }
+
+  closeOverlay.addEventListener('click', closeReview);
+  editBack.addEventListener('click', closeReview);
+  finishBtn.addEventListener('click', () => {
+    closeReview();
+    go(0);
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  exportBtn.addEventListener('click', () => {
+    const payload = {
+      title: 'Consulting Problem Solver',
+      timestamp: new Date().toISOString(),
+      answers: {...answers},
+      samples
     };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'consulting-problem-solver-answers.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  });
 
-    // =========================================================================
-    // Elements
-    // =========================================================================
-    const seg = document.getElementById("seg");
-    const segThumb = document.getElementById("segThumb");
-    const segButtons = Array.from(seg.querySelectorAll("button"));
-    const headline = document.getElementById("headline");
-    const tagRow = document.getElementById("tagRow");
-    const genBtn = document.getElementById("genBtn");
-    const shuffleBtn = document.getElementById("shuffleBtn");
-    const copyBtn = document.getElementById("copyBtn");
-    const copyTip = document.getElementById("copyTip");
-    const swap = document.getElementById("swap");
-    const paneA = document.getElementById("paneA");
-    const paneB = document.getElementById("paneB");
-    const historyRow = document.getElementById("history");
+  function escapeHTML(str){
+    return String(str).replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
+  }
 
-    let mode = "case";          // case | framework | estimation | brainstorm
-    let activePane = paneA;     // currently visible pane element
-    let cacheLast = "";         // last rendered plain text (for copy)
-    let lock = false;           // simple re-entrancy guard
-
-    // =========================================================================
-    // Helpers
-    // =========================================================================
-    function setMode(newMode) {
-      mode = newMode;
-      // Update segmented visuals
-      segButtons.forEach((b, i) => {
-        const isActive = b.dataset.mode === newMode;
-        b.classList.toggle("active", isActive);
-        b.setAttribute("aria-selected", String(isActive));
-        if (isActive) moveThumbTo(i);
-      });
-      // Headline + tags
-      const t = {
-        case: "Case Prompt",
-        framework: "Framework",
-        estimation: "Estimation",
-        brainstorm: "Brainstorm"
-      }[newMode];
-      headline.textContent = t;
-      renderTags(TAGS[newMode] || []);
-      // Generate fresh content on mode switch for immediacy
-      generate(true);
-    }
-
-    function moveThumbTo(index) {
-      const btn = segButtons[index];
-      if (!btn) return;
-      const segRect = seg.getBoundingClientRect();
-      const btnRect = btn.getBoundingClientRect();
-      const left = (btnRect.left - segRect.left) - 2; // padding delta
-      const width = btnRect.width + 4;
-      segThumb.style.transform = `translateX(${left}px)`;
-      segThumb.style.width = width + "px";
-      segThumb.style.left = "4px"; // initial anchor to keep consistent calc
-    }
-
-    function renderTags(tags) {
-      tagRow.innerHTML = "";
-      tags.forEach(t => {
-        const el = document.createElement("span");
-        el.className = "pill";
-        el.innerHTML = `<span class="dot-mini"></span>${t}`;
-        tagRow.appendChild(el);
-      });
-    }
-
-    function pick(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function buildFrameworkHTML(fw) {
-      const items = fw.items.map((it, i) => `
-        <div class="fw-item">
-          <div class="fw-bullet">${i+1}</div>
-          <div>${it}</div>
-        </div>
-      `).join("");
-      return `
-        <div class="prompt-title">${fw.title}</div>
-        <div class="fw-list">${items}</div>
-      `;
-    }
-
-    function buildPlainHTML(text, subtitle = "") {
-      return `
-        <div class="prompt-title">${text}</div>
-        ${subtitle ? `<div class="prompt-sub">${subtitle}</div>` : ""}
-      `;
-    }
-
-    function ripple(e, btnEl) {
-      const r = document.createElement("span");
-      r.className = "ripple";
-      const rect = btnEl.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      r.style.left = `${x}px`; r.style.top = `${y}px`;
-      btnEl.appendChild(r);
-      setTimeout(() => r.remove(), 700);
-    }
-
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        copyTip.classList.add("show");
-        setTimeout(() => copyTip.classList.remove("show"), 900);
-      });
-    }
-
-    function historyPush(label, data) {
-      const chip = document.createElement("button");
-      chip.className = "chip";
-      chip.title = "Restore";
-      chip.textContent = label;
-      chip.addEventListener("click", () => swapTo(data.html, data.text));
-      historyRow.prepend(chip);
-    }
-
-    function plainTextFromHTML(html) {
-      const tmp = document.createElement("div");
-      tmp.innerHTML = html;
-      return tmp.textContent || tmp.innerText || "";
-    }
-
-    // Core swap animation between panes
-    function swapTo(html, rawText) {
-      if (lock) return;
-      lock = true;
-
-      const nextPane = activePane === paneA ? paneB : paneA;
-      nextPane.innerHTML = html;
-
-      requestAnimationFrame(() => {
-        // Enter next
-        nextPane.classList.add("show");
-        // Exit prev
-        activePane.classList.add("exit");
-        activePane.classList.remove("show");
-
-        setTimeout(() => {
-          activePane.classList.remove("exit");
-          activePane.innerHTML = "";
-          activePane = nextPane;
-          cacheLast = rawText || plainTextFromHTML(html);
-          lock = false;
-        }, 550); // keep in sync with CSS
-      });
-    }
-
-    // =========================================================================
-    // Generate content
-    // =========================================================================
-    function generate(isModeSwitch = false) {
-      let html = "";
-      let textForCopy = "";
-
-      if (mode === "case") {
-        const t = pick(CASE_PROMPTS);
-        html = buildPlainHTML(t, "Structure: market, customer, product, economics, risk.");
-        textForCopy = t;
-        if (!isModeSwitch) historyPush("Case: " + t, { html, text: textForCopy });
-      }
-      else if (mode === "framework") {
-        const fw = pick(FRAMEWORKS);
-        html = buildFrameworkHTML(fw);
-        textForCopy = fw.title + " — " + fw.items.join("; ");
-        if (!isModeSwitch) historyPush("FW: " + fw.title, { html, text: textForCopy });
-      }
-      else if (mode === "estimation") {
-        const t = pick(ESTIMATIONS);
-        html = buildPlainHTML(t, "Approach: define drivers → estimate assumptions → sanity check.");
-        textForCopy = t;
-        if (!isModeSwitch) historyPush("Est: " + t, { html, text: textForCopy });
-      }
-      else {
-        const t = pick(BRAINSTORMS);
-        html = buildPlainHTML(t, "Aim for 10–20 ideas, then converge with ICE scoring.");
-        textForCopy = t;
-        if (!isModeSwitch) historyPush("Idea: " + t, { html, text: textForCopy });
-      }
-
-      swapTo(html, textForCopy);
-    }
-
-    // Variant = slight re-roll but same mode
-    function variant() { generate(false); }
-
-    // =========================================================================
-    // Events
-    // =========================================================================
-    segButtons.forEach((btn, i) => {
-      btn.addEventListener("click", () => setMode(btn.dataset.mode));
-    });
-
-    genBtn.addEventListener("click", (e) => { ripple(e, genBtn); generate(false); });
-
-    shuffleBtn.addEventListener("click", (e) => { ripple(e, shuffleBtn); variant(); });
-
-    copyBtn.addEventListener("click", (e) => {
-      ripple(e, copyBtn);
-      copyToClipboard(cacheLast || ""); 
-    });
-
-    // Keyboard: Space to generate
-    window.addEventListener("keydown", (e) => {
-      if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
-      if (e.code === "Space") { e.preventDefault(); generate(false); }
-      if (e.key.toLowerCase() === "c" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); copyToClipboard(cacheLast || ""); }
-    });
-
-    // Initial layout for segmented thumb
-    function initThumb() {
-      const activeIndex = segButtons.findIndex(b => b.classList.contains("active"));
-      moveThumbTo(activeIndex >= 0 ? activeIndex : 0);
-    }
-    window.addEventListener("resize", initThumb);
-
-    // Boot
-    initThumb();
-    generate(true);
+  // Sync top progress and bottom nav on load
+  go(0);
+})();
   </script>
 </body>
 </html>
