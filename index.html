@@ -593,64 +593,479 @@ body {
 </div>
 
 <!-- Main -->
-<main class="main" role="main">
-  <!-- Output card -->
-  <section class="card" aria-live="polite">
-    <header class="card-head">
-      <div class="headline" id="headline">Case Prompt</div>
-      <div class="controls">
-        <button class="btn btn-ghost" id="copyBtn" aria-label="Copy to clipboard">Copy</button>
-        <div class="tip" id="copyTip">Copied!</div>
-      </div>
-    </header>
-    <div class="card-body">
-      <div class="output">
-        <div class="output-inner">
-          <div class="pillrow" id="tagRow">
-            <span class="pill"><span class="dot-mini"></span> Strategy</span>
-            <span class="pill"><span class="dot-mini"></span> MECE</span>
-            <span class="pill"><span class="dot-mini"></span> Client-ready</span>
+<main class="shell">
+  <div class="stage">
+    <section id="carousel" class="carousel" style="--active:0">
+      <!-- Q1 -->
+      <article class="card active" style="--i:0">
+        <div>
+          <div class="q-head">
+            <div>
+              <div class="q-kicker">01 — Objective</div>
+              <h2 class="q-title">State the client’s core objective in one sentence.</h2>
+              <p class="q-sub">Make it outcome-focused and time-bound (SMART).</p>
+            </div>
+            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
           </div>
-
-          <!-- Swappable content panes -->
-          <div class="swap" id="swap">
-            <div class="pane show" id="paneA"></div>
-            <div class="pane" id="paneB"></div>
-          </div>
-
-          <!-- Answer toggle + panel -->
-          <div class="answer-controls">
-            <button class="btn-toggle" id="ansToggle" aria-expanded="false" aria-controls="answerWrap">
-              <span class="chev" aria-hidden="true"></span>
-              <span id="ansToggleText">Show Sample Answer</span>
-            </button>
-          </div>
-          <div class="answer-wrap" id="answerWrap" role="region" aria-label="Sample Answer">
-            <div class="answer-card">
-              <div class="answer-title">Sample Answer</div>
-              <div class="answer-content" id="answerContent"></div>
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="face front">
+                <div class="field">
+                  <label for="q1">Your answer</label>
+                  <textarea id="q1" placeholder="Example: Grow quarterly net new revenue by 15% within 12 months while maintaining CAC payback under 12 months."></textarea>
+                </div>
+                <div class="hint">Tip: Use a verb + metric + timeline + constraint format.</div>
+              </div>
+              <div class="face back">
+                <div class="sample">
+                  <h4>Sample answer</h4>
+                  <div class="block">
+                    Increase annual recurring revenue (ARR) by 20% within the next 12 months while keeping gross margin above 65% and NPS above 50.
+                  </div>
+                  <ul>
+                    <li>Clear metric (ARR +20%)</li>
+                    <li>Time-bound (12 months)</li>
+                    <li>Constraints (margin, NPS)</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div class="actions">
-            <button class="btn btn-primary" id="genBtn" aria-label="Generate">Generate</button>
-            <button class="btn btn-ghost" id="shuffleBtn" aria-label="Generate variant">Variant</button>
+          <div class="controls">
+            <div class="btns">
+              <button class="ghost prev" disabled>Back</button>
+              <button class="primary next">Next <span class="bubble">2</span></button>
+            </div>
+            <div class="row">
+              <span class="pill">Objective clarity matters.</span>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
+      </article>
 
-  <!-- History card -->
-  <section class="card">
-    <header class="card-head">
-      <div class="headline">History</div>
-    </header>
-    <div class="card-body">
-      <div class="history">
-        <div class="row-scroll" id="history"></div>
-      </div>
-    </div>
+      <!-- Q2 -->
+      <article class="card" style="--i:1">
+        <div>
+          <div class="q-head">
+            <div>
+              <div class="q-kicker">02 — Profitability</div>
+              <h2 class="q-title">Profits are down. Outline a MECE diagnostic plan.</h2>
+              <p class="q-sub">Structure a revenue/cost tree and hypotheses.</p>
+            </div>
+            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
+          </div>
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="face front">
+                <div class="field">
+                  <label for="q2">Your plan</label>
+                  <textarea id="q2" placeholder="Revenue: price x volume → price (mix, discounts), volume (channel, churn, funnel). Cost: fixed vs variable → COGS (input, yield), OPEX (sales efficiency)…"></textarea>
+                </div>
+                <div class="hint">Be hypothesis-led, data-backed, and time-boxed.</div>
+              </div>
+              <div class="face back">
+                <div class="sample">
+                  <h4>Sample answer</h4>
+                  <div class="block">
+                    Revenue: Price (discounting, mix, promos), Volume (acquisition funnel by channel, conversion, churn).<br>
+                    Cost: COGS (input inflation, waste), OPEX (sales productivity, marketing ROI, support workload).<br>
+                    Prioritize by impact x ease; run cohort analyses for churn; decompose CAC and LTV.
+                  </div>
+                  <ul>
+                    <li>Tree is MECE</li>
+                    <li>Explicit hypotheses per branch</li>
+                    <li>Prioritization framework</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="btns">
+              <button class="ghost prev">Back</button>
+              <button class="primary next">Next <span class="bubble">3</span></button>
+            </div>
+            <span class="pill">Aim for quick wins + root-cause.</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Q3 -->
+      <article class="card" style="--i:2">
+        <div>
+          <div class="q-head">
+            <div>
+              <div class="q-kicker">03 — Market Sizing</div>
+              <h2 class="q-title">Guesstimate annual coffee cups consumed in the US.</h2>
+              <p class="q-sub">State assumptions and compute.</p>
+            </div>
+            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
+          </div>
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="face front">
+                <div class="field">
+                  <label for="q3">Your approach</label>
+                  <textarea id="q3" placeholder="Population x penetration x frequency x cups per occasion…"></textarea>
+                </div>
+                <div class="hint">Top-down or bottom-up; keep numbers round.</div>
+              </div>
+              <div class="face back">
+                <div class="sample">
+                  <h4>Sample answer</h4>
+                  <div class="block">
+                    Population ~330M; 70% drink coffee → 231M. Avg 1.2 cups/day → ~420 cups/year. 231M × 420 ≈ 97B cups/year.
+                  </div>
+                  <ul>
+                    <li>Assumptions stated</li>
+                    <li>Simple multiplication</li>
+                    <li>Sensitivity: ±10–20%</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="btns">
+              <button class="ghost prev">Back</button>
+              <button class="primary next">Next <span class="bubble">4</span></button>
+            </div>
+            <span class="pill">Round numbers → faster math.</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Q4 -->
+      <article class="card" style="--i:3">
+        <div>
+          <div class="q-head">
+            <div>
+              <div class="q-kicker">04 — Break-even</div>
+              <h2 class="q-title">Calculate break-even units.</h2>
+              <p class="q-sub">Fixed cost $2M, price $50, variable cost $20.</p>
+            </div>
+            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
+          </div>
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="face front">
+                <div class="row">
+                  <div class="field" style="flex:1;">
+                    <label for="q4">Show your calculation</label>
+                    <textarea id="q4" placeholder="BE units = Fixed / (Price - Variable) = 2,000,000 / (50 - 20) = 66,667"></textarea>
+                  </div>
+                </div>
+                <div class="hint">Contribution margin per unit = price − variable.</div>
+              </div>
+              <div class="face back">
+                <div class="sample">
+                  <h4>Sample answer</h4>
+                  <div class="block">
+                    BE units = 2,000,000 / (50 − 20) = 66,666.7 ≈ 66,667 units.
+                  </div>
+                  <ul>
+                    <li>Contribution margin = $30</li>
+                    <li>Interpretation: need ~66.7k units to cover fixed costs</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="btns">
+              <button class="ghost prev">Back</button>
+              <button class="primary next">Next <span class="bubble">5</span></button>
+            </div>
+            <span class="pill">Always sanity-check magnitude.</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Q5 -->
+      <article class="card" style="--i:4">
+        <div>
+          <div class="q-head">
+            <div>
+              <div class="q-kicker">05 — Pricing</div>
+              <h2 class="q-title">Outline a pricing strategy for a B2B SaaS tool.</h2>
+              <p class="q-sub">Include value metrics and packaging.</p>
+            </div>
+            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
+          </div>
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="face front">
+                <div class="field">
+                  <label for="q5">Your strategy</label>
+                  <textarea id="q5" placeholder="Segmentation, value metric (seats/usage), 3 tiers, add-ons, annual discounts, price fences…"></textarea>
+                </div>
+                <div class="hint">Anchor, good-better-best, guardrails.</div>
+              </div>
+              <div class="face back">
+                <div class="sample">
+                  <h4>Sample answer</h4>
+                  <div class="block">
+                    Value metric: seats + tracked projects. Tiers: Starter ($), Growth ($$), Enterprise ($$$) with SSO, audit logs, premium support. Annual 15% discount; usage-based overages; regional price fences.
+                  </div>
+                  <ul>
+                    <li>Value-based metric</li>
+                    <li>3–4 SKUs max</li>
+                    <li>Clear fences and add-ons</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="btns">
+              <button class="ghost prev">Back</button>
+              <button class="primary next">Next <span class="bubble">6</span></button>
+            </div>
+            <span class="pill">Price follows value realized.</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Q6 -->
+      <article class="card" style="--i:5">
+        <div>
+          <div class="q-head">
+            <div>
+              <div class="q-kicker">06 — Prioritization</div>
+              <h2 class="q-title">Pick 2 of 5 initiatives using Impact x Effort.</h2>
+              <p class="q-sub">Explain trade-offs.</p>
+            </div>
+            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
+          </div>
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="face front">
+                <div class="field">
+                  <label for="q6">Your selection and why</label>
+                  <textarea id="q6" placeholder="A: Referral program (High impact, Low effort); B: Onboarding revamp (Med impact, Med effort)… Choose A + B; delay C…"></textarea>
+                </div>
+                <div class="hint">Be explicit on impact, risk, and time-to-value.</div>
+              </div>
+              <div class="face back">
+                <div class="sample">
+                  <h4>Sample answer</h4>
+                  <div class="block">
+                    Choose Referral (H/L) and Onboarding (M/M) for near-term lift and compounding effects. Defer Data Warehouse Migration (H/H) pending resourcing; park Brand Refresh (L/M).
+                  </div>
+                  <ul>
+                    <li>Uses a simple scorecard</li>
+                    <li>Balancing quick wins with foundations</li>
+                    <li>States what not to do</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="btns">
+              <button class="ghost prev">Back</button>
+              <button class="primary next">Next <span class="bubble">7</span></button>
+            </div>
+            <span class="pill">Saying no is strategy.</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Q7 -->
+      <article class="card" style="--i:6">
+        <div>
+          <div class="q-head">
+            <div>
+              <div class="q-kicker">07 — Root Cause</div>
+              <h2 class="q-title">Churn spiked in APAC by 3 pts. Diagnose.</h2>
+              <p class="q-sub">Frame leading hypotheses and tests.</p>
+            </div>
+            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
+          </div>
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="face front">
+                <div class="field">
+                  <label for="q7">Your plan</label>
+                  <textarea id="q7" placeholder="Cohorts by country/segment, reasons codes, CSAT, latency, billing failures… Run logit on churn drivers; A/B save offers…"></textarea>
+                </div>
+                <div class="hint">Combine quant cohorts with qual calls.</div>
+              </div>
+              <div class="face back">
+                <div class="sample">
+                  <h4>Sample answer</h4>
+                  <div class="block">
+                    Hypotheses: payment failures post price rise; localized latency; competitor promo. Tests: failed payments % trend, RUM metrics, win-loss, NPS themes. Actions: grace periods, APAC CDN POP, promo parity.
+                  </div>
+                  <ul>
+                    <li>3 hypotheses</li>
+                    <li>Evidence and quick mitigations</li>
+                    <li>Owner + timeline</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="btns">
+              <button class="ghost prev">Back</button>
+              <button class="primary next">Next <span class="bubble">8</span></button>
+            </div>
+            <span class="pill">Define success metrics early.</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Q8 -->
+      <article class="card" style="--i:7">
+        <div>
+          <div class="q-head">
+            <div>
+              <div class="q-kicker">08 — Growth Levers</div>
+              <h2 class="q-title">Name 3 growth levers for a marketplace.</h2>
+              <p class="q-sub">Briefly justify each.</p>
+            </div>
+            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
+          </div>
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="face front">
+                <div class="field">
+                  <label for="q8">Your levers</label>
+                  <textarea id="q8" placeholder="Supply acquisition, demand activation, trust & safety, liquidity by geo/category, fees optimization…"></textarea>
+                </div>
+                <div class="hint">Think liquidity: match rate, time to match, fill rate.</div>
+              </div>
+              <div class="face back">
+                <div class="sample">
+                  <h4>Sample answer</h4>
+                  <div class="block">
+                    1) Supply density in top geos to improve fill rate. 2) Repeat demand via subscriptions and reactivation CRM. 3) Trust & safety to reduce multi-homing and increase conversion.
+                  </div>
+                  <ul>
+                    <li>Targets marketplace constraints</li>
+                    <li>Metrics: match time, fill rate</li>
+                    <li>Expect spillover effects</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="btns">
+              <button class="ghost prev">Back</button>
+              <button class="primary next">Next <span class="bubble">9</span></button>
+            </div>
+            <span class="pill">Design for network effects.</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Q9 -->
+      <article class="card" style="--i:8">
+        <div>
+          <div class="q-head">
+            <div>
+              <div class="q-kicker">09 — KPI Design</div>
+              <h2 class="q-title">Draft a KPI dashboard for a freemium app.</h2>
+              <p class="q-sub">Define north star, input metrics, and guardrails.</p>
+            </div>
+            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
+          </div>
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="face front">
+                <div class="field">
+                  <label for="q9">Your dashboard</label>
+                  <textarea id="q9" placeholder="North star: WAU × retention × monetization… Input: activation, a-ha time, day 1/7/30 retention… Guardrails: latency, crash rate, abuse…"></textarea>
+                </div>
+                <div class="hint">Link inputs → outcomes. Avoid vanity metrics.</div>
+              </div>
+              <div class="face back">
+                <div class="sample">
+                  <h4>Sample answer</h4>
+                  <div class="block">
+                    North star: Weekly Active Teams. Inputs: new team creations, activation rate, day-7 retention, collab actions/week. Monetization: upgrade rate, ARPPU. Guardrails: p95 latency, crash free %, abuse reports.
+                  </div>
+                  <ul>
+                    <li>One north star metric</li>
+                    <li>Few causal inputs</li>
+                    <li>Quality guardrails</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="btns">
+              <button class="ghost prev">Back</button>
+              <button class="primary next">Next <span class="bubble">10</span></button>
+            </div>
+            <span class="pill">Make it actionable.</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Q10 -->
+      <article class="card" style="--i:9">
+        <div>
+          <div class="q-head">
+            <div>
+              <div class="q-kicker">10 — Recommendation</div>
+              <h2 class="q-title">Give a 60-second executive recommendation (SCQA).</h2>
+              <p class="q-sub">Situation, Complication, Question, Answer.</p>
+            </div>
+            <button class="soft flip-btn" aria-label="Show sample answer">Show sample</button>
+          </div>
+          <div class="flip">
+            <div class="flip-inner">
+              <div class="face front">
+                <div class="field">
+                  <label for="q10">Your SCQA</label>
+                  <textarea id="q10" placeholder="S: … C: … Q: … A: … with 2–3 actions, risks, next steps…"></textarea>
+                </div>
+                <div class="hint">Lead with the answer; support with 2–3 bullets.</div>
+              </div>
+              <div class="face back">
+                <div class="sample">
+                  <h4>Sample answer</h4>
+                  <div class="block">
+                    S: Growth slowed post price rise. C: Churn up 3 pts in APAC; conversion down 8% in SMB. Q: How to restore growth in 2Q?<br>
+                    A: Roll back APAC price 5% + add local CDN; launch referral + onboarding refinements. Expect +10% net growth in 90 days.
+                  </div>
+                  <ul>
+                    <li>2–3 crisp actions</li>
+                    <li>Timeline and ownership</li>
+                    <li>Risks + mitigations</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="btns">
+              <button class="ghost prev">Back</button>
+              <button class="cta submit">Review</button>
+            </div>
+            <span class="pill">Lead with the answer.</span>
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
+</main>
+
+<div class="nav">
+  <div class="mini-status">
+    <span class="step-dot"></span>
+    <span><strong><span id="stepNow">1</span>/10</strong> in progress</span>
+  </div>
+  <div class="row">
+    <button class="ghost go-prev" disabled>Back</button>
+    <button class="primary go-next">Next</button>
+    <button class="cta go-review" style="display:none;">Review</button>
+  </div>
+</div>
   </section>
 </main>
 
